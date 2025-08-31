@@ -27,6 +27,15 @@
         <h1>決算速報 コントローラー</h1>
 
         <h3>1行目</h3>
+        <!-- ▼▼▼ 1行目の色選択を追加 ▼▼▼ -->
+        <div class="control-group">
+            <label for="topBarColor">背景色</label>
+            <select id="topBarColor">
+                <option value="yellow">黄色</option>
+                <option value="red">赤色</option>
+            </select>
+        </div>
+        <!-- ▲▲▲ ここまで ▲▲▲ -->
         <div class="control-group">
             <label for="headerText">ヘッダー</label>
             <input type="text" id="headerText" value="決算速報">
@@ -75,7 +84,7 @@
     <div class="preview-wrapper">
         <h3>プレビュー</h3>
         <div id="preview-container" class="telop-container visible">
-            <div class="top-bar">
+            <div id="preview-top-bar" class="top-bar">
                 <div id="preview-header" class="top-bar-header"></div>
                 <div id="preview-companyName" class="top-bar-main"></div>
             </div>
@@ -90,7 +99,7 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <script>
         // ▼▼▼ あなたのFirebase設定をここに貼り付け ▼▼▼
-       const firebaseConfig = {
+        const firebaseConfig = {
   apiKey: "AIzaSyAhsAbTqQuairo-82A9rxQTazUCGdzdVc4",
   authDomain: "obs-telop-system-7c98c.firebaseapp.com",
   databaseURL: "https://obs-telop-system-7c98c-default-rtdb.asia-southeast1.firebasedatabase.app",
@@ -109,6 +118,7 @@
         document.getElementById('sendButton').addEventListener('click', () => {
             const telopData = {
                 visible: true,
+                topBarColor: document.getElementById('topBarColor').value, // 1行目の色データを追加
                 headerText: document.getElementById('headerText').value,
                 companyName: document.getElementById('companyName').value,
                 detailText1: document.getElementById('detailText1').value,
@@ -129,6 +139,7 @@
 
         function updatePreview() {
             // 1行目プレビュー
+            document.getElementById('preview-top-bar').className = 'top-bar ' + document.getElementById('topBarColor').value;
             document.getElementById('preview-header').innerText = document.getElementById('headerText').value;
             document.getElementById('preview-companyName').innerText = document.getElementById('companyName').value;
             

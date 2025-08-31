@@ -36,44 +36,58 @@ body {
 /* --- 1行目のデザイン --- */
 .top-bar {
     display: flex;
-    font-size: 36px;
+    font-size: 43px; /* 36px * 1.2 = 43.2px */
     font-weight: bold;
-    color: #000;
-    background-color: #ffff00; /* 背景は黄色で固定 */
+    align-items: center; /* 文字を垂直方向に中央揃え */
+    height: 65px; /* 高さを固定 */
 }
-/* ヘッダー部分（左側）*/
 .top-bar-header {
-    padding: 12px 25px;
-    background-color: #ffffff; /* ヘッダーの背景は白 */
+    padding: 0 25px;
     white-space: nowrap;
-    border-right: 2px solid #ddd; /* 区切り線 */
+    border-right: 2px solid rgba(0, 0, 0, 0.2); /* 区切り線 */
 }
-/* 企業名部分（右側）*/
 .top-bar-main {
-    padding: 12px 25px;
+    padding: 0 25px;
     flex-grow: 1;
     overflow: hidden;
     white-space: nowrap;
-    text-overflow: ellipsis; /* はみ出した場合に...で表示 */
+    text-overflow: ellipsis;
 }
+
+/* 1行目の配色プリセット */
+.top-bar.yellow {
+    background-color: #ffff00;
+    color: #000;
+}
+.top-bar.yellow .top-bar-header {
+    border-right-color: rgba(0, 0, 0, 0.2);
+}
+.top-bar.red {
+    background-color: #c8202f;
+    color: #fff;
+}
+.top-bar.red .top-bar-header {
+    border-right-color: rgba(255, 255, 255, 0.3);
+}
+
 
 /* --- 2行目のデザイン --- */
 .bottom-bar {
-    display: grid; /* 2つの要素を均等に配置するためにGridを使用 */
-    grid-template-columns: 1fr 1fr; /* 2つのカラムを1:1の比率で作成 */
-    background-color: rgba(255, 255, 255, 0.85); /* 背景を半透明の白に変更 */
-    font-size: 32px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    background-color: rgba(255, 255, 255, 0.85);
+    font-size: 54px; /* 32px * 1.7 = 54.4px */
     font-weight: bold;
-    padding: 10px 0;
+    align-items: center; /* 文字を垂直方向に中央揃え */
+    height: 85px; /* 高さを固定 */
 }
 .bottom-bar span {
-    padding: 8px 25px;
+    padding: 0 25px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
     text-align: center;
 }
-/* 2つのテキストの間に区切り線を追加 */
 .bottom-bar span:first-child {
     border-right: 2px solid #ccc;
 }

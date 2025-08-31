@@ -9,9 +9,9 @@
 <body>
     <div id="telop-container" class="telop-container">
         <!-- 1行目 -->
-        <div class="top-bar">
-            <div id="header"></div>
-            <div id="companyName"></div>
+        <div id="top-bar" class="top-bar">
+            <div id="header" class="top-bar-header"></div>
+            <div id="companyName" class="top-bar-main"></div>
         </div>
         <!-- 2行目 -->
         <div class="bottom-bar">
@@ -40,6 +40,7 @@
         const database = firebase.database();
 
         const container = document.getElementById('telop-container');
+        const topBar = document.getElementById('top-bar');
         const header = document.getElementById('header');
         const companyName = document.getElementById('companyName');
         const detail1 = document.getElementById('detail1');
@@ -50,16 +51,13 @@
 
             if (data && data.visible) {
                 // 1行目のデータを反映
-                header.className = 'top-bar-header';
+                topBar.className = 'top-bar ' + (data.topBarColor || 'yellow'); // 親要素に色クラスを適用
                 header.innerText = data.headerText || '';
-                
-                companyName.className = 'top-bar-main';
                 companyName.innerText = data.companyName || '';
 
                 // 2行目のデータを反映
                 detail1.innerText = data.detailText1 || '';
                 detail1.className = data.detailColor1 || 'text-black';
-
                 detail2.innerText = data.detailText2 || '';
                 detail2.className = data.detailColor2 || 'text-black';
 
