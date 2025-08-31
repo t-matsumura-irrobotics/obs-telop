@@ -1,4 +1,4 @@
-/* style.css */
+/* style.css (更新後) */
 
 /* LINEフォントの読み込み */
 @font-face {
@@ -11,23 +11,27 @@ body {
     font-family: 'LINE Seed JP', sans-serif;
     margin: 0;
     padding: 0;
-    overflow: hidden; /* はみ出しを非表示に */
-    background-color: transparent; /* 背景を透明に */
+    overflow: hidden;
+    background-color: transparent;
 }
 
+/* --- 変更点 --- */
 .telop-container {
     position: absolute;
     bottom: 0;
     left: 0;
-    width: 1920px; /* OBSのキャンバスサイズに合わせる */
+    width: 1920px;
     height: 1080px;
-    opacity: 0; /* 初期状態は非表示 */
-    transition: opacity 0.5s ease;
+    opacity: 0; /* 初期状態は透明 */
+    transform: translateX(-100%); /* 初期状態は画面の左外 */
+    transition: transform 0.5s ease-out, opacity 0.5s ease-out; /* アニメーション設定 */
 }
 
 .telop-container.visible {
-    opacity: 1; /* 表示状態 */
+    opacity: 1; /* 表示状態は不透明に */
+    transform: translateX(0); /* 表示状態は定位置にスライド */
 }
+/* --- 変更点ここまで --- */
 
 /* 緊急地震速報風テロップ（下部） */
 .bottom-bar {
@@ -36,7 +40,10 @@ body {
     left: 20px;
     width: calc(100% - 40px);
     display: flex;
-    font-size: 32px;
+    /* --- 変更点：文字サイズと余白を調整 --- */
+    font-size: 48px; 
+    padding: 15px 0; /* プレビュー用に少し調整 */
+    /* --- 変更点ここまで --- */
     font-weight: bold;
     color: #000;
     line-height: 1.5;
@@ -44,17 +51,19 @@ body {
 }
 
 .bottom-bar-header {
-    padding: 10px 30px;
+    padding: 15px 40px;
     color: white;
+    white-space: nowrap; /* ヘッダーが改行しないように */
 }
 
 .bottom-bar-content {
     background-color: rgba(230, 230, 230, 0.95);
-    padding: 10px 30px;
-    flex-grow: 1; /* 残りの幅をすべて使用 */
+    padding: 15px 40px;
+    flex-grow: 1;
     display: flex;
     align-items: center;
-    gap: 20px;
+    gap: 30px; /* 文字間のスペースを調整 */
+    overflow: hidden; /* はみ出した文字を隠す */
 }
 
 /* 色の定義 */

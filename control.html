@@ -1,74 +1,117 @@
-<!-- control.html -->
+<!-- control.html (更新後) -->
 <!DOCTYPE html>
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
     <title>OBS Telop Controller</title>
+    <!-- ▼▼▼ プレビュー用にCSSを読み込み ▼▼▼ -->
+    <link rel="stylesheet" href="style.css">
+    <!-- ▲▲▲ ここまで ▲▲▲ -->
     <style>
-        body { font-family: sans-serif; padding: 20px; }
+        /* 操作パネル用のスタイル */
+        body { font-family: sans-serif; padding: 20px; background-color: #f0f0f0; }
+        .controller-wrapper { max-width: 800px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        h1, h2 { text-align: center; }
         .control-group { margin-bottom: 15px; }
         label { display: block; margin-bottom: 5px; font-weight: bold; }
-        input, select { width: 300px; padding: 8px; font-size: 16px; }
-        button { padding: 10px 20px; font-size: 16px; cursor: pointer; }
+        input, select { width: 100%; box-sizing: border-box; padding: 8px; font-size: 16px; border: 1px solid #ccc; border-radius: 4px; }
+        button { padding: 10px 20px; font-size: 16px; cursor: pointer; border-radius: 4px; }
+        .buttons { display: flex; gap: 10px; justify-content: center; margin-top: 20px; }
         .show-btn { background-color: #28a745; color: white; border: none; }
-        .hide-btn { background-color: #dc3545; color: white; border: none; margin-left: 10px; }
+        .hide-btn { background-color: #dc3545; color: white; border: none; }
+
+        /* ▼▼▼ プレビューエリア用のスタイル ▼▼▼ */
+        .preview-wrapper {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #333;
+            border-radius: 8px;
+            overflow: hidden; /* 横スライドが見えるように */
+            position: relative;
+            height: 150px; /* 高さを固定 */
+        }
+        /* プレビュー用のコンテナは縮小して表示 */
+        .preview-wrapper .telop-container {
+            transform: scale(0.4); /* 40%に縮小 */
+            transform-origin: bottom left; /* 左下を基点に縮小 */
+            bottom: -50px; /* 位置調整 */
+            left: 0;
+            width: 1920px;
+            height: 1080px;
+            opacity: 1; /* 常に表示 */
+            transform: none; /* アニメーションはさせない */
+            transition: none; /* トランジションも無効に */
+        }
+        /* ▲▲▲ ここまで ▲▲▲ */
     </style>
 </head>
 <body>
-    <h1>速報テロップ コントローラー</h1>
 
-    <div class="control-group">
-        <label for="type">テロップ種類（色）</label>
-        <select id="type">
-            <option value="red">赤色（緊急度 高）</option>
-            <option value="yellow">黄色（注意）</option>
-            <option value="blue">青色（通常）</option>
-        </select>
-    </div>
-    <div class="control-group">
-        <label for="header">ヘッダー（左の coloured box）</label>
-        <input type="text" id="header" value="緊急地震速報">
-    </div>
-    <div class="control-group">
-        <label for="text1">テキスト1</label>
-        <input type="text" id="text1" value="最大震度 5強">
-    </div>
-    <div class="control-group">
-        <label for="text2">テキスト2</label>
-        <input type="text" id="text2" value="震源 石川県能登地方">
-    </div>
-    <div class="control-group">
-        <label for="text3">テキスト3</label>
-        <input type="text" id="text3" value="発生日時 16:06頃">
+    <div class="controller-wrapper">
+        <h1>速報テロップ コントローラー</h1>
+
+        <div class="control-group">
+            <label for="type">テロップ種類（色）</label>
+            <select id="type">
+                <option value="red">赤色（緊急度 高）</option>
+                <option value="yellow">黄色（注意）</option>
+                <option value="blue">青色（通常）</option>
+            </select>
+        </div>
+        <div class="control-group">
+            <label for="header">ヘッダー</label>
+            <input type="text" id="header" value="緊急地震速報">
+        </div>
+        <div class="control-group">
+            <label for="text1">テキスト1</label>
+            <input type="text" id="text1" value="最大震度 5強">
+        </div>
+        <div class="control-group">
+            <label for="text2">テキスト2</label>
+            <input type="text" id="text2" value="震源 石川県能登地方">
+        </div>
+        <div class="control-group">
+            <label for="text3">テキスト3</label>
+            <input type="text" id="text3" value="発生日時 16:06頃">
+        </div>
+
+        <div class="buttons">
+            <button id="sendButton" class="show-btn">テロップ表示</button>
+            <button id="hideButton" class="hide-btn">テロップ非表示</button>
+        </div>
     </div>
 
-    <button id="sendButton" class="show-btn">テロップ表示</button>
-    <button id="hideButton" class="hide-btn">テロップ非表示</button>
+    <!-- ▼▼▼ プレビュー表示エリア ▼▼▼ -->
+    <div class="preview-wrapper">
+        <h2>プレビュー</h2>
+        <div id="preview-container" class="telop-container red visible">
+            <div class="bottom-bar">
+                <div id="preview-header" class="bottom-bar-header"></div>
+                <div class="bottom-bar-content">
+                    <span id="preview-text1"></span>
+                    <span id="preview-text2"></span>
+                    <span id="preview-text3"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- ▲▲▲ ここまで ▲▲▲ -->
 
-    <!-- Firebase SDKの読み込み -->
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
     <script>
-        // ▼▼▼ Step1でコピーした自分のFirebase設定をここに貼り付け ▼▼▼
+        // ▼▼▼ あなたのFirebase設定をここに貼り付け ▼▼▼
         const firebaseConfig = {
-  apiKey: "AIzaSyAhsAbTqQuairo-82A9rxQTazUCGdzdVc4",
-  authDomain: "obs-telop-system-7c98c.firebaseapp.com",
-  databaseURL: "https://obs-telop-system-7c98c-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "obs-telop-system-7c98c",
-  storageBucket: "obs-telop-system-7c98c.firebasestorage.app",
-  messagingSenderId: "368503557333",
-  appId: "1:368503557333:web:409dae2b1cf0c14b31a65c",
-  measurementId: "G-VMBCJ2952Z"
-};
+            // ... (ここはあなたの既存の設定のままにしてください)
+        };
         // ▲▲▲ ここまで ▲▲▲
 
-        // Firebaseの初期化
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
         const telopRef = database.ref('telop');
 
-        // 表示ボタンの処理
+        // 表示ボタンの処理 (変更なし)
         document.getElementById('sendButton').addEventListener('click', () => {
             const telopData = {
                 visible: true,
@@ -82,11 +125,39 @@
             alert('テロップを送信しました！');
         });
 
-        // 非表示ボタンの処理
+        // 非表示ボタンの処理 (変更なし)
         document.getElementById('hideButton').addEventListener('click', () => {
             telopRef.update({ visible: false });
             alert('テロップを非表示にしました！');
         });
+
+        // ▼▼▼ プレビュー機能の追加 ▼▼▼
+        const inputs = document.querySelectorAll('#type, #header, #text1, #text2, #text3');
+        const previewContainer = document.getElementById('preview-container');
+        const previewHeader = document.getElementById('preview-header');
+        const previewText1 = document.getElementById('preview-text1');
+        const previewText2 = document.getElementById('preview-text2');
+        const previewText3 = document.getElementById('preview-text3');
+
+        function updatePreview() {
+            const type = document.getElementById('type').value;
+            previewContainer.className = 'telop-container visible'; // クラスをリセット
+            previewContainer.classList.add(type); // 新しい色クラスを追加
+
+            previewHeader.innerText = document.getElementById('header').value;
+            previewText1.innerText = document.getElementById('text1').value;
+            previewText2.innerText = document.getElementById('text2').value;
+            previewText3.innerText = document.getElementById('text3').value;
+        }
+
+        // 各入力欄が変更されるたびにプレビューを更新
+        inputs.forEach(input => {
+            input.addEventListener('input', updatePreview);
+        });
+
+        // ページ読み込み時に最初のプレビューを生成
+        document.addEventListener('DOMContentLoaded', updatePreview);
+        // ▲▲▲ ここまで ▲▲▲
     </script>
 </body>
 </html>
