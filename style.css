@@ -37,12 +37,12 @@ body {
     left: 20px;
     width: calc(100% - 40px);
     display: flex;
-    font-size: 36px; /* 少しサイズを調整 */
+    font-size: 36px;
     font-weight: bold;
-    line-height: 1.4; /* 行間を調整 */
+    line-height: 1.4;
     box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-    border-radius: 5px; /* 角を少し丸める */
-    overflow: hidden; /* 角丸を適用するため */
+    border-radius: 5px;
+    overflow: hidden;
 }
 
 .bottom-bar-header {
@@ -52,17 +52,23 @@ body {
 }
 
 .bottom-bar-content {
+    background-color: #e6e6e6; /* 背景色はライトグレーに固定 */
+    color: #000; /* デフォルトの文字色は黒 */
     padding: 15px 30px;
     flex-grow: 1;
     display: flex;
     align-items: center;
-    overflow: hidden; /* はみ出した長体テキストを隠す */
+    overflow: hidden;
 }
 
-/* --- 追加: 長体用のテキストコンテナ --- */
 .ticker-text {
-    white-space: nowrap; /* 絶対に改行させない */
-    transform-origin: left center; /* 左揃えで長体をかける */
+    white-space: nowrap; /* 中の要素が改行されるのを防ぐ */
+    transform-origin: left center;
+}
+
+/* --- テキスト間のスペース --- */
+.ticker-text span + span {
+    margin-left: 2em; /* 文字サイズ2文字分のスペースを空ける */
 }
 
 /* ヘッダー色の定義 */
@@ -70,16 +76,7 @@ body {
 .header-yellow .bottom-bar-header { background-color: #f39800; }
 .header-blue .bottom-bar-header { background-color: #0068b7; }
 
-/* --- 追加: コンテンツ部分の色の定義 --- */
-.content-lightgray {
-    background-color: #e6e6e6;
-    color: #000;
-}
-.content-white {
-    background-color: #ffffff;
-    color: #000;
-}
-.content-dark {
-    background-color: #333333;
-    color: #fff;
-}
+/* ▼▼▼ 文字色の定義 ▼▼▼ */
+.text-black { color: #000000; }
+.text-red { color: #c8202f; }
+.text-blue { color: #0068b7; }

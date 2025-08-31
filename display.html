@@ -11,11 +11,14 @@
     <div id="telop-container" class="telop-container">
         <div class="bottom-bar">
             <div id="telop-header" class="bottom-bar-header"></div>
-            <!-- ▼▼▼ contentにIDを追加し、中にticker-textを配置 ▼▼▼ -->
-            <div id="telop-content" class="bottom-bar-content">
-                <div id="telop-ticker" class="ticker-text"></div>
+            <div class="bottom-bar-content">
+                <!-- ▼▼▼ 長体処理用の親要素と、各テキスト用のspanを配置 ▼▼▼ -->
+                <div id="telop-ticker" class="ticker-text">
+                    <span id="text-span-1"></span>
+                    <span id="text-span-2"></span>
+                    <span id="text-span-3"></span>
+                </div>
             </div>
-            <!-- ▲▲▲ ここまで ▲▲▲ -->
         </div>
     </div>
 
@@ -23,7 +26,7 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <script>
         // ▼▼▼ あなたのFirebase設定 ▼▼▼
-      const firebaseConfig = {
+        const firebaseConfig = {
   apiKey: "AIzaSyAhsAbTqQuairo-82A9rxQTazUCGdzdVc4",
   authDomain: "obs-telop-system-7c98c.firebaseapp.com",
   databaseURL: "https://obs-telop-system-7c98c-default-rtdb.asia-southeast1.firebasedatabase.app",
@@ -38,21 +41,18 @@
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
-        // 要素を取得
         const container = document.getElementById('telop-container');
         const telopHeader = document.getElementById('telop-header');
-        const telopContent = document.getElementById('telop-content');
-        const telopTicker = document.getElementById('telop-ticker');
-
-        // --- 追加: 長体処理の関数 ---
+        const telopTicker = document.getElementById('telop-ticker'); // 親コンテナ
+        const textSpan1 = document.getElementById('text-span-1');
+        const textSpan2 = document.getElementById('text-span-2');
+        const textSpan3 = document.getElementById('text-span-3');
+        
         function adjustTextScaling() {
-            // 一旦スケールをリセットして正しい幅を計算
             telopTicker.style.transform = 'scaleX(1)';
-            
-            const containerWidth = telopContent.clientWidth;
+            const containerWidth = telopTicker.parentElement.clientWidth;
             const textWidth = telopTicker.scrollWidth;
 
-            // テキストがコンテナより大きい場合のみ長体をかける
             if (textWidth > containerWidth) {
                 const scale = containerWidth / textWidth;
                 telopTicker.style.transform = `scaleX(${scale})`;
@@ -65,22 +65,21 @@
             if (data && data.visible) {
                 // ヘッダーテキストと色を更新
                 telopHeader.innerText = data.header || '';
-                container.className = 'telop-container'; // クラスをリセット
-                container.classList.add(data.headerColor); // 例: 'header-red'
+                container.className = 'telop-container';
+                container.classList.add(data.headerColor);
 
-                // コンテンツの色を更新
-                telopContent.className = 'bottom-bar-content'; // クラスをリセット
-                telopContent.classList.add(data.contentColor); // 例: 'content-lightgray'
+                // 各テキストと文字色を更新
+                textSpan1.innerText = data.text1 || '';
+                textSpan1.className = data.textColor1 || 'text-black';
+                
+                textSpan2.innerText = data.text2 || '';
+                textSpan2.className = data.textColor2 || 'text-black';
 
-                // テキストを結合して表示
-                const combinedText = `${data.text1 || ''}　${data.text2 || ''}　${data.text3 || ''}`;
-                telopTicker.innerText = combinedText;
-
-                // 表示クラスを追加
+                textSpan3.innerText = data.text3 || '';
+                textSpan3.className = data.textColor3 || 'text-black';
+                
                 container.classList.add('visible');
-
-                // 表示後に長体処理を実行 (表示されないと正しい幅が取れないため)
-                setTimeout(adjustTextScaling, 50); // 少し遅延させて実行
+                setTimeout(adjustTextScaling, 50);
 
             } else {
                 container.classList.remove('visible');

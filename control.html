@@ -10,8 +10,11 @@
         .controller-wrapper { max-width: 800px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
         h1, h2 { text-align: center; }
         .control-group { margin-bottom: 15px; }
+        .text-control-group { display: flex; gap: 10px; align-items: flex-end; }
+        .text-control-group .text-input { flex-grow: 1; }
         label { display: block; margin-bottom: 5px; font-weight: bold; }
         input, select { width: 100%; box-sizing: border-box; padding: 8px; font-size: 16px; border: 1px solid #ccc; border-radius: 4px; }
+        select { width: 120px; }
         button { padding: 10px 20px; font-size: 16px; cursor: pointer; border-radius: 4px; }
         .buttons { display: flex; gap: 10px; justify-content: center; margin-top: 20px; }
         .show-btn { background-color: #28a745; color: white; border: none; }
@@ -23,7 +26,6 @@
 <body>
     <div class="controller-wrapper">
         <h1>速報テロップ コントローラー</h1>
-
         <div class="control-group">
             <label for="headerColor">ヘッダー色</label>
             <select id="headerColor">
@@ -32,36 +34,55 @@
                 <option value="header-blue">青色</option>
             </select>
         </div>
-        <!-- ▼▼▼ コンテンツ色の選択肢を追加 ▼▼▼ -->
         <div class="control-group">
-            <label for="contentColor">コンテンツ色</label>
-            <select id="contentColor">
-                <option value="content-lightgray">ライトグレー</option>
-                <option value="content-white">ホワイト</option>
-                <option value="content-dark">ダーク</option>
-            </select>
-        </div>
-        <!-- ▲▲▲ ここまで ▲▲▲ -->
-
-        <!-- ▼▼▼ デフォルト値を変更 ▼▼▼ -->
-        <div class="control-group">
-            <label for="header">ヘッダー</label>
+            <label for="header">ヘッダーテキスト</label>
             <input type="text" id="header" value="決算速報">
         </div>
-        <div class="control-group">
-            <label for="text1">テキスト1</label>
-            <input type="text" id="text1" value="東証P【7203】トヨタ自動車">
+        <hr>
+        <!-- ▼▼▼ テキストごとの入力欄 ▼▼▼ -->
+        <div class="control-group text-control-group">
+            <div class="text-input">
+                <label for="text1">テキスト1</label>
+                <input type="text" id="text1" value="東証P【7203】トヨタ自動車">
+            </div>
+            <div>
+                <label for="textColor1">文字色</label>
+                <select id="textColor1">
+                    <option value="text-black">黒</option>
+                    <option value="text-red">赤</option>
+                    <option value="text-blue">青</option>
+                </select>
+            </div>
         </div>
-        <div class="control-group">
-            <label for="text2">テキスト2</label>
-            <input type="text" id="text2" value="2026年3月期 第3四半期">
+        <div class="control-group text-control-group">
+            <div class="text-input">
+                <label for="text2">テキスト2</label>
+                <input type="text" id="text2" value="2026年3月期 第3四半期">
+            </div>
+            <div>
+                <label for="textColor2">文字色</label>
+                <select id="textColor2">
+                    <option value="text-black">黒</option>
+                    <option value="text-red">赤</option>
+                    <option value="text-blue">青</option>
+                </select>
+            </div>
         </div>
-        <div class="control-group">
-            <label for="text3">テキスト3</label>
-            <input type="text" id="text3" value="増収増益で着地">
+        <div class="control-group text-control-group">
+            <div class="text-input">
+                <label for="text3">テキスト3</label>
+                <input type="text" id="text3" value="増収増益で着地">
+            </div>
+            <div>
+                <label for="textColor3">文字色</label>
+                <select id="textColor3">
+                    <option value="text-black">黒</option>
+                    <option value="text-red">赤</option>
+                    <option value="text-blue">青</option>
+                </select>
+            </div>
         </div>
         <!-- ▲▲▲ ここまで ▲▲▲ -->
-
         <div class="buttons">
             <button id="sendButton" class="show-btn">テロップ表示</button>
             <button id="hideButton" class="hide-btn">テロップ非表示</button>
@@ -73,8 +94,12 @@
         <div id="preview-container" class="telop-container visible">
             <div class="bottom-bar">
                 <div id="preview-header" class="bottom-bar-header"></div>
-                <div id="preview-content" class="bottom-bar-content">
-                    <div id="preview-ticker" class="ticker-text"></div>
+                <div class="bottom-bar-content">
+                    <div id="preview-ticker" class="ticker-text">
+                        <span id="preview-span-1"></span>
+                        <span id="preview-span-2"></span>
+                        <span id="preview-span-3"></span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -104,11 +129,13 @@
             const telopData = {
                 visible: true,
                 headerColor: document.getElementById('headerColor').value,
-                contentColor: document.getElementById('contentColor').value, // コンテンツ色を追加
                 header: document.getElementById('header').value,
                 text1: document.getElementById('text1').value,
+                textColor1: document.getElementById('textColor1').value,
                 text2: document.getElementById('text2').value,
-                text3: document.getElementById('text3').value
+                textColor2: document.getElementById('textColor2').value,
+                text3: document.getElementById('text3').value,
+                textColor3: document.getElementById('textColor3').value,
             };
             telopRef.set(telopData);
             alert('テロップを送信しました！');
@@ -122,24 +149,25 @@
         const inputs = document.querySelectorAll('input, select');
         const previewContainer = document.getElementById('preview-container');
         const previewHeader = document.getElementById('preview-header');
-        const previewContent = document.getElementById('preview-content');
         const previewTicker = document.getElementById('preview-ticker');
+        const previewSpan1 = document.getElementById('preview-span-1');
+        const previewSpan2 = document.getElementById('preview-span-2');
+        const previewSpan3 = document.getElementById('preview-span-3');
 
         function updatePreview() {
-            // 色の更新
             previewContainer.className = 'telop-container visible';
             previewContainer.classList.add(document.getElementById('headerColor').value);
-            previewContent.className = 'bottom-bar-content';
-            previewContent.classList.add(document.getElementById('contentColor').value);
-
-            // テキストの更新
             previewHeader.innerText = document.getElementById('header').value;
-            const combinedText = `${document.getElementById('text1').value}　${document.getElementById('text2').value}　${document.getElementById('text3').value}`;
-            previewTicker.innerText = combinedText;
+            
+            previewSpan1.innerText = document.getElementById('text1').value;
+            previewSpan1.className = document.getElementById('textColor1').value;
+            previewSpan2.innerText = document.getElementById('text2').value;
+            previewSpan2.className = document.getElementById('textColor2').value;
+            previewSpan3.innerText = document.getElementById('text3').value;
+            previewSpan3.className = document.getElementById('textColor3').value;
 
-            // 長体処理
             previewTicker.style.transform = 'scaleX(1)';
-            const containerWidth = previewContent.clientWidth;
+            const containerWidth = previewTicker.parentElement.clientWidth;
             const textWidth = previewTicker.scrollWidth;
             if (textWidth > containerWidth) {
                 const scale = containerWidth / textWidth;
