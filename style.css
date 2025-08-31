@@ -1,0 +1,63 @@
+/* style.css */
+
+/* LINEフォントの読み込み */
+@font-face {
+    font-family: 'LINE Seed JP';
+    src: url('fonts/LINESeedJP_OTF_Rg.woff2') format('woff2'); /* ファイル名は適宜変更 */
+    font-weight: normal;
+}
+
+body {
+    font-family: 'LINE Seed JP', sans-serif;
+    margin: 0;
+    padding: 0;
+    overflow: hidden; /* はみ出しを非表示に */
+    background-color: transparent; /* 背景を透明に */
+}
+
+.telop-container {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 1920px; /* OBSのキャンバスサイズに合わせる */
+    height: 1080px;
+    opacity: 0; /* 初期状態は非表示 */
+    transition: opacity 0.5s ease;
+}
+
+.telop-container.visible {
+    opacity: 1; /* 表示状態 */
+}
+
+/* 緊急地震速報風テロップ（下部） */
+.bottom-bar {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    width: calc(100% - 40px);
+    display: flex;
+    font-size: 32px;
+    font-weight: bold;
+    color: #000;
+    line-height: 1.5;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+}
+
+.bottom-bar-header {
+    padding: 10px 30px;
+    color: white;
+}
+
+.bottom-bar-content {
+    background-color: rgba(230, 230, 230, 0.95);
+    padding: 10px 30px;
+    flex-grow: 1; /* 残りの幅をすべて使用 */
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+/* 色の定義 */
+.telop-container.red .bottom-bar-header { background-color: #c8202f; }
+.telop-container.yellow .bottom-bar-header { background-color: #f39800; }
+.telop-container.blue .bottom-bar-header { background-color: #0068b7; }

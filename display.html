@@ -1,0 +1,71 @@
+<!-- display.html -->
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>OBS Telop Display</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- テロップ全体のコンテナ -->
+    <div id="telop-container" class="telop-container">
+        <!-- 下部テロップ -->
+        <div class="bottom-bar">
+            <div id="telop-header" class="bottom-bar-header">
+                <!-- 例: 緊急地震速報 -->
+            </div>
+            <div class="bottom-bar-content">
+                <span id="telop-text1"></span>
+                <span id="telop-text2"></span>
+                <span id="telop-text3"></span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDKの読み込み -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
+    <script>
+        // ▼▼▼ Step1でコピーした自分のFirebase設定をここに貼り付け ▼▼▼
+        const firebaseConfig = {
+  apiKey: "AIzaSyAhsAbTqQuairo-82A9rxQTazUCGdzdVc4",
+  authDomain: "obs-telop-system-7c98c.firebaseapp.com",
+  databaseURL: "https://obs-telop-system-7c98c-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "obs-telop-system-7c98c",
+  storageBucket: "obs-telop-system-7c98c.firebasestorage.app",
+  messagingSenderId: "368503557333",
+  appId: "1:368503557333:web:409dae2b1cf0c14b31a65c",
+  measurementId: "G-VMBCJ2952Z"
+};
+        // ▲▲▲ ここまで ▲▲▲
+
+        // Firebaseの初期化
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        // データベースの 'telop' パスを監視
+        database.ref('telop').on('value', (snapshot) => {
+            const data = snapshot.val();
+            const container = document.getElementById('telop-container');
+
+            if (data && data.visible) {
+                // データを各要素に反映
+                document.getElementById('telop-header').innerText = data.header || '';
+                document.getElementById('telop-text1').innerText = data.text1 || '';
+                document.getElementById('telop-text2').innerText = data.text2 || '';
+                document.getElementById('telop-text3').innerText = data.text3 || '';
+
+                // クラスを一旦リセットしてから、指定された色クラスを追加
+                container.className = 'telop-container'; // リセット
+                container.classList.add(data.type); // 例: 'red', 'yellow'
+                container.classList.add('visible'); // 表示クラスを追加
+            } else {
+                // データがない、または非表示の場合
+                container.classList.remove('visible');
+            }
+        });
+    </script>
+</body>
+</html>
