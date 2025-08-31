@@ -3,7 +3,7 @@
 /* LINEフォントの読み込み */
 @font-face {
     font-family: 'LINE Seed JP';
-    src: url('fonts/LINESeedJP_OTF_Rg.woff2') format('woff2'); /* ファイル名は適宜変更 */
+    src: url('fonts/LINESeedJP_OTF_Rg.woff2') format('woff2');
     font-weight: normal;
 }
 
@@ -21,7 +21,7 @@ body {
     left: 20px;
     width: calc(100% - 40px);
     opacity: 0;
-    transform: translateY(100%); /* 下からスライドインするアニメーションに変更 */
+    transform: translateY(100%);
     transition: transform 0.5s ease-out, opacity 0.5s ease-out;
     box-shadow: 0 4px 10px rgba(0,0,0,0.3);
     border-radius: 5px;
@@ -36,56 +36,49 @@ body {
 /* --- 1行目のデザイン --- */
 .top-bar {
     display: flex;
-    font-size: 38px;
+    font-size: 36px;
     font-weight: bold;
-}
-.top-bar-header {
-    padding: 10px 25px;
-    white-space: nowrap;
-}
-.top-bar-main {
-    padding: 10px 25px;
-    flex-grow: 1;
-}
-
-/* 1行目の配色プリセット */
-.top-bar.yellow {
-    background-color: #ffff00; /* 黄色 */
     color: #000;
+    background-color: #ffff00; /* 背景は黄色で固定 */
 }
-.top-bar.yellow .top-bar-header {
-    background-color: #ffffff; /* 白 */
-    color: #8a2be2; /* 紫 */
+/* ヘッダー部分（左側）*/
+.top-bar-header {
+    padding: 12px 25px;
+    background-color: #ffffff; /* ヘッダーの背景は白 */
+    white-space: nowrap;
+    border-right: 2px solid #ddd; /* 区切り線 */
 }
-.top-bar.red {
-    background-color: #ff3333; /* 赤 */
-    color: #fff;
+/* 企業名部分（右側）*/
+.top-bar-main {
+    padding: 12px 25px;
+    flex-grow: 1;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis; /* はみ出した場合に...で表示 */
 }
-.top-bar.red .top-bar-header {
-    background-color: #ffffff;
-    color: #ff3333;
-}
-
 
 /* --- 2行目のデザイン --- */
 .bottom-bar {
-    display: flex;
-    justify-content: space-around; /* 各要素を均等に配置 */
-    align-items: center;
-    background-color: #222222;
-    color: #ffffff;
+    display: grid; /* 2つの要素を均等に配置するためにGridを使用 */
+    grid-template-columns: 1fr 1fr; /* 2つのカラムを1:1の比率で作成 */
+    background-color: rgba(255, 255, 255, 0.85); /* 背景を半透明の白に変更 */
     font-size: 32px;
     font-weight: bold;
     padding: 10px 0;
 }
 .bottom-bar span {
-    padding: 5px 15px;
+    padding: 8px 25px;
     white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
     text-align: center;
-    flex-basis: 0; /* flexアイテムの基本幅 */
-    flex-grow: 1; /* 空きスペースを均等に埋める */
 }
-/* 各要素の間に区切り線を追加 */
-.bottom-bar span + span {
-    border-left: 2px solid #555;
+/* 2つのテキストの間に区切り線を追加 */
+.bottom-bar span:first-child {
+    border-right: 2px solid #ccc;
 }
+
+/* 文字色の定義 */
+.text-black { color: #000000; }
+.text-red { color: #c8202f; }
+.text-blue { color: #0068b7; }

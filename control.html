@@ -8,58 +8,61 @@
     <style>
         body { font-family: sans-serif; padding: 20px; background-color: #f0f0f0; }
         .controller-wrapper { max-width: 800px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        h1, h2, h3 { text-align: center; color: #333; }
+        h1, h3 { text-align: center; color: #333; }
         h3 { margin-top: 30px; border-bottom: 2px solid #eee; padding-bottom: 10px; }
         .control-group { margin-bottom: 15px; }
-        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .grid-2 { display: grid; grid-template-columns: 1fr 120px; gap: 10px; align-items: flex-end;}
         label { display: block; margin-bottom: 5px; font-weight: bold; }
-        input, select { width: 100%; box-sizing: border-box; padding: 8px; font-size: 16px; border: 1px solid #ccc; border-radius: 4px; }
+        input, select { width: 100%; box-sizing: border-box; padding: 10px; font-size: 16px; border: 1px solid #ccc; border-radius: 4px; }
         button { padding: 10px 20px; font-size: 16px; cursor: pointer; border-radius: 4px; }
         .buttons { display: flex; gap: 10px; justify-content: center; margin-top: 30px; }
         .show-btn { background-color: #28a745; color: white; border: none; }
         .hide-btn { background-color: #dc3545; color: white; border: none; }
         .preview-wrapper { margin-top: 30px; background-color: #333; border-radius: 8px; padding: 20px; }
-        .preview-wrapper .telop-container { transform: scale(0.4); transform-origin: bottom left; position: relative; opacity: 1; transform: none; transition: none; bottom: auto; left: auto; box-shadow: none; }
+        .preview-wrapper .telop-container { transform: scale(0.4); transform-origin: top left; position: relative; opacity: 1; transform: none; transition: none; bottom: auto; left: auto; box-shadow: none; width: 100%; }
     </style>
 </head>
 <body>
     <div class="controller-wrapper">
-        <h1>速報テロップ コントローラー</h1>
+        <h1>決算速報 コントローラー</h1>
 
-        <h3>1行目（メインメッセージ）</h3>
+        <h3>1行目</h3>
         <div class="control-group">
-            <label for="topBarColor">配色</label>
-            <select id="topBarColor">
-                <option value="yellow">黄色（警告）</option>
-                <option value="red">赤色（緊急）</option>
-            </select>
+            <label for="headerText">ヘッダー</label>
+            <input type="text" id="headerText" value="決算速報">
         </div>
         <div class="control-group">
-            <label for="headerText">ヘッダー (左側)</label>
-            <input type="text" id="headerText" value="緊急地震速報">
-        </div>
-        <div class="control-group">
-            <label for="mainText">メインテキスト (右側)</label>
-            <input type="text" id="mainText" value="念のため海岸から離れてください">
+            <label for="companyName">企業名</label>
+            <input type="text" id="companyName" value="東証プライム 7203 トヨタ自動車">
         </div>
 
-        <h3>2行目（詳細情報）</h3>
-        <div class="grid-2">
-            <div class="control-group">
-                <label for="info1">情報 1</label>
-                <input type="text" id="info1" value="最大震度 3">
+        <h3>2行目</h3>
+        <div class="control-group grid-2">
+            <div>
+                <label for="detailText1">テキスト1</label>
+                <input type="text" id="detailText1" value="2026年3月期 第3四半期">
             </div>
-            <div class="control-group">
-                <label for="info2">情報 2</label>
-                <input type="text" id="info2" value="M 4.5">
+            <div>
+                <label for="detailColor1">文字色</label>
+                <select id="detailColor1">
+                    <option value="text-black">黒</option>
+                    <option value="text-red">赤</option>
+                    <option value="text-blue">青</option>
+                </select>
             </div>
-            <div class="control-group">
-                <label for="info3">情報 3</label>
-                <input type="text" id="info3" value="震源 福島県沖">
+        </div>
+        <div class="control-group grid-2">
+            <div>
+                <label for="detailText2">テキスト2</label>
+                <input type="text" id="detailText2" value="増収増益で着地 トランプ関税の影響限定的">
             </div>
-            <div class="control-group">
-                <label for="info4">情報 4</label>
-                <input type="text" id="info4" value="発生日時 19:18頃">
+            <div>
+                <label for="detailColor2">文字色</label>
+                <select id="detailColor2">
+                    <option value="text-black">黒</option>
+                    <option value="text-red">赤</option>
+                    <option value="text-blue">青</option>
+                </select>
             </div>
         </div>
 
@@ -70,17 +73,15 @@
     </div>
 
     <div class="preview-wrapper">
-        <h2>プレビュー</h2>
+        <h3>プレビュー</h3>
         <div id="preview-container" class="telop-container visible">
-            <div id="preview-top-bar" class="top-bar">
-                <div id="preview-top-bar-header"></div>
-                <div id="preview-top-bar-main"></div>
+            <div class="top-bar">
+                <div id="preview-header" class="top-bar-header"></div>
+                <div id="preview-companyName" class="top-bar-main"></div>
             </div>
             <div class="bottom-bar">
-                <span id="preview-info1"></span>
-                <span id="preview-info2"></span>
-                <span id="preview-info3"></span>
-                <span id="preview-info4"></span>
+                <span id="preview-detail1"></span>
+                <span id="preview-detail2"></span>
             </div>
         </div>
     </div>
@@ -89,7 +90,7 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <script>
         // ▼▼▼ あなたのFirebase設定をここに貼り付け ▼▼▼
-        const firebaseConfig = {
+       const firebaseConfig = {
   apiKey: "AIzaSyAhsAbTqQuairo-82A9rxQTazUCGdzdVc4",
   authDomain: "obs-telop-system-7c98c.firebaseapp.com",
   databaseURL: "https://obs-telop-system-7c98c-default-rtdb.asia-southeast1.firebasedatabase.app",
@@ -108,13 +109,12 @@
         document.getElementById('sendButton').addEventListener('click', () => {
             const telopData = {
                 visible: true,
-                topBarColor: document.getElementById('topBarColor').value,
                 headerText: document.getElementById('headerText').value,
-                mainText: document.getElementById('mainText').value,
-                info1: document.getElementById('info1').value,
-                info2: document.getElementById('info2').value,
-                info3: document.getElementById('info3').value,
-                info4: document.getElementById('info4').value,
+                companyName: document.getElementById('companyName').value,
+                detailText1: document.getElementById('detailText1').value,
+                detailColor1: document.getElementById('detailColor1').value,
+                detailText2: document.getElementById('detailText2').value,
+                detailColor2: document.getElementById('detailColor2').value,
             };
             telopRef.set(telopData);
             alert('テロップを送信しました！');
@@ -129,15 +129,17 @@
 
         function updatePreview() {
             // 1行目プレビュー
-            document.getElementById('preview-top-bar').className = 'top-bar ' + document.getElementById('topBarColor').value;
-            document.getElementById('preview-top-bar-header').innerText = document.getElementById('headerText').value;
-            document.getElementById('preview-top-bar-main').innerText = document.getElementById('mainText').value;
-
+            document.getElementById('preview-header').innerText = document.getElementById('headerText').value;
+            document.getElementById('preview-companyName').innerText = document.getElementById('companyName').value;
+            
             // 2行目プレビュー
-            document.getElementById('preview-info1').innerText = document.getElementById('info1').value;
-            document.getElementById('preview-info2').innerText = document.getElementById('info2').value;
-            document.getElementById('preview-info3').innerText = document.getElementById('info3').value;
-            document.getElementById('preview-info4').innerText = document.getElementById('info4').value;
+            const detail1 = document.getElementById('preview-detail1');
+            detail1.innerText = document.getElementById('detailText1').value;
+            detail1.className = document.getElementById('detailColor1').value;
+
+            const detail2 = document.getElementById('preview-detail2');
+            detail2.innerText = document.getElementById('detailText2').value;
+            detail2.className = document.getElementById('detailColor2').value;
         }
 
         inputs.forEach(input => input.addEventListener('input', updatePreview));

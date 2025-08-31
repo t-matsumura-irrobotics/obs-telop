@@ -7,22 +7,18 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <!-- ▼▼▼ 2段組の構造に変更 ▼▼▼ -->
     <div id="telop-container" class="telop-container">
         <!-- 1行目 -->
-        <div id="top-bar" class="top-bar">
-            <div id="top-bar-header"></div>
-            <div id="top-bar-main"></div>
+        <div class="top-bar">
+            <div id="header"></div>
+            <div id="companyName"></div>
         </div>
         <!-- 2行目 -->
-        <div id="bottom-bar" class="bottom-bar">
-            <span id="info1"></span>
-            <span id="info2"></span>
-            <span id="info3"></span>
-            <span id="info4"></span>
+        <div class="bottom-bar">
+            <span id="detail1"></span>
+            <span id="detail2"></span>
         </div>
     </div>
-    <!-- ▲▲▲ ここまで ▲▲▲ -->
 
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
@@ -43,31 +39,29 @@
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
-        // 新しい要素を取得
         const container = document.getElementById('telop-container');
-        const topBar = document.getElementById('top-bar');
-        const topBarHeader = document.getElementById('top-bar-header');
-        const topBarMain = document.getElementById('top-bar-main');
-        const info1 = document.getElementById('info1');
-        const info2 = document.getElementById('info2');
-        const info3 = document.getElementById('info3');
-        const info4 = document.getElementById('info4');
+        const header = document.getElementById('header');
+        const companyName = document.getElementById('companyName');
+        const detail1 = document.getElementById('detail1');
+        const detail2 = document.getElementById('detail2');
 
         database.ref('telop').on('value', (snapshot) => {
             const data = snapshot.val();
 
             if (data && data.visible) {
                 // 1行目のデータを反映
-                topBar.className = 'top-bar'; // クラスをリセット
-                topBar.classList.add(data.topBarColor || 'yellow');
-                topBarHeader.innerText = data.headerText || '';
-                topBarMain.innerText = data.mainText || '';
+                header.className = 'top-bar-header';
+                header.innerText = data.headerText || '';
+                
+                companyName.className = 'top-bar-main';
+                companyName.innerText = data.companyName || '';
 
                 // 2行目のデータを反映
-                info1.innerText = data.info1 || '';
-                info2.innerText = data.info2 || '';
-                info3.innerText = data.info3 || '';
-                info4.innerText = data.info4 || '';
+                detail1.innerText = data.detailText1 || '';
+                detail1.className = data.detailColor1 || 'text-black';
+
+                detail2.innerText = data.detailText2 || '';
+                detail2.className = data.detailColor2 || 'text-black';
 
                 container.classList.add('visible');
 
