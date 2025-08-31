@@ -1,4 +1,4 @@
-<!-- control.html (更新後) -->
+<!-- control.html (修正後) -->
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -6,7 +6,9 @@
     <title>OBS Telop Controller</title>
     <link rel="stylesheet" href="style.css">
     <style>
-        body { font-family: sans-serif; padding: 20px; background-color: #f0f0f0; padding-bottom: 300px; } /* スクロールできるように余白を追加 */
+        /* ▼▼▼ 修正点2: スクロール問題を修正 ▼▼▼ */
+        body { font-family: sans-serif; padding: 20px; background-color: #f0f0f0; padding-bottom: 400px; /* プレビュー等が隠れないよう、ページ下部に十分な余白を確保 */ }
+        /* ▲▲▲ ここまで ▲▲▲ */
         .controller-wrapper, .draft-wrapper { max-width: 800px; margin: 0 auto 20px auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
         h1, h3 { text-align: center; color: #333; }
         h3 { margin-top: 30px; border-bottom: 2px solid #eee; padding-bottom: 10px; }
@@ -125,14 +127,9 @@
             const currentLength = document.getElementById('detailText').value.length;
             document.getElementById('char-count').innerText = currentLength;
         }
-
-        // --- 下書き機能 ---
-        function getDrafts() {
-            return JSON.parse(localStorage.getItem(DRAFT_KEY) || '{}');
-        }
-        function saveDrafts(drafts) {
-            localStorage.setItem(DRAFT_KEY, JSON.stringify(drafts));
-        }
+        
+        function getDrafts() { return JSON.parse(localStorage.getItem(DRAFT_KEY) || '{}'); }
+        function saveDrafts(drafts) { localStorage.setItem(DRAFT_KEY, JSON.stringify(drafts)); }
         function updateDraftList() {
             const drafts = getDrafts();
             const draftSelect = document.getElementById('drafts');
@@ -157,19 +154,16 @@
         });
 
         document.getElementById('loadDraftButton').addEventListener('click', () => {
-            const draftSelect = document.getElementById('drafts');
-            const name = draftSelect.value;
+            const name = document.getElementById('drafts').value;
             if (!name) return alert('下書きを選択してください。');
-            const drafts = getDrafts();
-            const draftData = drafts[name];
+            const draftData = getDrafts()[name];
             allControlIDs.forEach(id => document.getElementById(id).value = draftData[id]);
-            updatePreview(); // プレビューも更新
+            updatePreview();
             alert(`「${name}」を読み込みました。`);
         });
         
         document.getElementById('deleteDraftButton').addEventListener('click', () => {
-            const draftSelect = document.getElementById('drafts');
-            const name = draftSelect.value;
+            const name = document.getElementById('drafts').value;
             if (!name) return alert('下書きを選択してください。');
             if (!confirm(`「${name}」を削除しますか？`)) return;
             const drafts = getDrafts();
@@ -179,20 +173,26 @@
             alert(`「${name}」を削除しました。`);
         });
 
-        // --- 送信機能 ---
+        // ▼▼▼ 修正点1: データ送信部分を修正 ▼▼▼
         document.getElementById('sendButton').addEventListener('click', () => {
-            const telopData = { visible: true };
-            allControlIDs.forEach(id => telopData[id.replace('Text', '').replace('Name', '')] = document.getElementById(id).value);
+            const telopData = {
+                visible: true,
+                themeColor: document.getElementById('themeColor').value,
+                headerText: document.getElementById('headerText').value,
+                companyName: document.getElementById('companyName').value,
+                detailText: document.getElementById('detailText').value,
+                detailColor: document.getElementById('detailColor').value,
+            };
             telopRef.set(telopData);
             alert('テロップを送信しました！');
         });
+        // ▲▲▲ ここまで ▲▲▲
 
         document.getElementById('hideButton').addEventListener('click', () => {
             telopRef.update({ visible: false });
             alert('テロップを非表示にしました！');
         });
 
-        // --- 初期化処理 ---
         inputs.forEach(input => input.addEventListener('input', updatePreview));
         document.addEventListener('DOMContentLoaded', () => {
             updatePreview();
