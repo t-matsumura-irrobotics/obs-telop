@@ -1,19 +1,28 @@
-/* style.css (更新後) */
+/* style.css (修正後) */
 
 /* LINEフォントの読み込み */
 @font-face {
     font-family: 'LINE Seed JP';
     src: url('fonts/LINESeedJP_OTF_Rg.woff2') format('woff2');
     font-weight: normal;
+    font-weight: 400; /* normal */
+}
+@font-face {
+    font-family: 'LINE Seed JP';
+    src: url('fonts/LINESeedJP_OTF_Bd.woff2') format('woff2'); /* 太字フォントも読み込む場合 */
+    font-weight: bold;
+    font-weight: 700; /* bold */
 }
 
-body {
+/* ▼▼▼ 変更点: セレクタを "body" から "body.obs-display" に変更 ▼▼▼ */
+body.obs-display {
     font-family: 'LINE Seed JP', sans-serif;
     margin: 0;
     padding: 0;
-    overflow: hidden;
+    overflow: hidden; /* この設定がコントローラーページに影響しないようにする */
     background-color: transparent;
 }
+/* ▲▲▲ 変更ここまで ▲▲▲ */
 
 .telop-container {
     position: absolute;
@@ -37,7 +46,6 @@ body {
 .top-bar {
     display: flex;
     font-size: 43px;
-    font-weight: bold;
     align-items: center;
     height: 65px;
 }
@@ -46,6 +54,8 @@ body {
     padding: 0 25px;
     white-space: nowrap;
     border-right: 2px solid rgba(0, 0, 0, 0.15);
+    font-weight: bold;
+    font-size: 52px;
 }
 .top-bar-main {
     padding: 0 25px;
@@ -53,27 +63,24 @@ body {
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
+    font-weight: 400;
 }
 
-/* ▼▼▼ 変更点: グラデーションに変更 ▼▼▼ */
 /* 1行目の配色プリセット */
 .theme-yellow .top-bar-main {
-    background: linear-gradient(to bottom, #FFEB3B, #FBC02D); /* 明るい黄色から濃い黄色へのグラデーション */
+    background: linear-gradient(to bottom, #FBC02D, #F57F17);
     color: #000;
 }
 .theme-yellow .top-bar-header {
-    color: #F57F17; /* グラデーションの濃い部分に合わせた文字色 */
+    color: #F57F17;
 }
-
 .theme-red .top-bar-main {
-    background: linear-gradient(to bottom, #E53935, #B71C1C); /* 明るい赤から濃い赤へのグラデーション */
+    background: linear-gradient(to bottom, #D32F2F, #9A0007);
     color: #fff;
 }
 .theme-red .top-bar-header {
-    color: #B71C1C;
+    color: #9A0007;
 }
-/* ▲▲▲ 変更ここまで ▲▲▲ */
-
 
 /* --- 2行目のデザイン --- */
 .bottom-bar {
