@@ -15,25 +15,24 @@
         </div>
         <!-- 2行目 -->
         <div class="bottom-bar">
-            <span id="detail1"></span>
-            <span id="detail2"></span>
+            <span id="detailText"></span>
         </div>
     </div>
 
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <script>
-        // ▼▼▼ あなたのFirebase設定 ▼▼▼
-       const firebaseConfig = {
-  apiKey: "AIzaSyAhsAbTqQuairo-82A9rxQTazUCGdzdVc4",
-  authDomain: "obs-telop-system-7c98c.firebaseapp.com",
-  databaseURL: "https://obs-telop-system-7c98c-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "obs-telop-system-7c98c",
-  storageBucket: "obs-telop-system-7c98c.firebasestorage.app",
-  messagingSenderId: "368503557333",
-  appId: "1:368503557333:web:409dae2b1cf0c14b31a65c",
-  measurementId: "G-VMBCJ2952Z"
-};
+        // ▼▼▼ あなた専用のFirebase設定（変更不要） ▼▼▼
+        const firebaseConfig = {
+            apiKey: "AIzaSyAhsAbTqQuairo-82A9rxQTazUCGdzdVc4",
+            authDomain: "obs-telop-system-7c98c.firebaseapp.com",
+            databaseURL: "https://obs-telop-system-7c98c-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "obs-telop-system-7c98c",
+            storageBucket: "obs-telop-system-7c98c.appspot.com",
+            messagingSenderId: "368503557333",
+            appId: "1:368503557333:web:409dae2b1cf0c14b31a65c",
+            measurementId: "G-VMBCJ2952Z"
+        };
         // ▲▲▲ ここまで ▲▲▲
 
         firebase.initializeApp(firebaseConfig);
@@ -43,28 +42,43 @@
         const topBar = document.getElementById('top-bar');
         const header = document.getElementById('header');
         const companyName = document.getElementById('companyName');
-        const detail1 = document.getElementById('detail1');
-        const detail2 = document.getElementById('detail2');
+        const detailText = document.getElementById('detailText');
+        let isVisible = false;
+
+        // テロップの見た目を更新する関数
+        function updateTelopContent(data) {
+            // 1行目のデータを反映
+            topBar.className = 'top-bar ' + (data.themeColor || 'theme-yellow');
+            header.innerText = data.headerText || '';
+            companyName.innerText = data.companyName || '';
+
+            // 2行目のデータを反映
+            detailText.innerText = data.detailText || '';
+            detailText.className = data.detailColor || 'text-black';
+        }
 
         database.ref('telop').on('value', (snapshot) => {
             const data = snapshot.val();
 
             if (data && data.visible) {
-                // 1行目のデータを反映
-                topBar.className = 'top-bar ' + (data.topBarColor || 'yellow'); // 親要素に色クラスを適用
-                header.innerText = data.headerText || '';
-                companyName.innerText = data.companyName || '';
-
-                // 2行目のデータを反映
-                detail1.innerText = data.detailText1 || '';
-                detail1.className = data.detailColor1 || 'text-black';
-                detail2.innerText = data.detailText2 || '';
-                detail2.className = data.detailColor2 || 'text-black';
-
-                container.classList.add('visible');
-
+                // すでに表示中の場合、再表示アニメーションを行う
+                if (isVisible) {
+                    container.classList.remove('visible'); // 一旦隠す
+                    // 隠れるアニメーションが終わるのを待ってから内容を更新して表示
+                    setTimeout(() => {
+                        updateTelopContent(data);
+                        container.classList.add('visible');
+                    }, 450); // CSSのtransitionより少し長い時間
+                } else {
+                    // 新規表示の場合
+                    updateTelopContent(data);
+                    container.classList.add('visible');
+                    isVisible = true;
+                }
             } else {
+                // 非表示の場合
                 container.classList.remove('visible');
+                isVisible = false;
             }
         });
     </script>

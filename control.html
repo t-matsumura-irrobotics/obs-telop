@@ -25,49 +25,32 @@
 <body>
     <div class="controller-wrapper">
         <h1>決算速報 コントローラー</h1>
-
         <h3>1行目</h3>
-        <!-- ▼▼▼ 1行目の色選択を追加 ▼▼▼ -->
         <div class="control-group">
-            <label for="topBarColor">背景色</label>
-            <select id="topBarColor">
-                <option value="yellow">黄色</option>
-                <option value="red">赤色</option>
+            <label for="themeColor">テーマ色 (ヘッダー文字色 / 企業名背景色)</label>
+            <select id="themeColor">
+                <option value="theme-yellow">黄色</option>
+                <option value="theme-red">赤色</option>
             </select>
         </div>
-        <!-- ▲▲▲ ここまで ▲▲▲ -->
         <div class="control-group">
-            <label for="headerText">ヘッダー</label>
+            <label for="headerText">ヘッダー (白背景部分)</label>
             <input type="text" id="headerText" value="決算速報">
         </div>
         <div class="control-group">
             <label for="companyName">企業名</label>
-            <input type="text" id="companyName" value="東証プライム 7203 トヨタ自動車">
+            <input type="text" id="companyName" value="東証プライム【7203】トヨタ自動車">
         </div>
 
         <h3>2行目</h3>
         <div class="control-group grid-2">
             <div>
-                <label for="detailText1">テキスト1</label>
-                <input type="text" id="detailText1" value="2026年3月期 第3四半期">
+                <label for="detailText">テキスト</label>
+                <input type="text" id="detailText" value="2026年3月期 第3四半期 増収増益で着地">
             </div>
             <div>
-                <label for="detailColor1">文字色</label>
-                <select id="detailColor1">
-                    <option value="text-black">黒</option>
-                    <option value="text-red">赤</option>
-                    <option value="text-blue">青</option>
-                </select>
-            </div>
-        </div>
-        <div class="control-group grid-2">
-            <div>
-                <label for="detailText2">テキスト2</label>
-                <input type="text" id="detailText2" value="増収増益で着地 トランプ関税の影響限定的">
-            </div>
-            <div>
-                <label for="detailColor2">文字色</label>
-                <select id="detailColor2">
+                <label for="detailColor">文字色</label>
+                <select id="detailColor">
                     <option value="text-black">黒</option>
                     <option value="text-red">赤</option>
                     <option value="text-blue">青</option>
@@ -89,8 +72,7 @@
                 <div id="preview-companyName" class="top-bar-main"></div>
             </div>
             <div class="bottom-bar">
-                <span id="preview-detail1"></span>
-                <span id="preview-detail2"></span>
+                <span id="preview-detailText"></span>
             </div>
         </div>
     </div>
@@ -98,17 +80,17 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <script>
-        // ▼▼▼ あなたのFirebase設定をここに貼り付け ▼▼▼
+        // ▼▼▼ あなた専用のFirebase設定（変更不要） ▼▼▼
         const firebaseConfig = {
-  apiKey: "AIzaSyAhsAbTqQuairo-82A9rxQTazUCGdzdVc4",
-  authDomain: "obs-telop-system-7c98c.firebaseapp.com",
-  databaseURL: "https://obs-telop-system-7c98c-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "obs-telop-system-7c98c",
-  storageBucket: "obs-telop-system-7c98c.firebasestorage.app",
-  messagingSenderId: "368503557333",
-  appId: "1:368503557333:web:409dae2b1cf0c14b31a65c",
-  measurementId: "G-VMBCJ2952Z"
-};
+            apiKey: "AIzaSyAhsAbTqQuairo-82A9rxQTazUCGdzdVc4",
+            authDomain: "obs-telop-system-7c98c.firebaseapp.com",
+            databaseURL: "https://obs-telop-system-7c98c-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "obs-telop-system-7c98c",
+            storageBucket: "obs-telop-system-7c98c.appspot.com",
+            messagingSenderId: "368503557333",
+            appId: "1:368503557333:web:409dae2b1cf0c14b31a65c",
+            measurementId: "G-VMBCJ2952Z"
+        };
         // ▲▲▲ ここまで ▲▲▲
 
         firebase.initializeApp(firebaseConfig);
@@ -118,13 +100,11 @@
         document.getElementById('sendButton').addEventListener('click', () => {
             const telopData = {
                 visible: true,
-                topBarColor: document.getElementById('topBarColor').value, // 1行目の色データを追加
+                themeColor: document.getElementById('themeColor').value,
                 headerText: document.getElementById('headerText').value,
                 companyName: document.getElementById('companyName').value,
-                detailText1: document.getElementById('detailText1').value,
-                detailColor1: document.getElementById('detailColor1').value,
-                detailText2: document.getElementById('detailText2').value,
-                detailColor2: document.getElementById('detailColor2').value,
+                detailText: document.getElementById('detailText').value,
+                detailColor: document.getElementById('detailColor').value,
             };
             telopRef.set(telopData);
             alert('テロップを送信しました！');
@@ -138,19 +118,13 @@
         const inputs = document.querySelectorAll('input, select');
 
         function updatePreview() {
-            // 1行目プレビュー
-            document.getElementById('preview-top-bar').className = 'top-bar ' + document.getElementById('topBarColor').value;
+            document.getElementById('preview-top-bar').className = 'top-bar ' + document.getElementById('themeColor').value;
             document.getElementById('preview-header').innerText = document.getElementById('headerText').value;
             document.getElementById('preview-companyName').innerText = document.getElementById('companyName').value;
             
-            // 2行目プレビュー
-            const detail1 = document.getElementById('preview-detail1');
-            detail1.innerText = document.getElementById('detailText1').value;
-            detail1.className = document.getElementById('detailColor1').value;
-
-            const detail2 = document.getElementById('preview-detail2');
-            detail2.innerText = document.getElementById('detailText2').value;
-            detail2.className = document.getElementById('detailColor2').value;
+            const detailText = document.getElementById('preview-detailText');
+            detailText.innerText = document.getElementById('detailText').value;
+            detailText.className = document.getElementById('detailColor').value;
         }
 
         inputs.forEach(input => input.addEventListener('input', updatePreview));

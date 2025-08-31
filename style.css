@@ -22,7 +22,7 @@ body {
     width: calc(100% - 40px);
     opacity: 0;
     transform: translateY(100%);
-    transition: transform 0.5s ease-out, opacity 0.5s ease-out;
+    transition: transform 0.4s ease-out, opacity 0.4s ease-out; /* アニメーション速度を調整 */
     box-shadow: 0 4px 10px rgba(0,0,0,0.3);
     border-radius: 5px;
     overflow: hidden;
@@ -36,15 +36,16 @@ body {
 /* --- 1行目のデザイン --- */
 .top-bar {
     display: flex;
-    font-size: 43px; /* 36px * 1.2 = 43.2px */
+    font-size: 43px;
     font-weight: bold;
-    align-items: center; /* 文字を垂直方向に中央揃え */
-    height: 65px; /* 高さを固定 */
+    align-items: center;
+    height: 65px;
 }
 .top-bar-header {
+    background-color: #ffffff; /* ヘッダー背景は白で固定 */
     padding: 0 25px;
     white-space: nowrap;
-    border-right: 2px solid rgba(0, 0, 0, 0.2); /* 区切り線 */
+    border-right: 2px solid rgba(0, 0, 0, 0.15);
 }
 .top-bar-main {
     padding: 0 25px;
@@ -55,31 +56,22 @@ body {
 }
 
 /* 1行目の配色プリセット */
-.top-bar.yellow {
-    background-color: #ffff00;
-    color: #000;
-}
-.top-bar.yellow .top-bar-header {
-    border-right-color: rgba(0, 0, 0, 0.2);
-}
-.top-bar.red {
-    background-color: #c8202f;
-    color: #fff;
-}
-.top-bar.red .top-bar-header {
-    border-right-color: rgba(255, 255, 255, 0.3);
-}
+.theme-yellow .top-bar-main { background-color: #ffff00; color: #000; }
+.theme-yellow .top-bar-header { color: #e6b400; } /* 黄色テーマの時のヘッダー文字色 */
+
+.theme-red .top-bar-main { background-color: #c8202f; color: #fff; }
+.theme-red .top-bar-header { color: #c8202f; } /* 赤色テーマの時のヘッダー文字色 */
 
 
 /* --- 2行目のデザイン --- */
 .bottom-bar {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
+    display: flex; /* 中央揃えのためflexに変更 */
+    justify-content: center;
+    align-items: center;
     background-color: rgba(255, 255, 255, 0.85);
-    font-size: 54px; /* 32px * 1.7 = 54.4px */
+    font-size: 54px;
     font-weight: bold;
-    align-items: center; /* 文字を垂直方向に中央揃え */
-    height: 85px; /* 高さを固定 */
+    height: 85px;
 }
 .bottom-bar span {
     padding: 0 25px;
@@ -87,9 +79,6 @@ body {
     overflow: hidden;
     text-overflow: ellipsis;
     text-align: center;
-}
-.bottom-bar span:first-child {
-    border-right: 2px solid #ccc;
 }
 
 /* 文字色の定義 */
