@@ -1,4 +1,4 @@
-<!-- display.html (更新後) -->
+<!-- display.html (変更なし・確認用) -->
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -45,14 +45,10 @@
         const detailText = document.getElementById('detailText');
         let isVisible = false;
 
-        // テロップの見た目を更新する関数
         function updateTelopContent(data) {
-            // 1行目のデータを反映
             topBar.className = 'top-bar ' + (data.themeColor || 'theme-yellow');
             header.innerText = data.headerText || '';
             companyName.innerText = data.companyName || '';
-
-            // 2行目のデータを反映
             detailText.innerText = data.detailText || '';
             detailText.className = data.detailColor || 'text-black';
         }
@@ -61,22 +57,18 @@
             const data = snapshot.val();
 
             if (data && data.visible) {
-                // すでに表示中の場合、再表示アニメーションを行う
                 if (isVisible) {
-                    container.classList.remove('visible'); // 一旦隠す
-                    // 隠れるアニメーションが終わるのを待ってから内容を更新して表示
+                    container.classList.remove('visible');
                     setTimeout(() => {
                         updateTelopContent(data);
                         container.classList.add('visible');
-                    }, 450); // CSSのtransitionより少し長い時間
+                    }, 450);
                 } else {
-                    // 新規表示の場合
                     updateTelopContent(data);
                     container.classList.add('visible');
                     isVisible = true;
                 }
             } else {
-                // 非表示の場合
                 container.classList.remove('visible');
                 isVisible = false;
             }
