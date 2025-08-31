@@ -21,7 +21,7 @@ body {
     left: 20px;
     width: calc(100% - 40px);
     opacity: 0;
-    transform: translateX(-100%); /* 左からスライドインするように変更 */
+    transform: translateX(-100%);
     transition: transform 0.4s ease-out, opacity 0.4s ease-out;
     box-shadow: 0 4px 10px rgba(0,0,0,0.3);
     border-radius: 5px;
@@ -30,7 +30,7 @@ body {
 
 .telop-container.visible {
     opacity: 1;
-    transform: translateX(0); /* 定位置に戻す */
+    transform: translateX(0);
 }
 
 /* --- 1行目のデザイン --- */
@@ -55,12 +55,24 @@ body {
     text-overflow: ellipsis;
 }
 
+/* ▼▼▼ 変更点: グラデーションに変更 ▼▼▼ */
 /* 1行目の配色プリセット */
-.theme-yellow .top-bar-main { background-color: #ffff00; color: #000; }
-.theme-yellow .top-bar-header { color: #e6b400; }
+.theme-yellow .top-bar-main {
+    background: linear-gradient(to bottom, #FFEB3B, #FBC02D); /* 明るい黄色から濃い黄色へのグラデーション */
+    color: #000;
+}
+.theme-yellow .top-bar-header {
+    color: #F57F17; /* グラデーションの濃い部分に合わせた文字色 */
+}
 
-.theme-red .top-bar-main { background-color: #B71C1C; color: #fff; } /* 濃い赤に変更 */
-.theme-red .top-bar-header { color: #B71C1C; } /* 濃い赤に変更 */
+.theme-red .top-bar-main {
+    background: linear-gradient(to bottom, #E53935, #B71C1C); /* 明るい赤から濃い赤へのグラデーション */
+    color: #fff;
+}
+.theme-red .top-bar-header {
+    color: #B71C1C;
+}
+/* ▲▲▲ 変更ここまで ▲▲▲ */
 
 
 /* --- 2行目のデザイン --- */
@@ -83,5 +95,5 @@ body {
 
 /* 文字色の定義 */
 .text-black { color: #000000; }
-.text-red { color: #B71C1C; } /* 濃い赤に変更 */
+.text-red { color: #B71C1C; }
 .text-blue { color: #0068b7; }
