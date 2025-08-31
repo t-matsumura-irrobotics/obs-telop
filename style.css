@@ -22,25 +22,25 @@ body.obs-display {
     background-color: transparent;
 }
 
-/* ▼▼▼ 変更点: アニメーションを横スライドに戻し、画質改善コードを統合 ▼▼▼ */
 .telop-container {
     position: absolute;
     bottom: 20px;
     left: 20px;
     width: calc(100% - 40px);
     opacity: 0;
-    transform: translateX(-100%) translateZ(0); /* 初期位置を左外に設定 + 画質改善 */
+    transform: translateX(-100%);
     transition: transform 0.4s ease-out, opacity 0.4s ease-out;
     box-shadow: 0 4px 10px rgba(0,0,0,0.3);
     border-radius: 5px;
     overflow: hidden;
+    /* ▼▼▼ 画質改善のコードをこちらに変更 ▼▼▼ */
+    will-change: transform, opacity; /* アニメーションの最適化をブラウザに指示 */
 }
 
 .telop-container.visible {
     opacity: 1;
-    transform: translateX(0) translateZ(0); /* 定位置にスライドイン + 画質改善 */
+    transform: translateX(0);
 }
-/* ▲▲▲ 変更ここまで ▲▲▲ */
 
 
 /* --- 1行目のデザイン --- */
