@@ -20,7 +20,6 @@
         .hide-btn { background-color: #dc3545; color: white; border: none; }
         .preview-wrapper { margin-top: 30px; background-color: #333; border-radius: 8px; padding: 20px; }
         .preview-wrapper .telop-container { transform: scale(0.4); transform-origin: top left; position: relative; opacity: 1; transform: none; transition: none; bottom: auto; left: auto; box-shadow: none; width: 100%; }
-        /* ▼▼▼ 文字数カウンター用のスタイル ▼▼▼ */
         .char-counter { text-align: right; font-size: 12px; color: #666; margin-top: -10px; margin-bottom: 15px; }
     </style>
 </head>
@@ -48,8 +47,8 @@
         <div class="control-group grid-2">
             <div>
                 <label for="detailText">テキスト</label>
-                <!-- ▼▼▼ maxlength属性を追加 ▼▼▼ -->
-                <input type="text" id="detailText" value="2026年3月期 第3四半期 増収増益で着地" maxlength="40">
+                <!-- ▼▼▼ 変更点 ▼▼▼ -->
+                <input type="text" id="detailText" value="2026年3月期 第3四半期 増収増益で着地" maxlength="38">
             </div>
             <div>
                 <label for="detailColor">文字色</label>
@@ -60,8 +59,8 @@
                 </select>
             </div>
         </div>
-        <!-- ▼▼▼ 文字数カウンターの表示エリアを追加 ▼▼▼ -->
-        <div class="char-counter"><span id="char-count">0</span> / 40</div>
+        <!-- ▼▼▼ 変更点 ▼▼▼ -->
+        <div class="char-counter"><span id="char-count">0</span> / 38</div>
 
         <div class="buttons">
             <button id="sendButton" class="show-btn">テロップ表示</button>
@@ -123,17 +122,14 @@
         const inputs = document.querySelectorAll('input, select');
 
         function updatePreview() {
-            // 1行目プレビュー
             document.getElementById('preview-top-bar').className = 'top-bar ' + document.getElementById('themeColor').value;
             document.getElementById('preview-header').innerText = document.getElementById('headerText').value;
             document.getElementById('preview-companyName').innerText = document.getElementById('companyName').value;
             
-            // 2行目プレビュー
             const detailText = document.getElementById('preview-detailText');
             detailText.innerText = document.getElementById('detailText').value;
             detailText.className = document.getElementById('detailColor').value;
-
-            // ▼▼▼ 文字数カウンターの更新処理を追加 ▼▼▼
+            
             const currentLength = document.getElementById('detailText').value.length;
             document.getElementById('char-count').innerText = currentLength;
         }
