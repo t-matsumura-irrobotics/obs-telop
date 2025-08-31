@@ -4,11 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <title>OBS Telop Controller</title>
-    <!-- ▼▼▼ プレビュー用にCSSを読み込み ▼▼▼ -->
     <link rel="stylesheet" href="style.css">
-    <!-- ▲▲▲ ここまで ▲▲▲ -->
     <style>
-        /* 操作パネル用のスタイル */
         body { font-family: sans-serif; padding: 20px; background-color: #f0f0f0; }
         .controller-wrapper { max-width: 800px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
         h1, h2 { text-align: center; }
@@ -19,61 +16,51 @@
         .buttons { display: flex; gap: 10px; justify-content: center; margin-top: 20px; }
         .show-btn { background-color: #28a745; color: white; border: none; }
         .hide-btn { background-color: #dc3545; color: white; border: none; }
-
-        /* ▼▼▼ プレビューエリア用のスタイル ▼▼▼ */
-        .preview-wrapper {
-            margin-top: 30px;
-            padding: 20px;
-            background-color: #333;
-            border-radius: 8px;
-            overflow: hidden; /* 横スライドが見えるように */
-            position: relative;
-            height: 150px; /* 高さを固定 */
-        }
-        /* プレビュー用のコンテナは縮小して表示 */
-        .preview-wrapper .telop-container {
-            transform: scale(0.4); /* 40%に縮小 */
-            transform-origin: bottom left; /* 左下を基点に縮小 */
-            bottom: -50px; /* 位置調整 */
-            left: 0;
-            width: 1920px;
-            height: 1080px;
-            opacity: 1; /* 常に表示 */
-            transform: none; /* アニメーションはさせない */
-            transition: none; /* トランジションも無効に */
-        }
-        /* ▲▲▲ ここまで ▲▲▲ */
+        .preview-wrapper { margin-top: 30px; padding: 20px; background-color: #333; border-radius: 8px; overflow: hidden; position: relative; height: 120px; }
+        .preview-wrapper .telop-container { transform: scale(0.4); transform-origin: bottom left; bottom: 0px; left: -20px; opacity: 1; transform: none; transition: none; }
     </style>
 </head>
 <body>
-
     <div class="controller-wrapper">
         <h1>速報テロップ コントローラー</h1>
 
         <div class="control-group">
-            <label for="type">テロップ種類（色）</label>
-            <select id="type">
-                <option value="red">赤色（緊急度 高）</option>
-                <option value="yellow">黄色（注意）</option>
-                <option value="blue">青色（通常）</option>
+            <label for="headerColor">ヘッダー色</label>
+            <select id="headerColor">
+                <option value="header-red">赤色</option>
+                <option value="header-yellow">黄色</option>
+                <option value="header-blue">青色</option>
             </select>
         </div>
+        <!-- ▼▼▼ コンテンツ色の選択肢を追加 ▼▼▼ -->
+        <div class="control-group">
+            <label for="contentColor">コンテンツ色</label>
+            <select id="contentColor">
+                <option value="content-lightgray">ライトグレー</option>
+                <option value="content-white">ホワイト</option>
+                <option value="content-dark">ダーク</option>
+            </select>
+        </div>
+        <!-- ▲▲▲ ここまで ▲▲▲ -->
+
+        <!-- ▼▼▼ デフォルト値を変更 ▼▼▼ -->
         <div class="control-group">
             <label for="header">ヘッダー</label>
-            <input type="text" id="header" value="緊急地震速報">
+            <input type="text" id="header" value="決算速報">
         </div>
         <div class="control-group">
             <label for="text1">テキスト1</label>
-            <input type="text" id="text1" value="最大震度 5強">
+            <input type="text" id="text1" value="東証P【7203】トヨタ自動車">
         </div>
         <div class="control-group">
             <label for="text2">テキスト2</label>
-            <input type="text" id="text2" value="震源 石川県能登地方">
+            <input type="text" id="text2" value="2026年3月期 第3四半期">
         </div>
         <div class="control-group">
             <label for="text3">テキスト3</label>
-            <input type="text" id="text3" value="発生日時 16:06頃">
+            <input type="text" id="text3" value="増収増益で着地">
         </div>
+        <!-- ▲▲▲ ここまで ▲▲▲ -->
 
         <div class="buttons">
             <button id="sendButton" class="show-btn">テロップ表示</button>
@@ -81,28 +68,23 @@
         </div>
     </div>
 
-    <!-- ▼▼▼ プレビュー表示エリア ▼▼▼ -->
     <div class="preview-wrapper">
         <h2>プレビュー</h2>
-        <div id="preview-container" class="telop-container red visible">
+        <div id="preview-container" class="telop-container visible">
             <div class="bottom-bar">
                 <div id="preview-header" class="bottom-bar-header"></div>
-                <div class="bottom-bar-content">
-                    <span id="preview-text1"></span>
-                    <span id="preview-text2"></span>
-                    <span id="preview-text3"></span>
+                <div id="preview-content" class="bottom-bar-content">
+                    <div id="preview-ticker" class="ticker-text"></div>
                 </div>
             </div>
         </div>
     </div>
-    <!-- ▲▲▲ ここまで ▲▲▲ -->
 
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-
     <script>
         // ▼▼▼ あなたのFirebase設定をここに貼り付け ▼▼▼
-       const firebaseConfig = {
+        const firebaseConfig = {
   apiKey: "AIzaSyAhsAbTqQuairo-82A9rxQTazUCGdzdVc4",
   authDomain: "obs-telop-system-7c98c.firebaseapp.com",
   databaseURL: "https://obs-telop-system-7c98c-default-rtdb.asia-southeast1.firebasedatabase.app",
@@ -118,11 +100,11 @@
         const database = firebase.database();
         const telopRef = database.ref('telop');
 
-        // 表示ボタンの処理 (変更なし)
         document.getElementById('sendButton').addEventListener('click', () => {
             const telopData = {
                 visible: true,
-                type: document.getElementById('type').value,
+                headerColor: document.getElementById('headerColor').value,
+                contentColor: document.getElementById('contentColor').value, // コンテンツ色を追加
                 header: document.getElementById('header').value,
                 text1: document.getElementById('text1').value,
                 text2: document.getElementById('text2').value,
@@ -132,39 +114,41 @@
             alert('テロップを送信しました！');
         });
 
-        // 非表示ボタンの処理 (変更なし)
         document.getElementById('hideButton').addEventListener('click', () => {
             telopRef.update({ visible: false });
             alert('テロップを非表示にしました！');
         });
 
-        // ▼▼▼ プレビュー機能の追加 ▼▼▼
-        const inputs = document.querySelectorAll('#type, #header, #text1, #text2, #text3');
+        const inputs = document.querySelectorAll('input, select');
         const previewContainer = document.getElementById('preview-container');
         const previewHeader = document.getElementById('preview-header');
-        const previewText1 = document.getElementById('preview-text1');
-        const previewText2 = document.getElementById('preview-text2');
-        const previewText3 = document.getElementById('preview-text3');
+        const previewContent = document.getElementById('preview-content');
+        const previewTicker = document.getElementById('preview-ticker');
 
         function updatePreview() {
-            const type = document.getElementById('type').value;
-            previewContainer.className = 'telop-container visible'; // クラスをリセット
-            previewContainer.classList.add(type); // 新しい色クラスを追加
+            // 色の更新
+            previewContainer.className = 'telop-container visible';
+            previewContainer.classList.add(document.getElementById('headerColor').value);
+            previewContent.className = 'bottom-bar-content';
+            previewContent.classList.add(document.getElementById('contentColor').value);
 
+            // テキストの更新
             previewHeader.innerText = document.getElementById('header').value;
-            previewText1.innerText = document.getElementById('text1').value;
-            previewText2.innerText = document.getElementById('text2').value;
-            previewText3.innerText = document.getElementById('text3').value;
+            const combinedText = `${document.getElementById('text1').value}　${document.getElementById('text2').value}　${document.getElementById('text3').value}`;
+            previewTicker.innerText = combinedText;
+
+            // 長体処理
+            previewTicker.style.transform = 'scaleX(1)';
+            const containerWidth = previewContent.clientWidth;
+            const textWidth = previewTicker.scrollWidth;
+            if (textWidth > containerWidth) {
+                const scale = containerWidth / textWidth;
+                previewTicker.style.transform = `scaleX(${scale})`;
+            }
         }
 
-        // 各入力欄が変更されるたびにプレビューを更新
-        inputs.forEach(input => {
-            input.addEventListener('input', updatePreview);
-        });
-
-        // ページ読み込み時に最初のプレビューを生成
+        inputs.forEach(input => input.addEventListener('input', updatePreview));
         document.addEventListener('DOMContentLoaded', updatePreview);
-        // ▲▲▲ ここまで ▲▲▲
     </script>
 </body>
 </html>

@@ -1,4 +1,4 @@
-<!-- display.html -->
+<!-- display.html (更新後) -->
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -8,28 +8,22 @@
 </head>
 <body>
 
-    <!-- テロップ全体のコンテナ -->
     <div id="telop-container" class="telop-container">
-        <!-- 下部テロップ -->
         <div class="bottom-bar">
-            <div id="telop-header" class="bottom-bar-header">
-                <!-- 例: 緊急地震速報 -->
+            <div id="telop-header" class="bottom-bar-header"></div>
+            <!-- ▼▼▼ contentにIDを追加し、中にticker-textを配置 ▼▼▼ -->
+            <div id="telop-content" class="bottom-bar-content">
+                <div id="telop-ticker" class="ticker-text"></div>
             </div>
-            <div class="bottom-bar-content">
-                <span id="telop-text1"></span>
-                <span id="telop-text2"></span>
-                <span id="telop-text3"></span>
-            </div>
+            <!-- ▲▲▲ ここまで ▲▲▲ -->
         </div>
     </div>
 
-    <!-- Firebase SDKの読み込み -->
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-
     <script>
-        // ▼▼▼ Step1でコピーした自分のFirebase設定をここに貼り付け ▼▼▼
-        const firebaseConfig = {
+        // ▼▼▼ あなたのFirebase設定 ▼▼▼
+      const firebaseConfig = {
   apiKey: "AIzaSyAhsAbTqQuairo-82A9rxQTazUCGdzdVc4",
   authDomain: "obs-telop-system-7c98c.firebaseapp.com",
   databaseURL: "https://obs-telop-system-7c98c-default-rtdb.asia-southeast1.firebasedatabase.app",
@@ -41,28 +35,54 @@
 };
         // ▲▲▲ ここまで ▲▲▲
 
-        // Firebaseの初期化
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
-        // データベースの 'telop' パスを監視
+        // 要素を取得
+        const container = document.getElementById('telop-container');
+        const telopHeader = document.getElementById('telop-header');
+        const telopContent = document.getElementById('telop-content');
+        const telopTicker = document.getElementById('telop-ticker');
+
+        // --- 追加: 長体処理の関数 ---
+        function adjustTextScaling() {
+            // 一旦スケールをリセットして正しい幅を計算
+            telopTicker.style.transform = 'scaleX(1)';
+            
+            const containerWidth = telopContent.clientWidth;
+            const textWidth = telopTicker.scrollWidth;
+
+            // テキストがコンテナより大きい場合のみ長体をかける
+            if (textWidth > containerWidth) {
+                const scale = containerWidth / textWidth;
+                telopTicker.style.transform = `scaleX(${scale})`;
+            }
+        }
+
         database.ref('telop').on('value', (snapshot) => {
             const data = snapshot.val();
-            const container = document.getElementById('telop-container');
 
             if (data && data.visible) {
-                // データを各要素に反映
-                document.getElementById('telop-header').innerText = data.header || '';
-                document.getElementById('telop-text1').innerText = data.text1 || '';
-                document.getElementById('telop-text2').innerText = data.text2 || '';
-                document.getElementById('telop-text3').innerText = data.text3 || '';
+                // ヘッダーテキストと色を更新
+                telopHeader.innerText = data.header || '';
+                container.className = 'telop-container'; // クラスをリセット
+                container.classList.add(data.headerColor); // 例: 'header-red'
 
-                // クラスを一旦リセットしてから、指定された色クラスを追加
-                container.className = 'telop-container'; // リセット
-                container.classList.add(data.type); // 例: 'red', 'yellow'
-                container.classList.add('visible'); // 表示クラスを追加
+                // コンテンツの色を更新
+                telopContent.className = 'bottom-bar-content'; // クラスをリセット
+                telopContent.classList.add(data.contentColor); // 例: 'content-lightgray'
+
+                // テキストを結合して表示
+                const combinedText = `${data.text1 || ''}　${data.text2 || ''}　${data.text3 || ''}`;
+                telopTicker.innerText = combinedText;
+
+                // 表示クラスを追加
+                container.classList.add('visible');
+
+                // 表示後に長体処理を実行 (表示されないと正しい幅が取れないため)
+                setTimeout(adjustTextScaling, 50); // 少し遅延させて実行
+
             } else {
-                // データがない、または非表示の場合
                 container.classList.remove('visible');
             }
         });

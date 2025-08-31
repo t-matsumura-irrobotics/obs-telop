@@ -15,58 +15,71 @@ body {
     background-color: transparent;
 }
 
-/* --- 変更点 --- */
 .telop-container {
     position: absolute;
     bottom: 0;
     left: 0;
     width: 1920px;
     height: 1080px;
-    opacity: 0; /* 初期状態は透明 */
-    transform: translateX(-100%); /* 初期状態は画面の左外 */
-    transition: transform 0.5s ease-out, opacity 0.5s ease-out; /* アニメーション設定 */
+    opacity: 0;
+    transform: translateX(-100%);
+    transition: transform 0.5s ease-out, opacity 0.5s ease-out;
 }
 
 .telop-container.visible {
-    opacity: 1; /* 表示状態は不透明に */
-    transform: translateX(0); /* 表示状態は定位置にスライド */
+    opacity: 1;
+    transform: translateX(0);
 }
-/* --- 変更点ここまで --- */
 
-/* 緊急地震速報風テロップ（下部） */
 .bottom-bar {
     position: absolute;
     bottom: 20px;
     left: 20px;
     width: calc(100% - 40px);
     display: flex;
-    /* --- 変更点：文字サイズと余白を調整 --- */
-    font-size: 48px; 
-    padding: 15px 0; /* プレビュー用に少し調整 */
-    /* --- 変更点ここまで --- */
+    font-size: 36px; /* 少しサイズを調整 */
     font-weight: bold;
-    color: #000;
-    line-height: 1.5;
+    line-height: 1.4; /* 行間を調整 */
     box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    border-radius: 5px; /* 角を少し丸める */
+    overflow: hidden; /* 角丸を適用するため */
 }
 
 .bottom-bar-header {
-    padding: 15px 40px;
+    padding: 15px 30px;
     color: white;
-    white-space: nowrap; /* ヘッダーが改行しないように */
+    white-space: nowrap;
 }
 
 .bottom-bar-content {
-    background-color: rgba(230, 230, 230, 0.95);
-    padding: 15px 40px;
+    padding: 15px 30px;
     flex-grow: 1;
     display: flex;
     align-items: center;
-    gap: 30px; /* 文字間のスペースを調整 */
-    overflow: hidden; /* はみ出した文字を隠す */
+    overflow: hidden; /* はみ出した長体テキストを隠す */
 }
 
-/* 色の定義 */
-.telop-container.red .bottom-bar-header { background-color: #c8202f; }
-.telop-container.yellow .bottom-bar-header { background-color: #f39800; }
-.telop-container.blue .bottom-bar-header { background-color: #0068b7; }
+/* --- 追加: 長体用のテキストコンテナ --- */
+.ticker-text {
+    white-space: nowrap; /* 絶対に改行させない */
+    transform-origin: left center; /* 左揃えで長体をかける */
+}
+
+/* ヘッダー色の定義 */
+.header-red .bottom-bar-header { background-color: #c8202f; }
+.header-yellow .bottom-bar-header { background-color: #f39800; }
+.header-blue .bottom-bar-header { background-color: #0068b7; }
+
+/* --- 追加: コンテンツ部分の色の定義 --- */
+.content-lightgray {
+    background-color: #e6e6e6;
+    color: #000;
+}
+.content-white {
+    background-color: #ffffff;
+    color: #000;
+}
+.content-dark {
+    background-color: #333333;
+    color: #fff;
+}
