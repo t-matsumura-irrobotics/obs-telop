@@ -7,26 +7,28 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
+    <!-- ▼▼▼ 2段組の構造に変更 ▼▼▼ -->
     <div id="telop-container" class="telop-container">
-        <div class="bottom-bar">
-            <div id="telop-header" class="bottom-bar-header"></div>
-            <div class="bottom-bar-content">
-                <!-- ▼▼▼ 長体処理用の親要素と、各テキスト用のspanを配置 ▼▼▼ -->
-                <div id="telop-ticker" class="ticker-text">
-                    <span id="text-span-1"></span>
-                    <span id="text-span-2"></span>
-                    <span id="text-span-3"></span>
-                </div>
-            </div>
+        <!-- 1行目 -->
+        <div id="top-bar" class="top-bar">
+            <div id="top-bar-header"></div>
+            <div id="top-bar-main"></div>
+        </div>
+        <!-- 2行目 -->
+        <div id="bottom-bar" class="bottom-bar">
+            <span id="info1"></span>
+            <span id="info2"></span>
+            <span id="info3"></span>
+            <span id="info4"></span>
         </div>
     </div>
+    <!-- ▲▲▲ ここまで ▲▲▲ -->
 
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <script>
         // ▼▼▼ あなたのFirebase設定 ▼▼▼
-        const firebaseConfig = {
+       const firebaseConfig = {
   apiKey: "AIzaSyAhsAbTqQuairo-82A9rxQTazUCGdzdVc4",
   authDomain: "obs-telop-system-7c98c.firebaseapp.com",
   databaseURL: "https://obs-telop-system-7c98c-default-rtdb.asia-southeast1.firebasedatabase.app",
@@ -41,45 +43,33 @@
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
+        // 新しい要素を取得
         const container = document.getElementById('telop-container');
-        const telopHeader = document.getElementById('telop-header');
-        const telopTicker = document.getElementById('telop-ticker'); // 親コンテナ
-        const textSpan1 = document.getElementById('text-span-1');
-        const textSpan2 = document.getElementById('text-span-2');
-        const textSpan3 = document.getElementById('text-span-3');
-        
-        function adjustTextScaling() {
-            telopTicker.style.transform = 'scaleX(1)';
-            const containerWidth = telopTicker.parentElement.clientWidth;
-            const textWidth = telopTicker.scrollWidth;
-
-            if (textWidth > containerWidth) {
-                const scale = containerWidth / textWidth;
-                telopTicker.style.transform = `scaleX(${scale})`;
-            }
-        }
+        const topBar = document.getElementById('top-bar');
+        const topBarHeader = document.getElementById('top-bar-header');
+        const topBarMain = document.getElementById('top-bar-main');
+        const info1 = document.getElementById('info1');
+        const info2 = document.getElementById('info2');
+        const info3 = document.getElementById('info3');
+        const info4 = document.getElementById('info4');
 
         database.ref('telop').on('value', (snapshot) => {
             const data = snapshot.val();
 
             if (data && data.visible) {
-                // ヘッダーテキストと色を更新
-                telopHeader.innerText = data.header || '';
-                container.className = 'telop-container';
-                container.classList.add(data.headerColor);
+                // 1行目のデータを反映
+                topBar.className = 'top-bar'; // クラスをリセット
+                topBar.classList.add(data.topBarColor || 'yellow');
+                topBarHeader.innerText = data.headerText || '';
+                topBarMain.innerText = data.mainText || '';
 
-                // 各テキストと文字色を更新
-                textSpan1.innerText = data.text1 || '';
-                textSpan1.className = data.textColor1 || 'text-black';
-                
-                textSpan2.innerText = data.text2 || '';
-                textSpan2.className = data.textColor2 || 'text-black';
+                // 2行目のデータを反映
+                info1.innerText = data.info1 || '';
+                info2.innerText = data.info2 || '';
+                info3.innerText = data.info3 || '';
+                info4.innerText = data.info4 || '';
 
-                textSpan3.innerText = data.text3 || '';
-                textSpan3.className = data.textColor3 || 'text-black';
-                
                 container.classList.add('visible');
-                setTimeout(adjustTextScaling, 50);
 
             } else {
                 container.classList.remove('visible');
