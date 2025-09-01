@@ -89,9 +89,9 @@ body.obs-display {
     justify-content: center;
     align-items: center;
     background-color: rgba(255, 255, 255, 0.85);
-    font-size: 54px;
+    font-size: 80px;
     font-weight: bold;
-    height: 85px;
+    height: 120px;
 }
 .bottom-bar span {
     padding: 0 25px;
