@@ -4,7 +4,6 @@
 <head>
     <meta charset="UTF-8">
     <title>OBS Telop Controller</title>
-    <!-- ▼▼▼ 変更点: Google Fontsを読み込む ▼▼▼ -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Anton&display=swap" rel="stylesheet">
@@ -14,7 +13,6 @@
         .wrapper { max-width: 800px; margin: 0 auto 20px auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
         h1, h3 { text-align: center; color: #333; }
         h3 { margin-top: 30px; border-bottom: 2px solid #eee; padding-bottom: 10px; }
-        /* (以下、スタイルに変更はありません) */
         .control-group { margin-bottom: 15px; }
         .grid-2 { display: grid; grid-template-columns: 1fr 120px; gap: 10px; align-items: flex-end;}
         .draft-controls { display: grid; grid-template-columns: 1fr auto auto auto; gap: 10px; align-items: flex-end; }
@@ -30,7 +28,6 @@
     </style>
 </head>
 <body>
-    <!-- (HTMLの構造部分に変更はありません) -->
     <div class="wrapper">
         <h1>ライブテロップ コントローラー</h1>
         <h3>通常ティッカー</h3>
@@ -60,7 +57,6 @@
             <button id="deleteDraftButton" class="delete-btn">削除</button>
         </div>
     </div>
-    <!-- (JavaScript部分に変更はありません) -->
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <script>

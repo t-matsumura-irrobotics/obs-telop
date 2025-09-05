@@ -4,7 +4,6 @@
 <head>
     <meta charset="UTF-8">
     <title>OBS Telop Display</title>
-    <!-- ▼▼▼ 変更点: Google Fontsを読み込む ▼▼▼ -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Anton&display=swap" rel="stylesheet">
@@ -14,7 +13,13 @@
     <div id="ticker-container" class="telop-wrapper">
         <div id="ticker-scroll-area"><span id="ticker-content" class="ticker-content"></span></div>
         <div id="ticker-header"><span id="ticker-header-text"></span></div>
-        <div id="ticker-clock"><span id="clock-time"></span><span id="clock-live">LIVE</span></div>
+        <!-- ▼▼▼ 変更点: LIVEの構造を変更 ▼▼▼ -->
+        <div id="ticker-clock">
+            <span id="clock-time"></span>
+            <span id="clock-live">
+                <span>L</span><span>I</span><span>V</span><span>E</span>
+            </span>
+        </div>
     </div>
     <div id="breaking-container" class="telop-wrapper">
         <div id="breaking-container-inner">
@@ -50,7 +55,6 @@
 
         function updateScrollSpeed() {
             const PIXELS_PER_SECOND = 168;
-            // ▼▼▼ 変更点: スクロール距離の計算方法を変更 ▼▼▼
             const scrollDistance = tickerScrollArea.offsetWidth + tickerContent.offsetWidth;
             const duration = scrollDistance / PIXELS_PER_SECOND;
             tickerContent.style.animationDuration = `${duration}s`;
@@ -71,7 +75,6 @@
             } else {
                 const content = data.ticker_content || {};
                 tickerHeaderText.innerText = content.headerText || '東京株式市場';
-                // ▼▼▼ 変更点: テキストの複製をやめる ▼▼▼
                 tickerContent.innerText = content.scrollText || 'コメントをお待ちしています。';
                 breakingContainer.classList.remove('visible');
                 tickerContainer.classList.add('visible');

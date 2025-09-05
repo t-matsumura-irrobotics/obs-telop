@@ -1,6 +1,7 @@
 /* style.css (更新後) */
 
-/* LINEフォントの読み込み */
+/* LINEフォント & Antonフォントの読み込み */
+@import url('https://fonts.googleapis.com/css2?family=Anton&display=swap');
 @font-face {
     font-family: 'LINE Seed JP';
     src: url('fonts/LINESeedJP_OTF_Rg.woff2') format('woff2');
@@ -15,15 +16,18 @@
 body.obs-display {
     font-family: 'LINE Seed JP', sans-serif;
     margin: 0; padding: 0; overflow: hidden; background-color: transparent;
-    height: 1080px; /* OBSの高さに固定 */
-    width: 1920px;  /* OBSの幅に固定 */
-    position: relative;
+    height: 1080px; width: 1920px; position: relative;
 }
-/* ▼▼▼ 変更点: 新しいスクロールアニメーション ▼▼▼ */
 @keyframes marquee-scroll { 0% { transform: translateX(100%); } 100% { transform: translateX(-100%); } }
+/* ▼▼▼ バウンドアニメーションの定義 ▼▼▼ */
+@keyframes bounce {
+  0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+  40% { transform: translateY(-15px); }
+  60% { transform: translateY(-7px); }
+}
 
 .telop-wrapper {
-    position: absolute; bottom: 20px; left: 0; width: 100%; opacity: 0; transition: opacity 0.4s ease-out;
+    position: absolute; top: 20px; left: 0; width: 100%; opacity: 0; transition: opacity 0.4s ease-out;
 }
 .telop-wrapper.visible { opacity: 1; }
 
@@ -35,10 +39,8 @@ body.obs-display {
     overflow: hidden; white-space: nowrap; display: flex; align-items: center;
 }
 .ticker-content {
-    display: inline-block;
-    font-size: 40px; font-weight: 400; letter-spacing: -0.05em;
-    padding-left: 100%; /* アニメーション開始位置を画面外にする */
-    animation: marquee-scroll linear infinite;
+    display: inline-block; font-size: 40px; font-weight: 400; letter-spacing: -0.05em;
+    padding-left: 100%; animation: marquee-scroll linear infinite;
 }
 #ticker-header {
     position: absolute; left: 0; top: 0; z-index: 1;
@@ -58,15 +60,25 @@ body.obs-display {
 }
 #clock-time, #clock-live {
     position: absolute; transition: opacity 0.3s ease-in-out;
+    font-family: 'Anton', sans-serif; /* 時計とLIVEの両方にAntonフォントを適用 */
 }
-/* ▼▼▼ 変更点: LIVEフォントの指定 ▼▼▼ */
 #clock-live {
-    font-family: 'Anton', sans-serif;
     font-style: italic;
+    letter-spacing: 0.1em; /* 文字間を広げる */
 }
+#clock-live span {
+    display: inline-block; /* アニメーションのために必要 */
+    animation: bounce 1.5s infinite ease-in-out;
+}
+/* 各文字のアニメーション開始をずらす */
+#clock-live span:nth-child(1) { animation-delay: 0.1s; }
+#clock-live span:nth-child(2) { animation-delay: 0.2s; }
+#clock-live span:nth-child(3) { animation-delay: 0.3s; }
+#clock-live span:nth-child(4) { animation-delay: 0.4s; }
 
-/* --- 速報テロップのデザイン (変更なし) --- */
-#breaking-container { padding: 0 20px; bottom: 20px; }
+
+/* --- 速報テロップのデザイン (位置を上部に) --- */
+#breaking-container { padding: 0 20px; top: 20px; }
 #breaking-container-inner { box-shadow: 0 6px 15px rgba(0,0,0,0.3); border-radius: 8px; overflow: hidden; }
 .top-bar { display: flex; font-size: 65px; align-items: center; height: 98px; }
 .top-bar-header { background-color: #ffffff; padding: 0 38px; white-space: nowrap; border-right: 3px solid rgba(0, 0, 0, 0.15); font-weight: bold; font-size: 78px; }
