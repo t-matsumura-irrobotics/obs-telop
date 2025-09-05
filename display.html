@@ -9,81 +9,68 @@
 <body class="obs-display">
     <!-- 通常ティッカー用コンテナ -->
     <div id="ticker-container" class="telop-wrapper">
-        <div class="ticker-text">
-            <span id="ticker-header"></span>
-            <span id="ticker-content"></span>
-        </div>
+        <div id="ticker-header"><span id="ticker-header-text"></span></div>
+        <div id="ticker-scroll-area"><span id="ticker-content" class="ticker-content"></span></div>
+        <div id="ticker-clock"></div>
     </div>
-
     <!-- 速報テロップ用コンテナ -->
     <div id="breaking-container" class="telop-wrapper">
         <div id="breaking-container-inner">
-            <div id="top-bar" class="top-bar">
-                <div id="header" class="top-bar-header"></div>
-                <div id="companyName" class="top-bar-main"></div>
-            </div>
-            <div class="bottom-bar">
-                <span id="detailText"></span>
-            </div>
+            <div id="top-bar" class="top-bar"><div id="header" class="top-bar-header"></div><div id="companyName" class="top-bar-main"></div></div>
+            <div class="bottom-bar"><span id="detailText"></span></div>
         </div>
     </div>
 
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyAhsAbTqQuairo-82A9rxQTazUCGdzdVc4",
-            authDomain: "obs-telop-system-7c98c.firebaseapp.com",
-            databaseURL: "https://obs-telop-system-7c98c-default-rtdb.asia-southeast1.firebasedatabase.app",
-            projectId: "obs-telop-system-7c98c",
-            storageBucket: "obs-telop-system-7c98c.appspot.com",
-            messagingSenderId: "368503557333",
-            appId: "1:368503557333:web:409dae2b1cf0c14b31a65c",
-            measurementId: "G-VMBCJ2952Z"
-        };
-
+        const firebaseConfig = { apiKey: "AIzaSyAhsAbTqQuairo-82A9rxQTazUCGdzdVc4", authDomain: "obs-telop-system-7c98c.firebaseapp.com", databaseURL: "https://obs-telop-system-7c98c-default-rtdb.asia-southeast1.firebasedatabase.app", projectId: "obs-telop-system-7c98c", storageBucket: "obs-telop-system-7c98c.appspot.com", messagingSenderId: "368503557333", appId: "1:368503557333:web:409dae2b1cf0c14b31a65c", measurementId: "G-VMBCJ2952Z" };
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
-        // 2つのモードのコンテナを取得
-        const tickerContainer = document.getElementById('ticker-container');
-        const breakingContainer = document.getElementById('breaking-container');
+        const tickerContainer = document.getElementById('ticker-container'), breakingContainer = document.getElementById('breaking-container');
+        const tickerHeader = document.getElementById('ticker-header'), tickerHeaderText = document.getElementById('ticker-header-text'), tickerContent = document.getElementById('ticker-content'), tickerClock = document.getElementById('ticker-clock');
+        const topBar = document.getElementById('top-bar'), header = document.getElementById('header'), companyName = document.getElementById('companyName'), detailText = document.getElementById('detailText');
 
-        // ティッカーの要素
-        const tickerHeader = document.getElementById('ticker-header');
-        const tickerContent = document.getElementById('ticker-content');
-        
-        // 速報の要素
-        const topBar = document.getElementById('top-bar');
-        const header = document.getElementById('header');
-        const companyName = document.getElementById('companyName');
-        const detailText = document.getElementById('detailText');
+        // 時計更新
+        function updateClock() {
+            const now = new Date();
+            const h = String(now.getHours()).padStart(2, '0'), m = String(now.getMinutes()).padStart(2, '0'), s = String(now.getSeconds()).padStart(2, '0');
+            tickerClock.textContent = `${h}:${m}:${s}`;
+        }
+        setInterval(updateClock, 1000); updateClock();
+
+        // ヘッダー長体処理
+        function adjustHeaderText() {
+            tickerHeaderText.style.transform = 'scaleX(1)';
+            const containerWidth = tickerHeader.clientWidth - 30; // padding分を引く
+            const textWidth = tickerHeaderText.scrollWidth;
+            if (textWidth > containerWidth) {
+                tickerHeaderText.style.transform = `scaleX(${containerWidth / textWidth})`;
+            }
+        }
 
         database.ref('live_data').on('value', (snapshot) => {
             const data = snapshot.val();
             if (!data) return;
 
-            // モードに応じて表示を切り替え
-            if (data.mode === 'breaking' && data.breaking_content) {
-                // 速報モード
+            if (data.mode === 'breaking' && data.breaking_content) { // 速報モード
                 const content = data.breaking_content;
                 topBar.className = 'top-bar ' + (content.themeColor || 'theme-yellow');
                 header.innerText = content.headerText || '';
                 companyName.innerText = content.companyName || '';
                 detailText.innerText = content.detailText || '';
                 detailText.className = content.detailColor || 'text-black';
-
                 tickerContainer.classList.remove('visible');
                 breakingContainer.classList.add('visible');
-
-            } else {
-                // 通常ティッカーモード
+            } else { // 通常ティッカーモード
                 const content = data.ticker_content || {};
-                tickerHeader.innerText = content.header || '情報';
-                tickerContent.innerText = content.text || 'コメントをお待ちしています。';
-
+                tickerHeader.className = content.headerColor || 'header-red';
+                tickerHeaderText.innerText = content.headerText || '東京株式市場';
+                tickerContent.innerText = content.scrollText || 'コメントをお待ちしています。';
                 breakingContainer.classList.remove('visible');
                 tickerContainer.classList.add('visible');
+                setTimeout(adjustHeaderText, 50); // 表示後に長体処理
             }
         });
     </script>

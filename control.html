@@ -27,52 +27,42 @@
 <body>
     <div class="wrapper">
         <h1>ライブテロップ コントローラー</h1>
-        
-        <!-- 通常ティッカーセクション -->
         <h3>通常ティッカー</h3>
-        <div class="control-group">
-            <label for="tickerHeader">ヘッダー</label>
-            <input type="text" id="tickerHeader" value="EveryStockNEWS">
+        <div class="grid-2">
+            <div>
+                <label for="tickerHeaderText">ヘッダーテキスト</label>
+                <input type="text" id="tickerHeaderText" value="東京株式市場">
+            </div>
+            <div>
+                <label for="tickerHeaderColor">ヘッダー色</label>
+                <select id="tickerHeaderColor">
+                    <option value="header-red">赤</option>
+                    <option value="header-blue">青</option>
+                    <option value="header-green">緑</option>
+                </select>
+            </div>
         </div>
         <div class="control-group">
-            <label for="tickerText">スクロールテキスト</label>
-            <textarea id="tickerText">質問や応援コメントお待ちしています。／日経平均株価は前日比プラスで推移しています。</textarea>
+            <label for="tickerScrollText">スクロールテキスト</label>
+            <textarea id="tickerScrollText">質問や応援コメントお待ちしています。／日経平均株価は前日比プラスで推移しています。</textarea>
         </div>
         <button id="tickerSendButton" class="show-btn" style="width:100%;">ティッカー表示を更新</button>
     </div>
 
     <div class="wrapper">
-        <!-- 速報テロップセクション -->
         <h3>決算速報</h3>
-        <div class="control-group">
-            <label for="themeColor">テーマ色</label>
-            <select id="themeColor"><option value="theme-yellow">黄色</option><option value="theme-red">赤色</option></select>
-        </div>
-        <div class="control-group">
-            <label for="headerText">ヘッダー (白背景)</label>
-            <input type="text" id="headerText" value="決算速報">
-        </div>
-        <div class="control-group">
-            <label for="companyName">企業名</label>
-            <input type="text" id="companyName" value="東証プライム【7203】トヨタ自動車">
-        </div>
+        <div class="control-group"><label for="themeColor">テーマ色</label><select id="themeColor"><option value="theme-yellow">黄色</option><option value="theme-red">赤色</option></select></div>
+        <div class="control-group"><label for="headerText">ヘッダー (白背景)</label><input type="text" id="headerText" value="決算速報"></div>
+        <div class="control-group"><label for="companyName">企業名</label><input type="text" id="companyName" value="東証プライム【7203】トヨタ自動車"></div>
         <div class="control-group grid-2">
-            <div>
-                <label for="detailText">テキスト</label>
-                <input type="text" id="detailText" value="2026年3月期 第3四半期 増収増益で着地" maxlength="30">
-            </div>
-            <div>
-                <label for="detailColor">文字色</label>
-                <select id="detailColor"><option value="text-black">黒</option><option value="text-red">赤</option><option value="text-blue">青</option></select>
-            </div>
+            <div><label for="detailText">テキスト</label><input type="text" id="detailText" value="2026年3月期 第3四半期 増収増益で着地" maxlength="30"></div>
+            <div><label for="detailColor">文字色</label><select id="detailColor"><option value="text-black">黒</option><option value="text-red">赤</option><option value="text-blue">青</option></select></div>
         </div>
         <div class="char-counter"><span id="char-count">0</span> / 30</div>
         <div style="display: flex; gap: 10px;">
             <button id="breakingSendButton" class="show-btn" style="flex-grow: 1;">速報表示</button>
             <button id="hideButton" class="hide-btn">ティッカーに戻る</button>
         </div>
-        
-        <!-- 下書きセクション -->
         <h3 style="margin-top: 40px;">下書き（速報用）</h3>
         <div class="draft-controls">
             <div class="control-group"><label for="drafts">保存済みテロップ</label><select id="drafts"></select></div>
@@ -85,59 +75,41 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyAhsAbTqQuairo-82A9rxQTazUCGdzdVc4",
-            authDomain: "obs-telop-system-7c98c.firebaseapp.com",
-            databaseURL: "https://obs-telop-system-7c98c-default-rtdb.asia-southeast1.firebasedatabase.app",
-            projectId: "obs-telop-system-7c98c",
-            storageBucket: "obs-telop-system-7c98c.appspot.com",
-            messagingSenderId: "368503557333",
-            appId: "1:368503557333:web:409dae2b1cf0c14b31a65c",
-            measurementId: "G-VMBCJ2952Z"
-        };
+        const firebaseConfig = { apiKey: "AIzaSyAhsAbTqQuairo-82A9rxQTazUCGdzdVc4", authDomain: "obs-telop-system-7c98c.firebaseapp.com", databaseURL: "https://obs-telop-system-7c98c-default-rtdb.asia-southeast1.firebasedatabase.app", projectId: "obs-telop-system-7c98c", storageBucket: "obs-telop-system-7c98c.appspot.com", messagingSenderId: "368503557333", appId: "1:368503557333:web:409dae2b1cf0c14b31a65c", measurementId: "G-VMBCJ2952Z" };
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
         const liveDataRef = database.ref('live_data');
         const DRAFT_KEY = 'obs-telop-drafts';
-
         const breakingControlIDs = ['themeColor', 'headerText', 'companyName', 'detailText', 'detailColor'];
 
-        // --- ティッカー操作 ---
         document.getElementById('tickerSendButton').addEventListener('click', () => {
-            const tickerData = {
+            liveDataRef.set({
                 mode: 'ticker',
                 ticker_content: {
-                    header: document.getElementById('tickerHeader').value,
-                    text: document.getElementById('tickerText').value,
+                    headerText: document.getElementById('tickerHeaderText').value,
+                    headerColor: document.getElementById('tickerHeaderColor').value,
+                    scrollText: document.getElementById('tickerScrollText').value,
                 }
-            };
-            liveDataRef.set(tickerData);
+            });
             alert('ティッカーを更新しました。');
         });
 
-        // --- 速報操作 ---
         document.getElementById('breakingSendButton').addEventListener('click', () => {
-            const breakingData = { mode: 'breaking', breaking_content: {} };
-            breakingControlIDs.forEach(id => breakingData.breaking_content[id] = document.getElementById(id).value);
-            liveDataRef.set(breakingData);
+            const breaking_content = {};
+            breakingControlIDs.forEach(id => breaking_content[id] = document.getElementById(id).value);
+            liveDataRef.set({ mode: 'breaking', breaking_content });
             alert('速報を送信しました！');
         });
         
-        // --- 非表示ボタン -> ティッカーモードに戻す ---
         document.getElementById('hideButton').addEventListener('click', () => {
             liveDataRef.update({ mode: 'ticker' });
             alert('ティッカー表示に戻します。');
         });
 
-        // --- 文字数カウンター ---
-        const detailTextInput = document.getElementById('detailText');
-        const charCountSpan = document.getElementById('char-count');
-        function updateCharCount() {
-            charCountSpan.textContent = detailTextInput.value.length;
-        }
+        const detailTextInput = document.getElementById('detailText'), charCountSpan = document.getElementById('char-count');
+        function updateCharCount() { charCountSpan.textContent = detailTextInput.value.length; }
         detailTextInput.addEventListener('input', updateCharCount);
 
-        // --- 下書き機能 (速報用) ---
         function getDrafts() { return JSON.parse(localStorage.getItem(DRAFT_KEY) || '{}'); }
         function saveDrafts(drafts) { localStorage.setItem(DRAFT_KEY, JSON.stringify(drafts)); }
         function updateDraftList() {
@@ -145,45 +117,29 @@
             const draftSelect = document.getElementById('drafts');
             draftSelect.innerHTML = '';
             for (const name in drafts) {
-                const option = document.createElement('option');
-                option.value = name; option.textContent = name;
-                draftSelect.appendChild(option);
+                const option = document.createElement('option'); option.value = name; option.textContent = name; draftSelect.appendChild(option);
             }
         }
         document.getElementById('saveDraftButton').addEventListener('click', () => {
-            const name = prompt('下書きの名前を入力してください:');
-            if (!name) return;
-            const drafts = getDrafts();
-            drafts[name] = {};
+            const name = prompt('下書きの名前を入力してください:'); if (!name) return;
+            const drafts = getDrafts(); drafts[name] = {};
             breakingControlIDs.forEach(id => drafts[name][id] = document.getElementById(id).value);
-            saveDrafts(drafts);
-            updateDraftList();
-            alert(`「${name}」として保存しました。`);
+            saveDrafts(drafts); updateDraftList(); alert(`「${name}」として保存しました。`);
         });
         document.getElementById('loadDraftButton').addEventListener('click', () => {
-            const name = document.getElementById('drafts').value;
-            if (!name) return alert('下書きを選択してください。');
+            const name = document.getElementById('drafts').value; if (!name) return alert('下書きを選択してください。');
             const draftData = getDrafts()[name];
             breakingControlIDs.forEach(id => document.getElementById(id).value = draftData[id]);
-            updateCharCount(); // 読込時に文字数も更新
-            alert(`「${name}」を読み込みました。`);
+            updateCharCount(); alert(`「${name}」を読み込みました。`);
         });
         document.getElementById('deleteDraftButton').addEventListener('click', () => {
-            const name = document.getElementById('drafts').value;
-            if (!name) return alert('下書きを選択してください。');
+            const name = document.getElementById('drafts').value; if (!name) return alert('下書きを選択してください。');
             if (!confirm(`「${name}」を削除しますか？`)) return;
-            const drafts = getDrafts();
-            delete drafts[name];
-            saveDrafts(drafts);
-            updateDraftList();
-            alert(`「${name}」を削除しました。`);
+            const drafts = getDrafts(); delete drafts[name];
+            saveDrafts(drafts); updateDraftList(); alert(`「${name}」を削除しました。`);
         });
 
-        // --- 初期化 ---
-        document.addEventListener('DOMContentLoaded', () => {
-            updateCharCount();
-            updateDraftList();
-        });
+        document.addEventListener('DOMContentLoaded', () => { updateCharCount(); updateDraftList(); });
     </script>
 </body>
 </html>
