@@ -13,13 +13,7 @@
     <div id="ticker-container" class="telop-wrapper">
         <div id="ticker-scroll-area"><span id="ticker-content" class="ticker-content"></span></div>
         <div id="ticker-header"><span id="ticker-header-text"></span></div>
-        <!-- ▼▼▼ 変更点: LIVEの構造を変更 ▼▼▼ -->
-        <div id="ticker-clock">
-            <span id="clock-time"></span>
-            <span id="clock-live">
-                <span>L</span><span>I</span><span>V</span><span>E</span>
-            </span>
-        </div>
+        <div id="ticker-clock"><span id="clock-time"></span><span id="clock-live">LIVE</span></div>
     </div>
     <div id="breaking-container" class="telop-wrapper">
         <div id="breaking-container-inner">
@@ -35,14 +29,15 @@
         const database = firebase.database();
 
         const tickerContainer = document.getElementById('ticker-container'), breakingContainer = document.getElementById('breaking-container');
-        const tickerHeader = document.getElementById('ticker-header'), tickerHeaderText = document.getElementById('ticker-header-text'), tickerScrollArea = document.getElementById('ticker-scroll-area'), tickerContent = document.getElementById('ticker-content'), clockTime = document.getElementById('clock-time'), clockLive = document.getElementById('clock-live');
+        const tickerHeader = document.getElementById('ticker-header'), tickerHeaderText = document.getElementById('ticker-header-text'), tickerScrollArea = document.getElementById('ticker-scroll-area'), tickerContent = document.getElementById('ticker-content'), tickerClock = document.getElementById('ticker-clock');
         const topBar = document.getElementById('top-bar'), header = document.getElementById('header'), companyName = document.getElementById('companyName'), detailText = document.getElementById('detailText');
 
         function updateClock() {
             const now = new Date(); const s = now.getSeconds();
-            clockTime.textContent = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
-            if (s >= 30) { clockTime.style.opacity = '0'; clockLive.style.opacity = '1'; } 
-            else { clockTime.style.opacity = '1'; clockLive.style.opacity = '0'; }
+            document.getElementById('clock-time').textContent = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+            // ▼▼▼ 変更点: opacityではなくクラスを操作する ▼▼▼
+            if (s >= 30) { tickerClock.classList.add('show-live'); } 
+            else { tickerClock.classList.remove('show-live'); }
         }
         setInterval(updateClock, 1000); updateClock();
 
