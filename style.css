@@ -13,21 +13,27 @@
     font-weight: 700; /* bold */
 }
 
+/* ▼▼▼ 変更点: 位置ずれを完全に修正するための設定 ▼▼▼ */
+html {
+    height: 100%;
+}
 body.obs-display {
     font-family: 'LINE Seed JP', sans-serif;
     margin: 0; padding: 0; overflow: hidden; background-color: transparent;
-    height: 1080px; width: 1920px; position: relative;
+    height: 100%; /* 高さをビューポート全体に広げます */
+    position: relative; /* これが位置の基準点となります */
 }
-@keyframes seamless-scroll { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+/* ▲▲▲ 変更ここまで ▲▲▲ */
+
+@keyframes marquee-scroll { 0% { transform: translateX(100%); } 100% { transform: translateX(-100%); } }
 @keyframes bounce {
   0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
   40% { transform: translateY(-15px); }
   60% { transform: translateY(-7px); }
 }
 
-/* ▼▼▼ 変更点: 位置を画面下部に変更 ▼▼▼ */
 .telop-wrapper {
-    position: absolute; bottom: 20px; 
+    position: absolute; bottom: 20px; /* 画面下部から20pxの位置に配置 */
     left: 20px; right: 20px; width: auto; 
     opacity: 0; transition: opacity 0.4s ease-out;
 }
@@ -43,13 +49,12 @@ body.obs-display {
 }
 .ticker-content {
     display: inline-block; font-size: 40px; font-weight: 400; letter-spacing: -0.05em;
-    animation: seamless-scroll linear infinite;
+    padding-left: 100%; animation: marquee-scroll linear infinite;
 }
 #ticker-header {
     position: absolute; left: 0; top: 0; z-index: 1;
     width: 300px; height: 100%; color: white; display: flex;
-    justify-content: center; /* 中央揃えに変更 */
-    align-items: center;
+    justify-content: flex-start; align-items: center;
     background: linear-gradient(to right, #ed949f, #69aef3);
     clip-path: polygon(0 0, 100% 0, 90% 100%, 0% 100%);
     font-size: 62px; font-weight: 700;
@@ -57,17 +62,13 @@ body.obs-display {
     box-shadow: 5px 0px 15px rgba(0,0,0,0.4);
 }
 #ticker-header-text {
-    display: inline-block; white-space: nowrap;
-    transform-origin: center center; /* 圧縮の基準点を中央に */
-    padding: 0 30px; /* 左右の余白を確保 */
+    display: inline-block; white-space: nowrap; transform-origin: left center; padding-left: 40px;
 }
 #ticker-clock {
     position: absolute; right: 0; top: 0; z-index: 1;
     width: 180px; height: 100%; background: linear-gradient(to right, #ed949f, #69aef3);
     color: white; display: flex; justify-content: center; align-items: center;
-    /* ▼▼▼ 変更点: サイズを0.8倍に ▼▼▼ */
-    font-size: 46px; /* 58px * 0.8 = 46.4px */
-    font-weight: bold;
+    font-size: 46px; font-weight: bold;
     box-shadow: -5px 0px 15px rgba(0,0,0,0.4);
     overflow: hidden;
 }
