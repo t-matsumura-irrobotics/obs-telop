@@ -1,4 +1,4 @@
-<!-- display.html (修正後) -->
+<!-- display.html (更新後) -->
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -6,17 +6,25 @@
     <title>OBS Telop Display</title>
     <link rel="stylesheet" href="style.css">
 </head>
-<!-- ▼▼▼ 変更点: bodyにクラスを追加 ▼▼▼ -->
 <body class="obs-display">
-    <div id="telop-container" class="telop-container">
-        <!-- 1行目 -->
-        <div id="top-bar" class="top-bar">
-            <div id="header" class="top-bar-header"></div>
-            <div id="companyName" class="top-bar-main"></div>
+    <!-- 通常ティッカー用コンテナ -->
+    <div id="ticker-container" class="telop-wrapper">
+        <div class="ticker-text">
+            <span id="ticker-header"></span>
+            <span id="ticker-content"></span>
         </div>
-        <!-- 2行目 -->
-        <div class="bottom-bar">
-            <span id="detailText"></span>
+    </div>
+
+    <!-- 速報テロップ用コンテナ -->
+    <div id="breaking-container" class="telop-wrapper">
+        <div id="breaking-container-inner">
+            <div id="top-bar" class="top-bar">
+                <div id="header" class="top-bar-header"></div>
+                <div id="companyName" class="top-bar-main"></div>
+            </div>
+            <div class="bottom-bar">
+                <span id="detailText"></span>
+            </div>
         </div>
     </div>
 
@@ -37,39 +45,45 @@
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
-        const container = document.getElementById('telop-container');
+        // 2つのモードのコンテナを取得
+        const tickerContainer = document.getElementById('ticker-container');
+        const breakingContainer = document.getElementById('breaking-container');
+
+        // ティッカーの要素
+        const tickerHeader = document.getElementById('ticker-header');
+        const tickerContent = document.getElementById('ticker-content');
+        
+        // 速報の要素
         const topBar = document.getElementById('top-bar');
         const header = document.getElementById('header');
         const companyName = document.getElementById('companyName');
         const detailText = document.getElementById('detailText');
-        let isVisible = false;
 
-        function updateTelopContent(data) {
-            topBar.className = 'top-bar ' + (data.themeColor || 'theme-yellow');
-            header.innerText = data.headerText || '';
-            companyName.innerText = data.companyName || '';
-            detailText.innerText = data.detailText || '';
-            detailText.className = data.detailColor || 'text-black';
-        }
-
-        database.ref('telop').on('value', (snapshot) => {
+        database.ref('live_data').on('value', (snapshot) => {
             const data = snapshot.val();
+            if (!data) return;
 
-            if (data && data.visible) {
-                if (isVisible) {
-                    container.classList.remove('visible');
-                    setTimeout(() => {
-                        updateTelopContent(data);
-                        container.classList.add('visible');
-                    }, 450);
-                } else {
-                    updateTelopContent(data);
-                    container.classList.add('visible');
-                    isVisible = true;
-                }
+            // モードに応じて表示を切り替え
+            if (data.mode === 'breaking' && data.breaking_content) {
+                // 速報モード
+                const content = data.breaking_content;
+                topBar.className = 'top-bar ' + (content.themeColor || 'theme-yellow');
+                header.innerText = content.headerText || '';
+                companyName.innerText = content.companyName || '';
+                detailText.innerText = content.detailText || '';
+                detailText.className = content.detailColor || 'text-black';
+
+                tickerContainer.classList.remove('visible');
+                breakingContainer.classList.add('visible');
+
             } else {
-                container.classList.remove('visible');
-                isVisible = false;
+                // 通常ティッカーモード
+                const content = data.ticker_content || {};
+                tickerHeader.innerText = content.header || '情報';
+                tickerContent.innerText = content.text || 'コメントをお待ちしています。';
+
+                breakingContainer.classList.remove('visible');
+                tickerContainer.classList.add('visible');
             }
         });
     </script>

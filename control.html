@@ -1,4 +1,4 @@
-<!-- control.html (修正後) -->
+<!-- control.html (更新後) -->
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -6,48 +6,56 @@
     <title>OBS Telop Controller</title>
     <link rel="stylesheet" href="style.css">
     <style>
-        /* ▼▼▼ 修正点2: スクロール問題を修正 ▼▼▼ */
-        body { font-family: sans-serif; padding: 20px; background-color: #f0f0f0; padding-bottom: 400px; /* プレビュー等が隠れないよう、ページ下部に十分な余白を確保 */ }
-        /* ▲▲▲ ここまで ▲▲▲ */
-        .controller-wrapper, .draft-wrapper { max-width: 800px; margin: 0 auto 20px auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        body { font-family: sans-serif; padding: 20px; background-color: #f0f0f0; padding-bottom: 400px; }
+        .wrapper { max-width: 800px; margin: 0 auto 20px auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
         h1, h3 { text-align: center; color: #333; }
         h3 { margin-top: 30px; border-bottom: 2px solid #eee; padding-bottom: 10px; }
         .control-group { margin-bottom: 15px; }
         .grid-2 { display: grid; grid-template-columns: 1fr 120px; gap: 10px; align-items: flex-end;}
         .draft-controls { display: grid; grid-template-columns: 1fr auto auto auto; gap: 10px; align-items: flex-end; }
         label { display: block; margin-bottom: 5px; font-weight: bold; }
-        input, select { width: 100%; box-sizing: border-box; padding: 10px; font-size: 16px; border: 1px solid #ccc; border-radius: 4px; }
+        input, select, textarea { width: 100%; box-sizing: border-box; padding: 10px; font-size: 16px; border: 1px solid #ccc; border-radius: 4px; }
+        textarea { height: 80px; resize: vertical; }
         button { padding: 10px 20px; font-size: 16px; cursor: pointer; border-radius: 4px; border: none; }
-        .buttons { display: flex; gap: 10px; justify-content: center; margin-top: 30px; }
         .show-btn { background-color: #28a745; color: white; }
-        .hide-btn { background-color: #dc3545; color: white; }
+        .hide-btn { background-color: #ffc107; color: black; }
         .draft-btn { background-color: #007bff; color: white; }
         .delete-btn { background-color: #6c757d; color: white; }
-        .preview-wrapper { margin-top: 30px; background-color: #333; border-radius: 8px; padding: 20px; }
-        .preview-wrapper .telop-container { transform: scale(0.4); transform-origin: top left; position: relative; opacity: 1; transform: none; transition: none; bottom: auto; left: auto; box-shadow: none; width: 100%; }
         .char-counter { text-align: right; font-size: 12px; color: #666; margin-top: -10px; margin-bottom: 15px; }
     </style>
 </head>
 <body>
-    <div class="controller-wrapper">
-        <h1>決算速報 コントローラー</h1>
-        <h3>1行目</h3>
+    <div class="wrapper">
+        <h1>ライブテロップ コントローラー</h1>
+        
+        <!-- 通常ティッカーセクション -->
+        <h3>通常ティッカー</h3>
         <div class="control-group">
-            <label for="themeColor">テーマ色 (ヘッダー文字色 / 企業名背景色)</label>
-            <select id="themeColor">
-                <option value="theme-yellow">黄色</option>
-                <option value="theme-red">赤色</option>
-            </select>
+            <label for="tickerHeader">ヘッダー</label>
+            <input type="text" id="tickerHeader" value="EveryStockNEWS">
         </div>
         <div class="control-group">
-            <label for="headerText">ヘッダー (白背景部分)</label>
+            <label for="tickerText">スクロールテキスト</label>
+            <textarea id="tickerText">質問や応援コメントお待ちしています。／日経平均株価は前日比プラスで推移しています。</textarea>
+        </div>
+        <button id="tickerSendButton" class="show-btn" style="width:100%;">ティッカー表示を更新</button>
+    </div>
+
+    <div class="wrapper">
+        <!-- 速報テロップセクション -->
+        <h3>決算速報</h3>
+        <div class="control-group">
+            <label for="themeColor">テーマ色</label>
+            <select id="themeColor"><option value="theme-yellow">黄色</option><option value="theme-red">赤色</option></select>
+        </div>
+        <div class="control-group">
+            <label for="headerText">ヘッダー (白背景)</label>
             <input type="text" id="headerText" value="決算速報">
         </div>
         <div class="control-group">
             <label for="companyName">企業名</label>
             <input type="text" id="companyName" value="東証プライム【7203】トヨタ自動車">
         </div>
-        <h3>2行目</h3>
         <div class="control-group grid-2">
             <div>
                 <label for="detailText">テキスト</label>
@@ -55,43 +63,22 @@
             </div>
             <div>
                 <label for="detailColor">文字色</label>
-                <select id="detailColor">
-                    <option value="text-black">黒</option>
-                    <option value="text-red">赤</option>
-                    <option value="text-blue">青</option>
-                </select>
+                <select id="detailColor"><option value="text-black">黒</option><option value="text-red">赤</option><option value="text-blue">青</option></select>
             </div>
         </div>
         <div class="char-counter"><span id="char-count">0</span> / 30</div>
-        <div class="buttons">
-            <button id="sendButton" class="show-btn">テロップ表示</button>
-            <button id="hideButton" class="hide-btn">テロップ非表示</button>
+        <div style="display: flex; gap: 10px;">
+            <button id="breakingSendButton" class="show-btn" style="flex-grow: 1;">速報表示</button>
+            <button id="hideButton" class="hide-btn">ティッカーに戻る</button>
         </div>
-    </div>
-
-    <div class="draft-wrapper">
-        <h3>下書き</h3>
+        
+        <!-- 下書きセクション -->
+        <h3 style="margin-top: 40px;">下書き（速報用）</h3>
         <div class="draft-controls">
-            <div class="control-group">
-                <label for="drafts">保存済みテロップ</label>
-                <select id="drafts"></select>
-            </div>
-            <button id="loadDraftButton" class="draft-btn">読み込み</button>
+            <div class="control-group"><label for="drafts">保存済みテロップ</label><select id="drafts"></select></div>
+            <button id="loadDraftButton" class="draft-btn">読込</button>
             <button id="saveDraftButton" class="draft-btn">保存</button>
             <button id="deleteDraftButton" class="delete-btn">削除</button>
-        </div>
-    </div>
-
-    <div class="preview-wrapper">
-        <h3>プレビュー</h3>
-        <div id="preview-container" class="telop-container visible">
-            <div id="preview-top-bar" class="top-bar">
-                <div id="preview-header" class="top-bar-header"></div>
-                <div id="preview-companyName" class="top-bar-main"></div>
-            </div>
-            <div class="bottom-bar">
-                <span id="preview-detailText"></span>
-            </div>
         </div>
     </div>
 
@@ -108,26 +95,49 @@
             appId: "1:368503557333:web:409dae2b1cf0c14b31a65c",
             measurementId: "G-VMBCJ2952Z"
         };
-
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
-        const telopRef = database.ref('telop');
+        const liveDataRef = database.ref('live_data');
         const DRAFT_KEY = 'obs-telop-drafts';
 
-        const inputs = document.querySelectorAll('input, select');
-        const allControlIDs = ['themeColor', 'headerText', 'companyName', 'detailText', 'detailColor'];
+        const breakingControlIDs = ['themeColor', 'headerText', 'companyName', 'detailText', 'detailColor'];
 
-        function updatePreview() {
-            document.getElementById('preview-top-bar').className = 'top-bar ' + document.getElementById('themeColor').value;
-            document.getElementById('preview-header').innerText = document.getElementById('headerText').value;
-            document.getElementById('preview-companyName').innerText = document.getElementById('companyName').value;
-            const detailText = document.getElementById('preview-detailText');
-            detailText.innerText = document.getElementById('detailText').value;
-            detailText.className = document.getElementById('detailColor').value;
-            const currentLength = document.getElementById('detailText').value.length;
-            document.getElementById('char-count').innerText = currentLength;
-        }
+        // --- ティッカー操作 ---
+        document.getElementById('tickerSendButton').addEventListener('click', () => {
+            const tickerData = {
+                mode: 'ticker',
+                ticker_content: {
+                    header: document.getElementById('tickerHeader').value,
+                    text: document.getElementById('tickerText').value,
+                }
+            };
+            liveDataRef.set(tickerData);
+            alert('ティッカーを更新しました。');
+        });
+
+        // --- 速報操作 ---
+        document.getElementById('breakingSendButton').addEventListener('click', () => {
+            const breakingData = { mode: 'breaking', breaking_content: {} };
+            breakingControlIDs.forEach(id => breakingData.breaking_content[id] = document.getElementById(id).value);
+            liveDataRef.set(breakingData);
+            alert('速報を送信しました！');
+        });
         
+        // --- 非表示ボタン -> ティッカーモードに戻す ---
+        document.getElementById('hideButton').addEventListener('click', () => {
+            liveDataRef.update({ mode: 'ticker' });
+            alert('ティッカー表示に戻します。');
+        });
+
+        // --- 文字数カウンター ---
+        const detailTextInput = document.getElementById('detailText');
+        const charCountSpan = document.getElementById('char-count');
+        function updateCharCount() {
+            charCountSpan.textContent = detailTextInput.value.length;
+        }
+        detailTextInput.addEventListener('input', updateCharCount);
+
+        // --- 下書き機能 (速報用) ---
         function getDrafts() { return JSON.parse(localStorage.getItem(DRAFT_KEY) || '{}'); }
         function saveDrafts(drafts) { localStorage.setItem(DRAFT_KEY, JSON.stringify(drafts)); }
         function updateDraftList() {
@@ -136,32 +146,28 @@
             draftSelect.innerHTML = '';
             for (const name in drafts) {
                 const option = document.createElement('option');
-                option.value = name;
-                option.textContent = name;
+                option.value = name; option.textContent = name;
                 draftSelect.appendChild(option);
             }
         }
-
         document.getElementById('saveDraftButton').addEventListener('click', () => {
             const name = prompt('下書きの名前を入力してください:');
             if (!name) return;
             const drafts = getDrafts();
             drafts[name] = {};
-            allControlIDs.forEach(id => drafts[name][id] = document.getElementById(id).value);
+            breakingControlIDs.forEach(id => drafts[name][id] = document.getElementById(id).value);
             saveDrafts(drafts);
             updateDraftList();
             alert(`「${name}」として保存しました。`);
         });
-
         document.getElementById('loadDraftButton').addEventListener('click', () => {
             const name = document.getElementById('drafts').value;
             if (!name) return alert('下書きを選択してください。');
             const draftData = getDrafts()[name];
-            allControlIDs.forEach(id => document.getElementById(id).value = draftData[id]);
-            updatePreview();
+            breakingControlIDs.forEach(id => document.getElementById(id).value = draftData[id]);
+            updateCharCount(); // 読込時に文字数も更新
             alert(`「${name}」を読み込みました。`);
         });
-        
         document.getElementById('deleteDraftButton').addEventListener('click', () => {
             const name = document.getElementById('drafts').value;
             if (!name) return alert('下書きを選択してください。');
@@ -173,29 +179,9 @@
             alert(`「${name}」を削除しました。`);
         });
 
-        // ▼▼▼ 修正点1: データ送信部分を修正 ▼▼▼
-        document.getElementById('sendButton').addEventListener('click', () => {
-            const telopData = {
-                visible: true,
-                themeColor: document.getElementById('themeColor').value,
-                headerText: document.getElementById('headerText').value,
-                companyName: document.getElementById('companyName').value,
-                detailText: document.getElementById('detailText').value,
-                detailColor: document.getElementById('detailColor').value,
-            };
-            telopRef.set(telopData);
-            alert('テロップを送信しました！');
-        });
-        // ▲▲▲ ここまで ▲▲▲
-
-        document.getElementById('hideButton').addEventListener('click', () => {
-            telopRef.update({ visible: false });
-            alert('テロップを非表示にしました！');
-        });
-
-        inputs.forEach(input => input.addEventListener('input', updatePreview));
+        // --- 初期化 ---
         document.addEventListener('DOMContentLoaded', () => {
-            updatePreview();
+            updateCharCount();
             updateDraftList();
         });
     </script>
