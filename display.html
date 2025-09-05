@@ -10,17 +10,22 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body class="obs-display">
-    <div id="ticker-container" class="telop-wrapper">
-        <div id="ticker-scroll-area"><span id="ticker-content" class="ticker-content"></span></div>
-        <div id="ticker-header"><span id="ticker-header-text"></span></div>
-        <div id="ticker-clock"><span id="clock-time"></span><span id="clock-live"><span>L</span><span>I</span><span>V</span><span>E</span></span></div>
-    </div>
-    <div id="breaking-container" class="telop-wrapper">
-        <div id="breaking-container-inner">
-            <div id="top-bar" class="top-bar"><div id="header" class="top-bar-header"></div><div id="companyName" class="top-bar-main"></div></div>
-            <div class="bottom-bar"><span id="detailText"></span></div>
+    <!-- ▼▼▼ 変更点: 全体をこのコンテナで囲む ▼▼▼ -->
+    <div id="main-container">
+        <div id="ticker-container" class="telop-wrapper">
+            <div id="ticker-scroll-area"><span id="ticker-content" class="ticker-content"></span></div>
+            <div id="ticker-header"><span id="ticker-header-text"></span></div>
+            <div id="ticker-clock"><span id="clock-time"></span><span id="clock-live"><span>L</span><span>I</span><span>V</span><span>E</span></span></div>
+        </div>
+        <div id="breaking-container" class="telop-wrapper">
+            <div id="breaking-container-inner">
+                <div id="top-bar" class="top-bar"><div id="header" class="top-bar-header"></div><div id="companyName" class="top-bar-main"></div></div>
+                <div class="bottom-bar"><span id="detailText"></span></div>
+            </div>
         </div>
     </div>
+    <!-- ▲▲▲ 変更ここまで ▲▲▲ -->
+
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <script>
@@ -42,16 +47,15 @@
 
         function adjustHeaderText() {
             tickerHeaderText.style.transform = 'scaleX(1)';
-            const containerWidth = tickerHeader.clientWidth - 40; // paddingを考慮
+            const containerWidth = tickerHeader.clientWidth - 40;
             const textWidth = tickerHeaderText.scrollWidth;
             if (textWidth > containerWidth) { tickerHeaderText.style.transform = `scaleX(${containerWidth / textWidth})`; }
         }
 
         function updateScrollSpeed() {
-            // ▼▼▼ 変更点: スクロール速度を1.2倍に (84 * 1.2 = 100.8) ▼▼▼
-            const PIXELS_PER_SECOND = 101; 
-            const scrollDistance = tickerScrollArea.offsetWidth + tickerContent.offsetWidth;
-            const duration = scrollDistance / PIXELS_PER_SECOND;
+            const PIXELS_PER_SECOND = 101;
+            const contentWidth = tickerContent.scrollWidth / 2;
+            const duration = contentWidth / PIXELS_PER_SECOND;
             tickerContent.style.animationDuration = `${duration}s`;
         }
 

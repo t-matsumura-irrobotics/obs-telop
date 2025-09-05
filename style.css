@@ -14,20 +14,19 @@
 }
 
 /* ▼▼▼ 変更点: 位置ずれを完全に修正するための設定 ▼▼▼ */
-html {
-    height: 100%;
-    width: 100%;
-}
-body.obs-display {
-    font-family: 'LINE Seed JP', sans-serif;
+html, body.obs-display {
     margin: 0; padding: 0; overflow: hidden; background-color: transparent;
-    height: 100%; /* 高さをビューポート全体に広げます */
-    width: 100%;
-    position: relative; /* これが位置の基準点となります */
+    height: 100%; width: 100%;
+    font-family: 'LINE Seed JP', sans-serif;
+}
+#main-container {
+    position: relative;
+    width: 1920px;
+    height: 1080px;
 }
 /* ▲▲▲ 変更ここまで ▲▲▲ */
 
-@keyframes marquee-scroll { 0% { transform: translateX(100%); } 100% { transform: translateX(-100%); } }
+@keyframes marquee-scroll { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
 @keyframes bounce {
   0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
   40% { transform: translateY(-15px); }
@@ -35,7 +34,7 @@ body.obs-display {
 }
 
 .telop-wrapper {
-    position: absolute; bottom: 20px; /* 画面下部から20pxの位置に配置 */
+    position: absolute; bottom: 20px; /* main-containerの下部から20pxの位置に配置 */
     left: 20px; right: 20px; width: auto; 
     opacity: 0; transition: opacity 0.4s ease-out;
 }
@@ -51,13 +50,12 @@ body.obs-display {
 }
 .ticker-content {
     display: inline-block; font-size: 40px; font-weight: 400; letter-spacing: -0.05em;
-    padding-left: 100%; animation: marquee-scroll linear infinite;
+    animation: seamless-scroll linear infinite;
 }
 #ticker-header {
     position: absolute; left: 0; top: 0; z-index: 1;
     width: 300px; height: 100%; color: white; display: flex;
-    justify-content: center;
-    align-items: center;
+    justify-content: center; align-items: center;
     background: linear-gradient(to right, #ed949f, #69aef3);
     clip-path: polygon(0 0, 100% 0, 90% 100%, 0% 100%);
     font-size: 62px; font-weight: 700;
@@ -65,9 +63,7 @@ body.obs-display {
     box-shadow: 5px 0px 15px rgba(0,0,0,0.4);
 }
 #ticker-header-text {
-    display: inline-block; white-space: nowrap;
-    transform-origin: center center;
-    padding: 0 20px;
+    display: inline-block; white-space: nowrap; transform-origin: center center; padding: 0 20px;
 }
 #ticker-clock {
     position: absolute; right: 0; top: 0; z-index: 1;
@@ -83,8 +79,7 @@ body.obs-display {
     width: 100%; text-align: center;
 }
 #clock-live {
-    font-style: italic; transform: translateX(120%);
-    font-size: 55px;
+    font-style: italic; transform: translateX(120%); font-size: 55px;
 }
 #ticker-clock.show-live #clock-time { transform: translateX(-120%); }
 #ticker-clock.show-live #clock-live { transform: translateX(0); }
