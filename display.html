@@ -7,20 +7,17 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body class="obs-display">
-    <!-- 通常ティッカー用コンテナ -->
     <div id="ticker-container" class="telop-wrapper">
         <div id="ticker-header"><span id="ticker-header-text"></span></div>
         <div id="ticker-scroll-area"><span id="ticker-content" class="ticker-content"></span></div>
-        <div id="ticker-clock"></div>
+        <div id="ticker-clock"><span id="clock-time"></span><span id="clock-live">LIVE</span></div>
     </div>
-    <!-- 速報テロップ用コンテナ -->
     <div id="breaking-container" class="telop-wrapper">
         <div id="breaking-container-inner">
             <div id="top-bar" class="top-bar"><div id="header" class="top-bar-header"></div><div id="companyName" class="top-bar-main"></div></div>
             <div class="bottom-bar"><span id="detailText"></span></div>
         </div>
     </div>
-
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <script>
@@ -29,32 +26,39 @@
         const database = firebase.database();
 
         const tickerContainer = document.getElementById('ticker-container'), breakingContainer = document.getElementById('breaking-container');
-        const tickerHeader = document.getElementById('ticker-header'), tickerHeaderText = document.getElementById('ticker-header-text'), tickerContent = document.getElementById('ticker-content'), tickerClock = document.getElementById('ticker-clock');
+        const tickerHeader = document.getElementById('ticker-header'), tickerHeaderText = document.getElementById('ticker-header-text'), tickerScrollArea = document.getElementById('ticker-scroll-area'), tickerContent = document.getElementById('ticker-content'), clockTime = document.getElementById('clock-time'), clockLive = document.getElementById('clock-live');
         const topBar = document.getElementById('top-bar'), header = document.getElementById('header'), companyName = document.getElementById('companyName'), detailText = document.getElementById('detailText');
 
-        // 時計更新
         function updateClock() {
             const now = new Date();
-            const h = String(now.getHours()).padStart(2, '0'), m = String(now.getMinutes()).padStart(2, '0'), s = String(now.getSeconds()).padStart(2, '0');
-            tickerClock.textContent = `${h}:${m}:${s}`;
+            const s = now.getSeconds();
+            clockTime.textContent = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+            if (s >= 30) { clockTime.style.opacity = '0'; clockLive.style.opacity = '1'; } 
+            else { clockTime.style.opacity = '1'; clockLive.style.opacity = '0'; }
         }
         setInterval(updateClock, 1000); updateClock();
 
-        // ヘッダー長体処理
         function adjustHeaderText() {
             tickerHeaderText.style.transform = 'scaleX(1)';
-            const containerWidth = tickerHeader.clientWidth - 30; // padding分を引く
+            const containerWidth = tickerHeader.clientWidth - 50;
             const textWidth = tickerHeaderText.scrollWidth;
             if (textWidth > containerWidth) {
                 tickerHeaderText.style.transform = `scaleX(${containerWidth / textWidth})`;
             }
         }
 
+        function updateScrollSpeed() {
+            const PIXELS_PER_SECOND = 150; // この数値を調整してスクロール速度を変更
+            const scrollAreaWidth = tickerScrollArea.offsetWidth;
+            const contentWidth = tickerContent.scrollWidth;
+            const duration = (scrollAreaWidth + contentWidth) / PIXELS_PER_SECOND;
+            tickerContent.style.animationDuration = `${duration}s`;
+        }
+
         database.ref('live_data').on('value', (snapshot) => {
             const data = snapshot.val();
             if (!data) return;
-
-            if (data.mode === 'breaking' && data.breaking_content) { // 速報モード
+            if (data.mode === 'breaking' && data.breaking_content) {
                 const content = data.breaking_content;
                 topBar.className = 'top-bar ' + (content.themeColor || 'theme-yellow');
                 header.innerText = content.headerText || '';
@@ -63,14 +67,16 @@
                 detailText.className = content.detailColor || 'text-black';
                 tickerContainer.classList.remove('visible');
                 breakingContainer.classList.add('visible');
-            } else { // 通常ティッカーモード
+            } else {
                 const content = data.ticker_content || {};
-                tickerHeader.className = content.headerColor || 'header-red';
                 tickerHeaderText.innerText = content.headerText || '東京株式市場';
                 tickerContent.innerText = content.scrollText || 'コメントをお待ちしています。';
                 breakingContainer.classList.remove('visible');
                 tickerContainer.classList.add('visible');
-                setTimeout(adjustHeaderText, 50); // 表示後に長体処理
+                setTimeout(() => {
+                    adjustHeaderText();
+                    updateScrollSpeed();
+                }, 50);
             }
         });
     </script>

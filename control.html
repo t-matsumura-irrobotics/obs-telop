@@ -28,19 +28,9 @@
     <div class="wrapper">
         <h1>ライブテロップ コントローラー</h1>
         <h3>通常ティッカー</h3>
-        <div class="grid-2">
-            <div>
-                <label for="tickerHeaderText">ヘッダーテキスト</label>
-                <input type="text" id="tickerHeaderText" value="東京株式市場">
-            </div>
-            <div>
-                <label for="tickerHeaderColor">ヘッダー色</label>
-                <select id="tickerHeaderColor">
-                    <option value="header-red">赤</option>
-                    <option value="header-blue">青</option>
-                    <option value="header-green">緑</option>
-                </select>
-            </div>
+        <div class="control-group">
+            <label for="tickerHeaderText">ヘッダーテキスト</label>
+            <input type="text" id="tickerHeaderText" value="東京株式市場">
         </div>
         <div class="control-group">
             <label for="tickerScrollText">スクロールテキスト</label>
@@ -87,7 +77,6 @@
                 mode: 'ticker',
                 ticker_content: {
                     headerText: document.getElementById('tickerHeaderText').value,
-                    headerColor: document.getElementById('tickerHeaderColor').value,
                     scrollText: document.getElementById('tickerScrollText').value,
                 }
             });
@@ -113,12 +102,8 @@
         function getDrafts() { return JSON.parse(localStorage.getItem(DRAFT_KEY) || '{}'); }
         function saveDrafts(drafts) { localStorage.setItem(DRAFT_KEY, JSON.stringify(drafts)); }
         function updateDraftList() {
-            const drafts = getDrafts();
-            const draftSelect = document.getElementById('drafts');
-            draftSelect.innerHTML = '';
-            for (const name in drafts) {
-                const option = document.createElement('option'); option.value = name; option.textContent = name; draftSelect.appendChild(option);
-            }
+            const drafts = getDrafts(); const draftSelect = document.getElementById('drafts'); draftSelect.innerHTML = '';
+            for (const name in drafts) { const option = document.createElement('option'); option.value = name; option.textContent = name; draftSelect.appendChild(option); }
         }
         document.getElementById('saveDraftButton').addEventListener('click', () => {
             const name = prompt('下書きの名前を入力してください:'); if (!name) return;
