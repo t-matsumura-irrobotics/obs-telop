@@ -8,8 +8,8 @@
 </head>
 <body class="obs-display">
     <div id="ticker-container" class="telop-wrapper">
-        <div id="ticker-header"><span id="ticker-header-text"></span></div>
         <div id="ticker-scroll-area"><span id="ticker-content" class="ticker-content"></span></div>
+        <div id="ticker-header"><span id="ticker-header-text"></span></div>
         <div id="ticker-clock"><span id="clock-time"></span><span id="clock-live">LIVE</span></div>
     </div>
     <div id="breaking-container" class="telop-wrapper">
@@ -30,8 +30,7 @@
         const topBar = document.getElementById('top-bar'), header = document.getElementById('header'), companyName = document.getElementById('companyName'), detailText = document.getElementById('detailText');
 
         function updateClock() {
-            const now = new Date();
-            const s = now.getSeconds();
+            const now = new Date(); const s = now.getSeconds();
             clockTime.textContent = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
             if (s >= 30) { clockTime.style.opacity = '0'; clockLive.style.opacity = '1'; } 
             else { clockTime.style.opacity = '1'; clockLive.style.opacity = '0'; }
@@ -40,18 +39,15 @@
 
         function adjustHeaderText() {
             tickerHeaderText.style.transform = 'scaleX(1)';
-            const containerWidth = tickerHeader.clientWidth - 50;
+            const containerWidth = tickerHeader.clientWidth - 60;
             const textWidth = tickerHeaderText.scrollWidth;
-            if (textWidth > containerWidth) {
-                tickerHeaderText.style.transform = `scaleX(${containerWidth / textWidth})`;
-            }
+            if (textWidth > containerWidth) { tickerHeaderText.style.transform = `scaleX(${containerWidth / textWidth})`; }
         }
 
-        function updateScrollSpeed() {
-            const PIXELS_PER_SECOND = 150; // この数値を調整してスクロール速度を変更
-            const scrollAreaWidth = tickerScrollArea.offsetWidth;
-            const contentWidth = tickerContent.scrollWidth;
-            const duration = (scrollAreaWidth + contentWidth) / PIXELS_PER_SECOND;
+        function updateScroll() {
+            const PIXELS_PER_SECOND = 120; // この数値を調整してスクロール速度を変更
+            const contentWidth = tickerContent.scrollWidth / 2; // テキストは2つ複製されているので半分の幅で計算
+            const duration = contentWidth / PIXELS_PER_SECOND;
             tickerContent.style.animationDuration = `${duration}s`;
         }
 
@@ -70,12 +66,13 @@
             } else {
                 const content = data.ticker_content || {};
                 tickerHeaderText.innerText = content.headerText || '東京株式市場';
-                tickerContent.innerText = content.scrollText || 'コメントをお待ちしています。';
+                const scrollText = content.scrollText || 'コメントをお待ちしています。';
+                tickerContent.innerText = `${scrollText}　　　${scrollText}`; // テキストを複製してシームレスに
                 breakingContainer.classList.remove('visible');
                 tickerContainer.classList.add('visible');
                 setTimeout(() => {
                     adjustHeaderText();
-                    updateScrollSpeed();
+                    updateScroll();
                 }, 50);
             }
         });

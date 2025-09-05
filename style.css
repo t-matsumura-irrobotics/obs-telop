@@ -16,8 +16,7 @@ body.obs-display {
     font-family: 'LINE Seed JP', sans-serif;
     margin: 0; padding: 0; overflow: hidden; background-color: transparent;
 }
-@keyframes scroll-left { 0% { transform: translateX(100%); } 100% { transform: translateX(-100%); } }
-@keyframes fade-in-out { 0%, 45% { opacity: 1; } 50% { opacity: 0; } 55%, 100% { opacity: 1; } }
+@keyframes scroll-left { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
 
 /* --- コンテナの共通スタイル --- */
 .telop-wrapper {
@@ -25,42 +24,53 @@ body.obs-display {
 }
 .telop-wrapper.visible { opacity: 1; }
 
-/* --- 通常ティッカーのデザイン (全体を1.5倍に) --- */
+/* --- 通常ティッカーのデザイン --- */
 #ticker-container {
-    display: flex; height: 90px; font-weight: bold;
-}
-/* ヘッダー */
-#ticker-header {
-    flex-shrink: 0; width: 400px; color: white; display: flex; justify-content: center; align-items: center; padding: 0 25px;
-    background: linear-gradient(to right, #ed949f, #69aef3);
-    clip-path: polygon(0 0, 100% 0, 90% 100%, 0% 100%);
-    font-size: 57px; /* 38px * 1.5 */
-}
-#ticker-header-text {
-    display: inline-block; white-space: nowrap; transform-origin: center center;
-}
-/* スクロールエリア */
-#ticker-scroll-area {
-    flex-grow: 1; background-color: white; color: black; overflow: hidden; white-space: nowrap;
-    display: flex; align-items: center; font-size: 57px; /* 38px * 1.5 */
-}
-.ticker-content {
-    display: inline-block; padding-left: 100%; animation: scroll-left linear infinite;
-}
-/* 時計 */
-#ticker-clock {
-    flex-shrink: 0; width: 270px; background-color: #222; color: white;
-    display: flex; justify-content: center; align-items: center; font-size: 63px; /* 42px * 1.5 */
+    height: 80px; /* 新しい基準の高さ */
     position: relative;
 }
-#clock-time, #clock-live {
+/* スクロールエリア (これが全体の白背景になる) */
+#ticker-scroll-area {
     position: absolute;
+    width: 100%; height: 100%;
+    background-color: white; color: black;
+    overflow: hidden; white-space: nowrap;
+    display: flex; align-items: center;
 }
-#clock-live {
-    opacity: 0; /* LIVEは初期非表示 */
+.ticker-content {
+    display: inline-block;
+    font-size: 51px; /* 57px * 0.9 */
+    font-weight: 400; /* 細く */
+    letter-spacing: -0.05em; /* 文字間を詰める */
+    animation: scroll-left linear infinite;
+}
+/* ヘッダー (白背景の上に重ねる) */
+#ticker-header {
+    position: absolute; left: 0; top: 0; z-index: 1;
+    width: 300px; height: 100%;
+    color: white; display: flex; justify-content: center; align-items: center;
+    background: linear-gradient(to right, #ed949f, #69aef3);
+    clip-path: polygon(0 0, 100% 0, 90% 100%, 0% 100%);
+    font-size: 40px; /* 57px * 0.7 */
+    font-weight: 400; /* 細く */
+}
+#ticker-header-text {
+    display: inline-block; white-space: nowrap; transform-origin: center center; padding: 0 30px;
+}
+/* 時計 (白背景の上に重ねる) */
+#ticker-clock {
+    position: absolute; right: 0; top: 0; z-index: 1;
+    width: 180px; height: 100%;
+    background: linear-gradient(to right, #ed949f, #69aef3);
+    color: white; display: flex; justify-content: center; align-items: center;
+    font-size: 32px; /* 63px * 0.5 */
+    font-weight: bold;
+}
+#clock-time, #clock-live {
+    position: absolute; transition: opacity 0.3s ease-in-out;
 }
 
-/* --- 速報テロップのデザイン (全体を1.5倍に) --- */
+/* --- 速報テロップのデザイン --- */
 #breaking-container { padding: 0 20px; bottom: 20px; }
 #breaking-container-inner { box-shadow: 0 6px 15px rgba(0,0,0,0.3); border-radius: 8px; overflow: hidden; }
 .top-bar { display: flex; font-size: 65px; align-items: center; height: 98px; }
