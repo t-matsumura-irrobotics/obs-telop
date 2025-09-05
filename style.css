@@ -33,10 +33,10 @@ body.obs-display {
 .telop-wrapper.visible { opacity: 1; }
 
 #ticker-container {
-    height: 96px; /* 80px * 1.2 */
+    height: 96px;
     position: relative;
-    border-radius: 10px; /* 全体を角丸に */
-    overflow: hidden; /* 角丸を適用するため */
+    border-radius: 10px;
+    overflow: hidden;
 }
 #ticker-scroll-area {
     position: absolute; width: 100%; height: 100%; background-color: white; color: black;
@@ -50,7 +50,7 @@ body.obs-display {
 #ticker-header {
     position: absolute; left: 0; top: 0; z-index: 1;
     width: 300px; height: 100%; color: white; display: flex;
-    justify-content: flex-start; /* 左寄せに変更 */
+    justify-content: flex-start;
     align-items: center;
     background: linear-gradient(to right, #ed949f, #69aef3);
     clip-path: polygon(0 0, 100% 0, 90% 100%, 0% 100%);
@@ -58,8 +58,10 @@ body.obs-display {
     box-shadow: 5px 0px 15px rgba(0,0,0,0.4);
 }
 #ticker-header-text {
-    display: inline-block; white-space: nowrap; transform-origin: center center;
-    padding-left: 40px; /* 左の余白を調整 */
+    display: inline-block; white-space: nowrap;
+    /* ▼▼▼ 変更点: 圧縮の基準点を左端に変更 ▼▼▼ */
+    transform-origin: left center;
+    padding-left: 40px;
 }
 #ticker-clock {
     position: absolute; right: 0; top: 0; z-index: 1;
@@ -75,37 +77,36 @@ body.obs-display {
     letter-spacing: 0.05em;
     transform: translateX(0);
     transition: transform 0.4s cubic-bezier(0.77, 0, 0.175, 1);
-    width: 100%; text-align: center; /* 重なり防止 */
+    width: 100%; text-align: center;
 }
 #clock-live {
     font-style: italic;
     transform: translateX(120%);
 }
-#ticker-clock.show-live #clock-time {
-    transform: translateX(-120%);
-}
-#ticker-clock.show-live #clock-live {
-    transform: translateX(0);
-}
+#ticker-clock.show-live #clock-time { transform: translateX(-120%); }
+#ticker-clock.show-live #clock-live { transform: translateX(0); }
+
 #clock-live span {
     display: inline-block;
     animation: bounce 1.5s infinite ease-in-out;
+    /* ▼▼▼ 変更点: アニメーションの競合を解消 ▼▼▼ */
+    will-change: transform;
 }
 #clock-live span:nth-child(1) { animation-delay: 0.1s; }
 #clock-live span:nth-child(2) { animation-delay: 0.2s; }
 #clock-live span:nth-child(3) { animation-delay: 0.3s; }
 #clock-live span:nth-child(4) { animation-delay: 0.4s; }
 
-/* --- 速報テロップのデザイン (角丸とサイズアップを適用) --- */
+/* --- 速報テロップのデザイン (変更なし) --- */
 #breaking-container { padding: 0 20px; top: 20px; }
 #breaking-container-inner { box-shadow: 0 6px 15px rgba(0,0,0,0.3); border-radius: 10px; overflow: hidden; }
-.top-bar { display: flex; font-size: 65px; align-items: center; height: 118px; } /* 98px * 1.2 */
-.top-bar-header { background-color: #ffffff; padding: 0 38px; white-space: nowrap; border-right: 3px solid rgba(0, 0, 0, 0.15); font-weight: bold; font-size: 94px; } /* 78px * 1.2 */
+.top-bar { display: flex; font-size: 65px; align-items: center; height: 118px; }
+.top-bar-header { background-color: #ffffff; padding: 0 38px; white-space: nowrap; border-right: 3px solid rgba(0, 0, 0, 0.15); font-weight: bold; font-size: 94px; }
 .top-bar-main { padding: 0 38px; flex-grow: 1; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font-weight: 400; }
 .theme-yellow .top-bar-main { background: linear-gradient(to bottom, #FBC02D, #F57F17); color: #000; }
 .theme-yellow .top-bar-header { color: #F57F17; }
 .theme-red .top-bar-main { background: linear-gradient(to bottom, #D32F2F, #9A0007); color: #fff; }
 .theme-red .top-bar-header { color: #9A0007; }
-.bottom-bar { display: flex; justify-content: center; align-items: center; background-color: rgba(255, 255, 255, 0.85); font-size: 81px; font-weight: bold; height: 154px; } /* 128px * 1.2 */
+.bottom-bar { display: flex; justify-content: center; align-items: center; background-color: rgba(255, 255, 255, 0.85); font-size: 81px; font-weight: bold; height: 154px; }
 .bottom-bar span { padding: 0 38px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: center; }
 .text-black { color: #000000; } .text-red { color: #B71C1C; } .text-blue { color: #0068b7; }
