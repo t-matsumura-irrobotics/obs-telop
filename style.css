@@ -12,16 +12,15 @@
     font-weight: 700; /* bold */
 }
 
-/* ▼▼▼ 変更点: 位置ずれを修正するための設定を追加 ▼▼▼ */
 body.obs-display {
     font-family: 'LINE Seed JP', sans-serif;
     margin: 0; padding: 0; overflow: hidden; background-color: transparent;
-    position: relative; /* これが位置の基準点となります */
-    height: 100vh;      /* 高さをビューポート全体に広げます */
+    height: 1080px; /* OBSの高さに固定 */
+    width: 1920px;  /* OBSの幅に固定 */
+    position: relative;
 }
-/* ▲▲▲ 変更ここまで ▲▲▲ */
-
-@keyframes scroll-left { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+/* ▼▼▼ 変更点: 新しいスクロールアニメーション ▼▼▼ */
+@keyframes marquee-scroll { 0% { transform: translateX(100%); } 100% { transform: translateX(-100%); } }
 
 .telop-wrapper {
     position: absolute; bottom: 20px; left: 0; width: 100%; opacity: 0; transition: opacity 0.4s ease-out;
@@ -37,9 +36,9 @@ body.obs-display {
 }
 .ticker-content {
     display: inline-block;
-    font-size: 40px; /* 57px * 0.7 = 39.9px -> 40px */
-    font-weight: 400; letter-spacing: -0.05em;
-    animation: scroll-left linear infinite;
+    font-size: 40px; font-weight: 400; letter-spacing: -0.05em;
+    padding-left: 100%; /* アニメーション開始位置を画面外にする */
+    animation: marquee-scroll linear infinite;
 }
 #ticker-header {
     position: absolute; left: 0; top: 0; z-index: 1;
@@ -53,14 +52,17 @@ body.obs-display {
 }
 #ticker-clock {
     position: absolute; right: 0; top: 0; z-index: 1;
-    width: 180px; height: 100%;
-    background: linear-gradient(to right, #ed949f, #69aef3);
+    width: 180px; height: 100%; background: linear-gradient(to right, #ed949f, #69aef3);
     color: white; display: flex; justify-content: center; align-items: center;
-    font-size: 48px; /* 32px * 1.5 = 48px */
-    font-weight: bold;
+    font-size: 48px; font-weight: bold;
 }
 #clock-time, #clock-live {
     position: absolute; transition: opacity 0.3s ease-in-out;
+}
+/* ▼▼▼ 変更点: LIVEフォントの指定 ▼▼▼ */
+#clock-live {
+    font-family: 'Anton', sans-serif;
+    font-style: italic;
 }
 
 /* --- 速報テロップのデザイン (変更なし) --- */

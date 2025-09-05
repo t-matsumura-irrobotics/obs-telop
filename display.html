@@ -4,6 +4,10 @@
 <head>
     <meta charset="UTF-8">
     <title>OBS Telop Display</title>
+    <!-- ▼▼▼ 変更点: Google Fontsを読み込む ▼▼▼ -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Anton&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body class="obs-display">
@@ -44,11 +48,11 @@
             if (textWidth > containerWidth) { tickerHeaderText.style.transform = `scaleX(${containerWidth / textWidth})`; }
         }
 
-        function updateScroll() {
-            // ▼▼▼ 変更点: スクロール速度を1.4倍に (120 * 1.4 = 168) ▼▼▼
-            const PIXELS_PER_SECOND = 168; 
-            const contentWidth = tickerContent.scrollWidth / 2;
-            const duration = contentWidth / PIXELS_PER_SECOND;
+        function updateScrollSpeed() {
+            const PIXELS_PER_SECOND = 168;
+            // ▼▼▼ 変更点: スクロール距離の計算方法を変更 ▼▼▼
+            const scrollDistance = tickerScrollArea.offsetWidth + tickerContent.offsetWidth;
+            const duration = scrollDistance / PIXELS_PER_SECOND;
             tickerContent.style.animationDuration = `${duration}s`;
         }
 
@@ -67,13 +71,13 @@
             } else {
                 const content = data.ticker_content || {};
                 tickerHeaderText.innerText = content.headerText || '東京株式市場';
-                const scrollText = content.scrollText || 'コメントをお待ちしています。';
-                tickerContent.innerText = `${scrollText}　　　${scrollText}`;
+                // ▼▼▼ 変更点: テキストの複製をやめる ▼▼▼
+                tickerContent.innerText = content.scrollText || 'コメントをお待ちしています。';
                 breakingContainer.classList.remove('visible');
                 tickerContainer.classList.add('visible');
                 setTimeout(() => {
                     adjustHeaderText();
-                    updateScroll();
+                    updateScrollSpeed();
                 }, 50);
             }
         });

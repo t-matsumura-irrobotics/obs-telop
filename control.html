@@ -1,15 +1,20 @@
-<!-- control.html (変更なし・確認用) -->
+<!-- control.html (更新後) -->
 <!DOCTYPE html>
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
     <title>OBS Telop Controller</title>
+    <!-- ▼▼▼ 変更点: Google Fontsを読み込む ▼▼▼ -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Anton&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
     <style>
         body { font-family: sans-serif; padding: 20px; background-color: #f0f0f0; padding-bottom: 400px; }
         .wrapper { max-width: 800px; margin: 0 auto 20px auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
         h1, h3 { text-align: center; color: #333; }
         h3 { margin-top: 30px; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+        /* (以下、スタイルに変更はありません) */
         .control-group { margin-bottom: 15px; }
         .grid-2 { display: grid; grid-template-columns: 1fr 120px; gap: 10px; align-items: flex-end;}
         .draft-controls { display: grid; grid-template-columns: 1fr auto auto auto; gap: 10px; align-items: flex-end; }
@@ -25,20 +30,14 @@
     </style>
 </head>
 <body>
+    <!-- (HTMLの構造部分に変更はありません) -->
     <div class="wrapper">
         <h1>ライブテロップ コントローラー</h1>
         <h3>通常ティッカー</h3>
-        <div class="control-group">
-            <label for="tickerHeaderText">ヘッダーテキスト</label>
-            <input type="text" id="tickerHeaderText" value="東京株式市場">
-        </div>
-        <div class="control-group">
-            <label for="tickerScrollText">スクロールテキスト</label>
-            <textarea id="tickerScrollText">質問や応援コメントお待ちしています。／日経平均株価は前日比プラスで推移しています。</textarea>
-        </div>
+        <div class="control-group"><label for="tickerHeaderText">ヘッダーテキスト</label><input type="text" id="tickerHeaderText" value="東京株式市場"></div>
+        <div class="control-group"><label for="tickerScrollText">スクロールテキスト</label><textarea id="tickerScrollText">質問や応援コメントお待ちしています。／日経平均株価は前日比プラスで推移しています。</textarea></div>
         <button id="tickerSendButton" class="show-btn" style="width:100%;">ティッカー表示を更新</button>
     </div>
-
     <div class="wrapper">
         <h3>決算速報</h3>
         <div class="control-group"><label for="themeColor">テーマ色</label><select id="themeColor"><option value="theme-yellow">黄色</option><option value="theme-red">赤色</option></select></div>
@@ -61,7 +60,7 @@
             <button id="deleteDraftButton" class="delete-btn">削除</button>
         </div>
     </div>
-
+    <!-- (JavaScript部分に変更はありません) -->
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <script>
@@ -75,10 +74,7 @@
         document.getElementById('tickerSendButton').addEventListener('click', () => {
             liveDataRef.set({
                 mode: 'ticker',
-                ticker_content: {
-                    headerText: document.getElementById('tickerHeaderText').value,
-                    scrollText: document.getElementById('tickerScrollText').value,
-                }
+                ticker_content: { headerText: document.getElementById('tickerHeaderText').value, scrollText: document.getElementById('tickerScrollText').value, }
             });
             alert('ティッカーを更新しました。');
         });
