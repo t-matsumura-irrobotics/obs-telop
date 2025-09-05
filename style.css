@@ -14,13 +14,14 @@
 }
 
 /* ▼▼▼ 変更点: 位置ずれを完全に修正するための設定 ▼▼▼ */
+html {
+    height: 100%;
+}
 body.obs-display {
     font-family: 'LINE Seed JP', sans-serif;
     margin: 0; padding: 0; overflow: hidden; background-color: transparent;
-    height: 1080px; width: 1920px;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-end; /* コンテンツを下端に寄せる */
+    height: 100%; /* 高さをビューポート全体に広げます */
+    position: relative; /* これが位置の基準点となります */
 }
 /* ▲▲▲ 変更ここまで ▲▲▲ */
 
@@ -32,10 +33,8 @@ body.obs-display {
 }
 
 .telop-wrapper {
-    /* ▼▼▼ 変更点: 配置方法を変更 ▼▼▼ */
-    position: relative;
-    margin: 0 20px 20px 20px; /* 上左右下のマージンを設定 */
-    width: auto; 
+    position: absolute; bottom: 20px; /* 画面下部から20pxの位置に配置 */
+    left: 20px; right: 20px; width: auto; 
     opacity: 0; transition: opacity 0.4s ease-out;
 }
 .telop-wrapper.visible { opacity: 1; }
@@ -55,19 +54,25 @@ body.obs-display {
 #ticker-header {
     position: absolute; left: 0; top: 0; z-index: 1;
     width: 300px; height: 100%; color: white; display: flex;
-    justify-content: center; align-items: center;
+    justify-content: center; /* 中央揃えに変更 */
+    align-items: center;
     background: linear-gradient(to right, #ed949f, #69aef3);
     clip-path: polygon(0 0, 100% 0, 90% 100%, 0% 100%);
     font-size: 62px; font-weight: 700;
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+    /* ▼▼▼ 変更点: シャドウを自然に ▼▼▼ */
+    text-shadow: 1px 1px 3px rgba(0,0,0,0.4);
     box-shadow: 5px 0px 15px rgba(0,0,0,0.4);
 }
 #ticker-header-text {
-    display: inline-block; white-space: nowrap; transform-origin: center center; padding: 0 30px;
+    display: inline-block; white-space: nowrap;
+    transform-origin: center center; /* 圧縮の基準点を中央に */
+    padding: 0 20px; /* 余白を狭く */
 }
 #ticker-clock {
     position: absolute; right: 0; top: 0; z-index: 1;
-    width: 180px; height: 100%; background: linear-gradient(to right, #ed949f, #69aef3);
+    /* ▼▼▼ 変更点: 幅を0.9倍に ▼▼▼ */
+    width: 162px; /* 180px * 0.9 = 162px */
+    height: 100%; background: linear-gradient(to right, #ed949f, #69aef3);
     color: white; display: flex; justify-content: center; align-items: center;
     font-size: 46px; font-weight: bold;
     box-shadow: -5px 0px 15px rgba(0,0,0,0.4);
@@ -80,8 +85,7 @@ body.obs-display {
 }
 #clock-live {
     font-style: italic; transform: translateX(120%);
-    /* ▼▼▼ 変更点: LIVEのサイズを1.2倍に ▼▼▼ */
-    font-size: 55px; /* 46px * 1.2 = 55.2px */
+    font-size: 55px;
 }
 #ticker-clock.show-live #clock-time { transform: translateX(-120%); }
 #ticker-clock.show-live #clock-live { transform: translateX(0); }
