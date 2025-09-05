@@ -13,7 +13,7 @@
     <div id="ticker-container" class="telop-wrapper">
         <div id="ticker-scroll-area"><span id="ticker-content" class="ticker-content"></span></div>
         <div id="ticker-header"><span id="ticker-header-text"></span></div>
-        <div id="ticker-clock"><span id="clock-time"></span><span id="clock-live">LIVE</span></div>
+        <div id="ticker-clock"><span id="clock-time"></span><span id="clock-live"><span>L</span><span>I</span><span>V</span><span>E</span></span></div>
     </div>
     <div id="breaking-container" class="telop-wrapper">
         <div id="breaking-container-inner">
@@ -35,7 +35,6 @@
         function updateClock() {
             const now = new Date(); const s = now.getSeconds();
             document.getElementById('clock-time').textContent = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
-            // ▼▼▼ 変更点: opacityではなくクラスを操作する ▼▼▼
             if (s >= 30) { tickerClock.classList.add('show-live'); } 
             else { tickerClock.classList.remove('show-live'); }
         }
@@ -50,8 +49,8 @@
 
         function updateScrollSpeed() {
             const PIXELS_PER_SECOND = 168;
-            const scrollDistance = tickerScrollArea.offsetWidth + tickerContent.offsetWidth;
-            const duration = scrollDistance / PIXELS_PER_SECOND;
+            const contentWidth = tickerContent.scrollWidth / 2; // テキストは2つ複製されているので半分の幅で計算
+            const duration = contentWidth / PIXELS_PER_SECOND;
             tickerContent.style.animationDuration = `${duration}s`;
         }
 
@@ -70,7 +69,9 @@
             } else {
                 const content = data.ticker_content || {};
                 tickerHeaderText.innerText = content.headerText || '東京株式市場';
-                tickerContent.innerText = content.scrollText || 'コメントをお待ちしています。';
+                const scrollText = content.scrollText || 'コメントをお待ちしています。';
+                // ▼▼▼ 変更点: テキストを複製してシームレスに ▼▼▼
+                tickerContent.innerText = `${scrollText}　　　${scrollText}`; 
                 breakingContainer.classList.remove('visible');
                 tickerContainer.classList.add('visible');
                 setTimeout(() => {
