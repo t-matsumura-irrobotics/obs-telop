@@ -32,6 +32,7 @@ body.obs-display {
   60% { transform: translateY(-7px); }
 }
 
+/* ▼▼▼ 変更点: 配置方法を修正 ▼▼▼ */
 .telop-wrapper {
     position: absolute; bottom: 20px; /* 画面下部から20pxの位置に配置 */
     left: 20px; right: 20px; width: auto; 
@@ -54,25 +55,24 @@ body.obs-display {
 #ticker-header {
     position: absolute; left: 0; top: 0; z-index: 1;
     width: 300px; height: 100%; color: white; display: flex;
-    justify-content: center; /* 中央揃えに変更 */
+    /* ▼▼▼ 変更点: 中央揃えに変更 ▼▼▼ */
+    justify-content: center;
     align-items: center;
     background: linear-gradient(to right, #ed949f, #69aef3);
     clip-path: polygon(0 0, 100% 0, 90% 100%, 0% 100%);
     font-size: 62px; font-weight: 700;
-    /* ▼▼▼ 変更点: シャドウを自然に ▼▼▼ */
     text-shadow: 1px 1px 3px rgba(0,0,0,0.4);
     box-shadow: 5px 0px 15px rgba(0,0,0,0.4);
 }
 #ticker-header-text {
     display: inline-block; white-space: nowrap;
-    transform-origin: center center; /* 圧縮の基準点を中央に */
-    padding: 0 20px; /* 余白を狭く */
+    /* ▼▼▼ 変更点: 圧縮の基準点を中央に ▼▼▼ */
+    transform-origin: center center;
+    padding: 0 20px;
 }
 #ticker-clock {
     position: absolute; right: 0; top: 0; z-index: 1;
-    /* ▼▼▼ 変更点: 幅を0.9倍に ▼▼▼ */
-    width: 162px; /* 180px * 0.9 = 162px */
-    height: 100%; background: linear-gradient(to right, #ed949f, #69aef3);
+    width: 162px; height: 100%; background: linear-gradient(to right, #ed949f, #69aef3);
     color: white; display: flex; justify-content: center; align-items: center;
     font-size: 46px; font-weight: bold;
     box-shadow: -5px 0px 15px rgba(0,0,0,0.4);
