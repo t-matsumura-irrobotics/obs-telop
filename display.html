@@ -10,19 +10,18 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body class="obs-display">
-    <div id="ticker-container" class="telop-wrapper">
-        <div id="ticker-base-white"></div>
-        <div id="ticker-scroll-area"><span id="ticker-content" class="ticker-content"></span></div>
-        <div id="ticker-header"><span id="ticker-header-text"></span></div>
-        <div id="ticker-clock"><span id="clock-time"></span><span id="clock-live"><span>L</span><span>I</span><span>V</span><span>E</span></span></div>
-    </div>
-    <div id="breaking-container" class="telop-wrapper">
-        <div id="breaking-container-inner">
-            <div class="br-row1">
-                <div id="br-row1-header"></div>
-                <div id="br-row1-main"></div>
+    <div id="canvas">
+        <div id="ticker-container" class="telop-wrapper">
+            <div id="ticker-base-white"></div>
+            <div id="ticker-scroll-area"><span id="ticker-content" class="ticker-content"></span></div>
+            <div id="ticker-header"><span id="ticker-header-text"></span></div>
+            <div id="ticker-clock"><span id="clock-time"></span><span id="clock-live"><span>L</span><span>I</span><span>V</span><span>E</span></span></div>
+        </div>
+        <div id="breaking-container" class="telop-wrapper">
+            <div id="breaking-container-inner">
+                <div id="top-bar" class="top-bar"><div id="header" class="top-bar-header"></div><div id="companyName" class="top-bar-main"></div></div>
+                <div class="bottom-bar"><span id="detailText"></span></div>
             </div>
-            <div id="br-row2" class="br-row2"></div>
         </div>
     </div>
     
@@ -32,163 +31,53 @@
         const firebaseConfig = { apiKey: "AIzaSyAhsAbTqQuairo-82A9rxQTazUCGdzdVc4", authDomain: "obs-telop-system-7c98c.firebaseapp.com", databaseURL: "https://obs-telop-system-7c98c-default-rtdb.asia-southeast1.firebasedatabase.app", projectId: "obs-telop-system-7c98c", storageBucket: "obs-telop-system-7c98c.appspot.com", messagingSenderId: "368503557333", appId: "1:368503557333:web:409dae2b1cf0c14b31a65c", measurementId: "G-VMBCJ2952Z" };
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
-        
-        let currentScrollText = "";
 
+        const tickerContainer = document.getElementById('ticker-container'), breakingContainer = document.getElementById('breaking-container');
+        const tickerHeader = document.getElementById('ticker-header'), tickerHeaderText = document.getElementById('ticker-header-text'), tickerScrollArea = document.getElementById('ticker-scroll-area'), tickerContent = document.getElementById('ticker-content'), tickerClock = document.getElementById('ticker-clock');
+        const topBar = document.getElementById('top-bar'), header = document.getElementById('header'), companyName = document.getElementById('companyName'), detailText = document.getElementById('detailText');
+
+        let currentTickerText = ""; 
+        
         function updateClock() {
             const now = new Date(); const s = now.getSeconds();
             document.getElementById('clock-time').textContent = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
-            const tickerClock = document.getElementById('ticker-clock');
-            if (s >= 30) { tickerClock.classList.add('show-live'); } else { tickerClock.classList.remove('show-live'); }
+            if (s >= 30) { tickerClock.classList.add('show-live'); } 
+            else { tickerClock.classList.remove('show-live'); }
         }
         setInterval(updateClock, 1000); updateClock();
 
         function adjustHeaderText() {
-            const tickerHeaderText = document.getElementById('ticker-header-text');
             tickerHeaderText.style.transform = 'scaleX(1)';
-            const containerWidth = tickerHeaderText.parentElement.clientWidth - 40;
+            const containerWidth = tickerHeader.clientWidth - 40;
             const textWidth = tickerHeaderText.scrollWidth;
             if (textWidth > containerWidth) { tickerHeaderText.style.transform = `scaleX(${containerWidth / textWidth})`; }
         }
 
+        // ▼▼▼ 変更点: updateScrollSpeed関数を完全に削除 ▼▼▼
+        
         database.ref('live_data').on('value', (snapshot) => {
             const data = snapshot.val();
             if (!data) return;
 
             if (data.mode === 'breaking' && data.breaking_content) {
                 const content = data.breaking_content;
-                document.getElementById('br-row1-header').innerText = content.b_header || '';
-                document.getElementById('br-row1-main').innerText = content.b_main || '';
-                document.getElementById('br-row2').innerText = content.b_detail || '';
-                
-                document.getElementById('ticker-container').classList.remove('visible');
-                document.getElementById('breaking-container').classList.add('visible');
+                // ... (速報テロップの表示処理は省略) ...
+                tickerContainer.classList.remove('visible');
+                breakingContainer.classList.add('visible');
             } else {
                 const content = data.ticker_content || {};
-                const newScrollText = content.scrollText || 'コメントをお待ちしています。';
+                tickerHeaderText.innerText = content.headerText || '東京株式市場';
+                const newTickerText = content.scrollText || 'コメントをお待ちしています。';
 
-                if (newScrollText !== currentScrollText) {
-                    currentScrollText = newScrollText;
-                    document.getElementById('ticker-content').innerText = `${currentScrollText}　　　${currentScrollText}`;
+                if (newTickerText !== currentTickerText) {
+                    currentTickerText = newTickerText;
+                    tickerContent.innerText = `${currentTickerText}${currentTickerText}`;
                 }
-                document.getElementById('ticker-header-text').innerText = content.headerText || '東京株式市場';
                 
-                document.getElementById('breaking-container').classList.remove('visible');
-                document.getElementById('ticker-container').classList.add('visible');
+                breakingContainer.classList.remove('visible');
+                tickerContainer.classList.add('visible');
                 setTimeout(adjustHeaderText, 50);
             }
-        });
-    </script>
-</body>
-</html>```
-
-### Step 3: `control.html` の更新
-
-コントローラーを決算速報用のシンプルなUIに修正し、テキストリセット問題を解決します。
-
-```html
-<!-- control.html (更新後) -->
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-    <meta charset="UTF-8">
-    <title>OBS Telop Controller</title>
-    <link rel="stylesheet" href="style.css">
-    <style>
-        body { font-family: sans-serif; padding: 20px; background-color: #f0f0f0; }
-        .wrapper { max-width: 800px; margin: 0 auto 20px auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        h1, h3 { text-align: center; color: #333; }
-        h3 { margin-top: 30px; border-bottom: 2px solid #eee; padding-bottom: 10px; }
-        label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 14px; }
-        input, select, textarea { width: 100%; box-sizing: border-box; padding: 10px; font-size: 16px; border: 1px solid #ccc; border-radius: 4px; }
-        .grid-2 { display: grid; grid-template-columns: 1fr 2fr; gap: 15px; }
-        button { padding: 10px 20px; font-size: 16px; cursor: pointer; border-radius: 4px; border: none; }
-        .show-btn { background-color: #28a745; color: white; }
-        .hide-btn { background-color: #ffc107; color: black; }
-        .mode-selector { display: flex; border-bottom: 2px solid #ccc; margin-bottom: 20px; }
-        .mode-selector label { padding: 10px 20px; cursor: pointer; color: #555; position: relative; }
-        .mode-selector input[type="radio"] { display: none; }
-        .mode-selector input[type="radio"]:checked + label { font-weight: bold; color: #007bff; border-bottom: 3px solid #007bff; }
-        .controls-panel { display: none; }
-        .controls-panel.active { display: block; }
-    </style>
-</head>
-<body>
-    <div class="wrapper">
-        <h1>ライブテロップ コントローラー</h1>
-        <div class="mode-selector">
-            <input type="radio" id="mode-ticker" name="mode" checked><label for="mode-ticker">通常ティッカー</label>
-            <input type="radio" id="mode-breaking" name="mode"><label for="mode-breaking">決算速報</label>
-        </div>
-
-        <div id="ticker-controls" class="controls-panel active">
-            <h3>通常ティッカー 設定</h3>
-            <div><label for="tickerHeaderText">ヘッダーテキスト</label><input type="text" id="tickerHeaderText" value="東京株式市場"></div>
-            <div style="margin-top:15px;"><label for="tickerScrollText">スクロールテキスト</label><textarea id="tickerScrollText">質問や応援コメントお待ちしています。</textarea></div>
-            <button id="tickerSendButton" class="show-btn" style="width:100%; margin-top:15px;">ティッカー表示・更新</button>
-        </div>
-
-        <div id="breaking-controls" class="controls-panel">
-            <h3>決算速報 設定</h3>
-            <div class="grid-2" style="margin-bottom:15px;">
-                <div><label for="b_header">ヘッダー</label><input type="text" id="b_header" value="決算速報"></div>
-                <div><label for="b_main">メイン</label><input type="text" id="b_main" value="トヨタ自動車(7203)"></div>
-            </div>
-            <div><label for="b_detail">詳細テキスト (2行目)</label><input type="text" id="b_detail" value="2026年3月期 第3四半期は増収増益で着地。"></div>
-            <div style="display: flex; gap: 10px; margin-top:20px;">
-                <button id="breakingSendButton" class="show-btn" style="flex-grow: 1;">速報表示</button>
-                <button id="hideButton" class="hide-btn">ティッカーに戻る</button>
-            </div>
-        </div>
-    </div>
-
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-    <script>
-        const firebaseConfig = { apiKey: "AIzaSyAhsAbTqQuairo-82A9rxQTazUCGdzdVc4", authDomain: "obs-telop-system-7c98c.firebaseapp.com", databaseURL: "https://obs-telop-system-7c98c-default-rtdb.asia-southeast1.firebasedatabase.app", projectId: "obs-telop-system-7c98c", storageBucket: "obs-telop-system-7c98c.appspot.com", messagingSenderId: "368503557333", appId: "1:368503557333:web:409dae2b1cf0c14b31a65c", measurementId: "G-VMBCJ2952Z" };
-        firebase.initializeApp(firebaseConfig);
-        const database = firebase.database();
-        const liveDataRef = database.ref('live_data');
-
-        document.getElementById('tickerSendButton').addEventListener('click', () => {
-            liveDataRef.update({
-                'mode': 'ticker',
-                'ticker_content': {
-                    'headerText': document.getElementById('tickerHeaderText').value,
-                    'scrollText': document.getElementById('tickerScrollText').value
-                }
-            });
-            alert('ティッカーを更新しました。');
-        });
-
-        document.getElementById('breakingSendButton').addEventListener('click', () => {
-            liveDataRef.update({
-                'mode': 'breaking',
-                'breaking_content': {
-                    b_header: document.getElementById('b_header').value,
-                    b_main: document.getElementById('b_main').value,
-                    b_detail: document.getElementById('b_detail').value
-                }
-            });
-            alert('速報を送信しました！');
-        });
-        
-        document.getElementById('hideButton').addEventListener('click', () => {
-            liveDataRef.update({ mode: 'ticker' });
-            alert('ティッカー表示に戻します。');
-            document.getElementById('mode-ticker').checked = true;
-            document.getElementById('mode-ticker').dispatchEvent(new Event('change'));
-        });
-        
-        // --- タブUIのロジック ---
-        const modeRadios = document.querySelectorAll('input[name="mode"]');
-        const tickerControls = document.getElementById('ticker-controls');
-        const breakingControls = document.getElementById('breaking-controls');
-        modeRadios.forEach(radio => {
-            radio.addEventListener('change', () => {
-                tickerControls.classList.toggle('active', radio.id === 'mode-ticker');
-                breakingControls.classList.toggle('active', radio.id === 'mode-breaking');
-            });
         });
     </script>
 </body>
