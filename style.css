@@ -1,3 +1,4 @@
+/* style.css (最終修正版) */
 @import url('https://fonts.googleapis.com/css2?family=Anton&display=swap');
 @font-face {
     font-family: 'LINE Seed JP';
@@ -48,7 +49,8 @@ html, body.obs-display {
     box-shadow: 5px 0px 15px rgba(0,0,0,0.4);
 }
 #ticker-header-text {
-    display: inline-block; white-space: nowrap; transform-origin: center center; padding: 0 15px;
+    display: inline-block; white-space: nowrap; transform-origin: center center;
+    padding: 0 15px;
 }
 #ticker-clock {
     position: absolute; right: 0; top: 0; z-index: 2;
@@ -65,11 +67,11 @@ html, body.obs-display {
     line-height: 96px;
 }
 .ticker-content {
-    display: inline-block;
-    font-size: 40px; font-weight: 400; letter-spacing: -0.05em;
+    display: inline-block; font-size: 40px; font-weight: 400; letter-spacing: -0.05em;
     color: #000;
     white-space: nowrap;
     vertical-align: middle;
+    /* ▼▼▼ 変更点: 固定のアニメーション時間（30秒で1周）を指定 ▼▼▼ */
     animation: seamless-scroll 30s linear infinite;
 }
 #clock-time, #clock-live {
@@ -90,6 +92,7 @@ html, body.obs-display {
 #clock-live span:nth-child(3) { animation-delay: 0.3s; }
 #clock-live span:nth-child(4) { animation-delay: 0.4s; }
 
+/* --- 速報テロップ --- */
 #breaking-container { height: auto; }
 #breaking-container-inner { box-shadow: 0 6px 15px rgba(0,0,0,0.3); border-radius: 8px; overflow: hidden; }
 .top-bar { display: flex; font-size: 65px; align-items: center; height: 118px; }

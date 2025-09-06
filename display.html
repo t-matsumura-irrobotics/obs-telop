@@ -1,4 +1,4 @@
-<!-- display.html (最終確定版) -->
+<!-- display.html (最終修正版) -->
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -11,8 +11,7 @@
 </head>
 <body class="obs-display">
     <div id="canvas">
-        <!-- ▼▼▼ 変更点: 最初から 'visible' クラスを追加 ▼▼▼ -->
-        <div id="ticker-container" class="telop-wrapper visible">
+        <div id="ticker-container" class="telop-wrapper">
             <div id="ticker-base-white"></div>
             <div id="ticker-scroll-area"><span id="ticker-content" class="ticker-content"></span></div>
             <div id="ticker-header"><span id="ticker-header-text"></span></div>
@@ -37,6 +36,7 @@
         const tickerHeader = document.getElementById('ticker-header'), tickerHeaderText = document.getElementById('ticker-header-text'), tickerScrollArea = document.getElementById('ticker-scroll-area'), tickerContent = document.getElementById('ticker-content'), tickerClock = document.getElementById('ticker-clock');
         const topBar = document.getElementById('top-bar'), header = document.getElementById('header'), companyName = document.getElementById('companyName'), detailText = document.getElementById('detailText');
 
+        // ▼▼▼ 変更点: 現在のテキストを保存する変数を追加 ▼▼▼
         let currentTickerText = ""; 
         
         function updateClock() {
@@ -54,6 +54,8 @@
             if (textWidth > containerWidth) { tickerHeaderText.style.transform = `scaleX(${containerWidth / textWidth})`; }
         }
 
+        // ▼▼▼ 変更点: updateScrollSpeed関数を完全に削除 ▼▼▼
+        
         database.ref('live_data').on('value', (snapshot) => {
             const data = snapshot.val();
             if (!data) return;
@@ -72,8 +74,9 @@
                 tickerHeaderText.innerText = content.headerText || '東京株式市場';
                 const newTickerText = content.scrollText || 'コメントをお待ちしています。';
 
+                // ▼▼▼ 変更点: テキストが本当に変更された時だけDOMを書き換える ▼▼▼
                 if (newTickerText !== currentTickerText) {
-                    currentTickerText = newTickerText;
+                    currentTickerText = newTickerText; // 新しいテキストを記憶
                     tickerContent.innerText = `${currentTickerText}${currentTickerText}`;
                 }
                 
