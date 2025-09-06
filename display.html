@@ -1,4 +1,4 @@
-<!-- display.html (更新後) -->
+<!-- display.html (最終修正版) -->
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -36,6 +36,9 @@
         const tickerHeader = document.getElementById('ticker-header'), tickerHeaderText = document.getElementById('ticker-header-text'), tickerScrollArea = document.getElementById('ticker-scroll-area'), tickerContent = document.getElementById('ticker-content'), tickerClock = document.getElementById('ticker-clock');
         const topBar = document.getElementById('top-bar'), header = document.getElementById('header'), companyName = document.getElementById('companyName'), detailText = document.getElementById('detailText');
 
+        // ▼▼▼ 変更点: 現在のテキストを保存する変数を追加 ▼▼▼
+        let currentTickerText = ""; 
+        
         function updateClock() {
             const now = new Date(); const s = now.getSeconds();
             document.getElementById('clock-time').textContent = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
@@ -51,11 +54,10 @@
             if (textWidth > containerWidth) { tickerHeaderText.style.transform = `scaleX(${containerWidth / textWidth})`; }
         }
 
-        // ▼▼▼ 変更点: updateScrollSpeed関数を完全に削除 ▼▼▼
-        
         database.ref('live_data').on('value', (snapshot) => {
             const data = snapshot.val();
             if (!data) return;
+
             if (data.mode === 'breaking' && data.breaking_content) {
                 const content = data.breaking_content;
                 topBar.className = 'top-bar ' + (content.themeColor || 'theme-yellow');
@@ -68,14 +70,17 @@
             } else {
                 const content = data.ticker_content || {};
                 tickerHeaderText.innerText = content.headerText || '東京株式市場';
-                const scrollText = content.scrollText || 'コメントをお待ちしています。';
-                tickerContent.innerText = `${scrollText}${scrollText}`;
+                const newTickerText = content.scrollText || 'コメントをお待ちしています。';
+
+                // ▼▼▼ 変更点: テキストが本当に変更された時だけDOMを書き換える ▼▼▼
+                if (newTickerText !== currentTickerText) {
+                    currentTickerText = newTickerText; // 新しいテキストを記憶
+                    tickerContent.innerText = `${currentTickerText}${currentTickerText}`; // 複製して切れ目なく表示
+                }
+                
                 breakingContainer.classList.remove('visible');
                 tickerContainer.classList.add('visible');
-                setTimeout(() => {
-                    adjustHeaderText();
-                    // スクロール速度の計算呼び出しも削除
-                }, 50);
+                setTimeout(adjustHeaderText, 50);
             }
         });
     </script>
