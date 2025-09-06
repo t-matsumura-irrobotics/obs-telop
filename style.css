@@ -11,7 +11,7 @@
     font-weight: 700; /* bold */
 }
 
-html, body.obs-display {
+html, body {
     margin: 0; padding: 0; overflow: hidden;
     font-family: 'LINE Seed JP', sans-serif;
     height: 100%; width: 100%;
@@ -29,17 +29,20 @@ html, body.obs-display {
 /* --- コンテナと表示制御 --- */
 .telop-wrapper {
     position: absolute; bottom: 20px; left: 20px; right: 20px;
-    height: 96px; /* ティッカー全体の高さを定義 */
-    opacity: 0; transition: opacity 0.4s ease-out;
+    opacity: 0; transition: opacity 0.4s ease-out; display: none;
 }
-.telop-wrapper.visible { opacity: 1; }
+.telop-wrapper.visible { opacity: 1; display: block; }
 
 /* --- 新しいティッカーのレイヤー構造 --- */
+#ticker-container {
+    height: 96px; border-radius: 10px;
+    overflow: hidden; /* 角丸を適用 */
+}
 #ticker-base-white {
-    width: 100%; height: 100%; background-color: white; border-radius: 10px;
+    width: 100%; height: 100%; background-color: white;
 }
 #ticker-header {
-    position: absolute; left: 0; top: 0; z-index: 2; /* 最上層 */
+    position: absolute; left: 0; top: 0; z-index: 2;
     width: 300px; height: 100%; color: white; display: flex;
     justify-content: center; align-items: center;
     background: linear-gradient(to right, #ed949f, #69aef3);
@@ -52,7 +55,7 @@ html, body.obs-display {
     display: inline-block; white-space: nowrap; transform-origin: center center; padding: 0 20px;
 }
 #ticker-clock {
-    position: absolute; right: 0; top: 0; z-index: 2; /* 最上層 */
+    position: absolute; right: 0; top: 0; z-index: 2;
     width: 162px; height: 100%; background: linear-gradient(to right, #ed949f, #69aef3);
     color: white; display: flex; justify-content: center; align-items: center;
     font-size: 46px; font-weight: bold;
@@ -60,14 +63,15 @@ html, body.obs-display {
     overflow: hidden;
 }
 #ticker-scroll-area {
-    position: absolute; left: 0; top: 0; z-index: 1; /* 中間層 */
+    position: absolute; left: 0; top: 0; z-index: 1;
     width: 100%; height: 100%;
     overflow: hidden; white-space: nowrap; display: flex; align-items: center;
 }
 .ticker-content {
     display: inline-block; font-size: 40px; font-weight: 400; letter-spacing: -0.05em;
-    animation: seamless-scroll linear infinite;
-    padding-left: 100%; /*
+    color: #000; /* 文字色を再指定 */
+    animation: seamless-scroll 25s linear infinite;
+    padding-left: 100%;
 }
 #clock-time, #clock-live {
     position: absolute; font-family: 'Anton', sans-serif; letter-spacing: 0.05em;
@@ -87,8 +91,8 @@ html, body.obs-display {
 #clock-live span:nth-child(3) { animation-delay: 0.3s; }
 #clock-live span:nth-child(4) { animation-delay: 0.4s; }
 
-/* --- 速報テロップ (位置は.telop-wrapperで指定) --- */
-#breaking-container { height: auto; } /* 高さを自動調整 */
+/* --- 速報テロップ --- */
+#breaking-container { height: auto; }
 #breaking-container-inner { box-shadow: 0 6px 15px rgba(0,0,0,0.3); border-radius: 10px; overflow: hidden; }
 .top-bar { display: flex; font-size: 65px; align-items: center; height: 118px; }
 .top-bar-header { background-color: #ffffff; padding: 0 38px; white-space: nowrap; border-right: 3px solid rgba(0, 0, 0, 0.15); font-weight: bold; font-size: 94px; }
