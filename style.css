@@ -13,16 +13,28 @@
     font-weight: 700; /* bold */
 }
 
-/* ▼▼▼ 変更点: test.htmlと同じ確実な配置方法に変更 ▼▼▼ */
+/* ▼▼▼ 変更点: Flexboxを使った確実な配置方法に変更 ▼▼▼ */
 html, body.obs-display {
     margin: 0; padding: 0; overflow: hidden;
     font-family: 'LINE Seed JP', sans-serif;
     height: 100%; width: 100%;
 }
 #fixed-container {
-    position: relative;
     width: 1920px;
     height: 1080px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end; /* これがコンテンツを下端に寄せる命令です */
+}
+.telop-wrapper {
+    margin: 0 20px 20px 20px; /* 上左右下のマージンを設定 */
+    opacity: 0;
+    transition: opacity 0.4s ease-out;
+    display: none; /* 初期状態では非表示 */
+}
+.telop-wrapper.visible {
+    opacity: 1;
+    display: block; /* 表示する */
 }
 /* ▲▲▲ 変更ここまで ▲▲▲ */
 
@@ -32,13 +44,6 @@ html, body.obs-display {
   40% { transform: translateY(-15px); }
   60% { transform: translateY(-7px); }
 }
-
-.telop-wrapper {
-    position: absolute; bottom: 20px;
-    left: 20px; right: 20px; width: auto; 
-    opacity: 0; transition: opacity 0.4s ease-out;
-}
-.telop-wrapper.visible { opacity: 1; }
 
 #ticker-container {
     height: 96px; position: relative; border-radius: 10px; overflow: hidden;
