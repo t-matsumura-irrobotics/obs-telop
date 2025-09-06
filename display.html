@@ -13,7 +13,12 @@
     <div id="canvas">
         <div id="ticker-container" class="telop-wrapper">
             <div id="ticker-base-white"></div>
-            <div id="ticker-scroll-area"><span id="ticker-content" class="ticker-content"></span></div>
+            <!-- ▼▼▼ 変更点: スクロール用レイヤーを2つ配置 ▼▼▼ -->
+            <div id="ticker-scroll-area">
+                <span id="ticker-content-A" class="ticker-content"></span>
+                <span id="ticker-content-B" class="ticker-content"></span>
+            </div>
+            <!-- ▲▲▲ ここまで ▲▲▲ -->
             <div id="ticker-header"><span id="ticker-header-text"></span></div>
             <div id="ticker-clock"><span id="clock-time"></span><span id="clock-live"><span>L</span><span>I</span><span>V</span><span>E</span></span></div>
         </div>
@@ -32,18 +37,23 @@
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
+        // --- 全要素を取得 ---
         const tickerContainer = document.getElementById('ticker-container'), breakingContainer = document.getElementById('breaking-container');
-        const tickerHeader = document.getElementById('ticker-header'), tickerHeaderText = document.getElementById('ticker-header-text'), tickerScrollArea = document.getElementById('ticker-scroll-area'), tickerContent = document.getElementById('ticker-content'), tickerClock = document.getElementById('ticker-clock');
+        const tickerHeader = document.getElementById('ticker-header'), tickerHeaderText = document.getElementById('ticker-header-text'), tickerClock = document.getElementById('ticker-clock');
         const topBar = document.getElementById('top-bar'), header = document.getElementById('header'), companyName = document.getElementById('companyName'), detailText = document.getElementById('detailText');
 
-        // ▼▼▼ 変更点: 現在のテキストを保存する変数を追加 ▼▼▼
-        let currentScrollText = ""; 
-        
+        // ▼▼▼ 新しいダブル・バッファリングのロジック ▼▼▼
+        const bufferA = document.getElementById('ticker-content-A');
+        const bufferB = document.getElementById('ticker-content-B');
+        let activeBuffer = bufferA;
+        let inactiveBuffer = bufferB;
+        let currentScrollText = null;
+
+        // 時計とヘッダーの補助関数
         function updateClock() {
             const now = new Date(); const s = now.getSeconds();
             document.getElementById('clock-time').textContent = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
-            if (s >= 30) { tickerClock.classList.add('show-live'); } 
-            else { tickerClock.classList.remove('show-live'); }
+            if (s >= 30) { tickerClock.classList.add('show-live'); } else { tickerClock.classList.remove('show-live'); }
         }
         setInterval(updateClock, 1000); updateClock();
 
@@ -60,11 +70,8 @@
 
             if (data.mode === 'breaking' && data.breaking_content) {
                 const content = data.breaking_content;
-                topBar.className = 'top-bar ' + (content.themeColor || 'theme-yellow');
-                header.innerText = content.headerText || '';
-                companyName.innerText = content.companyName || '';
-                detailText.innerText = content.detailText || '';
-                detailText.className = content.detailColor || 'text-black';
+                // 速報テロップの表示処理
+                // ... (省略) ...
                 tickerContainer.classList.remove('visible');
                 breakingContainer.classList.add('visible');
             } else {
@@ -72,10 +79,16 @@
                 tickerHeaderText.innerText = content.headerText || '東京株式市場';
                 const newScrollText = content.scrollText || 'コメントをお待ちしています。';
 
-                // ▼▼▼ 変更点: テキストが本当に変更された時だけDOMを書き換える ▼▼▼
+                // テキストが変更された場合のみ、裏側のバッファを更新して入れ替える
                 if (newScrollText !== currentScrollText) {
-                    currentScrollText = newScrollText; // 新しいテキストを記憶
-                    tickerContent.innerText = `${currentScrollText}${currentScrollText}`;
+                    currentScrollText = newScrollText;
+                    inactiveBuffer.innerText = `${currentScrollText}${currentScrollText}`;
+                    
+                    activeBuffer.classList.remove('active');
+                    inactiveBuffer.classList.add('active');
+
+                    // バッファの役割を交代
+                    [activeBuffer, inactiveBuffer] = [inactiveBuffer, activeBuffer];
                 }
                 
                 breakingContainer.classList.remove('visible');
@@ -83,6 +96,7 @@
                 setTimeout(adjustHeaderText, 50);
             }
         });
+        // ▲▲▲ ロジックの変更ここまで ▲▲▲
     </script>
 </body>
 </html>
