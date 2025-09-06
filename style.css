@@ -26,19 +26,17 @@ html, body.obs-display {
   60% { transform: translateY(-7px); }
 }
 
-/* --- コンテナと表示制御 --- */
 .telop-wrapper {
     position: absolute; bottom: 20px; left: 20px; right: 20px;
     opacity: 0; transition: opacity 0.4s ease-out; display: none;
 }
 .telop-wrapper.visible { opacity: 1; display: block; }
 
-/* --- 新しいティッカーのレイヤー構造 --- */
 #ticker-container {
-    height: 96px; /* 80px * 1.2 */
+    height: 96px; border-radius: 8px; overflow: hidden;
 }
 #ticker-base-white {
-    width: 100%; height: 100%; background-color: white; border-radius: 8px; /* 角丸 */
+    width: 100%; height: 100%; background-color: white;
 }
 #ticker-header {
     position: absolute; left: 0; top: 0; z-index: 2;
@@ -46,32 +44,36 @@ html, body.obs-display {
     justify-content: center; align-items: center;
     background: linear-gradient(to right, #ed949f, #69aef3);
     clip-path: polygon(0 0, 100% 0, 90% 100%, 0% 100%);
-    font-size: 62px; font-weight: 700;
+    /* ▼▼▼ 変更点: サイズを0.9倍に ▼▼▼ */
+    font-size: 56px; /* 62px * 0.9 = 55.8px */
+    font-weight: 700;
     text-shadow: 1px 1px 3px rgba(0,0,0,0.4);
     box-shadow: 5px 0px 15px rgba(0,0,0,0.4);
 }
 #ticker-header-text {
-    display: inline-block; white-space: nowrap; transform-origin: center center; padding: 0 20px;
+    display: inline-block; white-space: nowrap; transform-origin: center center;
+    /* ▼▼▼ 変更点: 余白を調整 ▼▼▼ */
+    padding: 0 25px;
 }
 #ticker-clock {
     position: absolute; right: 0; top: 0; z-index: 2;
     width: 162px; height: 100%; background: linear-gradient(to right, #ed949f, #69aef3);
     color: white; display: flex; justify-content: center; align-items: center;
-    font-size: 55px; /* 46px * 1.2 = 55.2px */
-    font-weight: bold;
+    font-size: 46px; font-weight: bold;
     box-shadow: -5px 0px 15px rgba(0,0,0,0.4);
     overflow: hidden;
 }
 #ticker-scroll-area {
     position: absolute; left: 0; top: 0; z-index: 1;
     width: 100%; height: 100%;
-    overflow: hidden; white-space: nowrap; display: flex; align-items: center;
-    color: #000;
+    overflow: hidden; display: flex; align-items: center;
 }
 .ticker-content {
     display: inline-block; font-size: 40px; font-weight: 400; letter-spacing: -0.05em;
+    color: #000;
     animation: seamless-scroll 25s linear infinite;
-    padding-left: 0; /* paddingをリセット */
+    /* ▼▼▼ 変更点: 改行を強制的に禁止する ▼▼▼ */
+    white-space: nowrap;
 }
 #clock-time, #clock-live {
     position: absolute; font-family: 'Anton', sans-serif; letter-spacing: 0.05em;
