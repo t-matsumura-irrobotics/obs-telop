@@ -17,15 +17,16 @@
             <div id="ticker-header"><span id="ticker-header-text"></span></div>
             <div id="ticker-clock"><span id="clock-time"></span><span id="clock-live"><span>L</span><span>I</span><span>V</span><span>E</span></span></div>
         </div>
-        
-        <!-- ▼▼▼ 新しい速報のHTML構造 ▼▼▼ -->
         <div id="breaking-container" class="telop-wrapper">
             <div id="breaking-container-inner">
-                <div class="br-row1">
-                    <div id="br-row1-header" class="br-row1-header"></div>
-                    <div id="br-row1-main" class="br-row1-main"></div>
+                <!-- ▼▼▼ 変更点: 速報テロップの構造を元に戻す ▼▼▼ -->
+                <div class="top-bar">
+                    <div id="br-top-header" class="top-bar-header"></div>
+                    <div id="br-top-main" class="top-bar-main"></div>
                 </div>
-                <div id="br-row2" class="br-row2"></div>
+                <div class="bottom-bar">
+                    <span id="br-bottom-text"></span>
+                </div>
             </div>
         </div>
     </div>
@@ -38,7 +39,7 @@
         const database = firebase.database();
         
         let currentScrollText = "";
-
+        
         // ... (時計、ヘッダー長体処理の補助関数は変更なし) ...
 
         database.ref('live_data').on('value', (snapshot) => {
@@ -47,23 +48,35 @@
 
             if (data.mode === 'breaking' && data.breaking_content) {
                 const content = data.breaking_content;
-                document.getElementById('br-row1-header').innerText = content.b_header || '';
-                document.getElementById('br-row1-main').innerText = content.b_main || '';
-                document.getElementById('br-row2').innerText = content.b_detail || '';
-                
+                document.getElementById('br-top-header').innerText = content.b_header || '';
+                document.getElementById('br-top-main').innerText = content.b_main || '';
+                document.getElementById('br-bottom-text').innerText = content.b_detail || '';
+                document.getElementById('br-top-main').parentElement.className = 'top-bar ' + (content.b_theme || 'theme-yellow');
+
                 document.getElementById('ticker-container').classList.remove('visible');
                 document.getElementById('breaking-container').classList.add('visible');
             } else {
-                // (通常ティッカーの処理は変更なし)
+                const content = data.ticker_content || {};
+                const newScrollText = content.scrollText || 'コメントをお待ちしています。';
+
+                if (newScrollText !== currentScrollText) {
+                    currentScrollText = newScrollText;
+                    document.getElementById('ticker-content').innerText = `${currentScrollText}　　　${currentScrollText}`;
+                }
+                document.getElementById('ticker-header-text').innerText = content.headerText || '東京株式市場';
+                
+                document.getElementById('breaking-container').classList.remove('visible');
+                document.getElementById('ticker-container').classList.add('visible');
+                setTimeout(adjustHeaderText, 50);
             }
         });
-        
-        // (関数定義はここに移動)
+
+        // ... (関数の定義は省略)
         function updateClock() {
             const now = new Date(); const s = now.getSeconds();
             document.getElementById('clock-time').textContent = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
-            if (s >= 30) { tickerClock.classList.add('show-live'); } 
-            else { tickerClock.classList.remove('show-live'); }
+            const tickerClock = document.getElementById('ticker-clock');
+            if (s >= 30) { tickerClock.classList.add('show-live'); } else { tickerClock.classList.remove('show-live'); }
         }
         setInterval(updateClock, 1000); updateClock();
 
@@ -80,7 +93,7 @@
 
 ### Step 3: `control.html` の更新
 
-コントローラーの速報セクションを、新しいデザインに合わせて全面的に作り直します。
+コントローラーを元の「決算速報」用のシンプルなUIに戻します。
 
 ```html
 <!-- control.html (更新後) -->
@@ -97,7 +110,7 @@
         h3 { margin-top: 30px; border-bottom: 2px solid #eee; padding-bottom: 10px; }
         label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 14px; }
         input, select, textarea { width: 100%; box-sizing: border-box; padding: 10px; font-size: 16px; border: 1px solid #ccc; border-radius: 4px; }
-        .grid-2 { display: grid; grid-template-columns: 1fr 2fr; gap: 15px; }
+        .grid-2 { display: grid; grid-template-columns: 1fr 2fr; gap: 15px; align-items: flex-end; }
         button { padding: 10px 20px; font-size: 16px; cursor: pointer; border-radius: 4px; border: none; }
         .show-btn { background-color: #28a745; color: white; }
         .hide-btn { background-color: #ffc107; color: black; }
@@ -119,64 +132,4 @@
 
         <div id="ticker-controls" class="controls-panel active">
             <h3>通常ティッカー 設定</h3>
-            <div><label for="tickerHeaderText">ヘッダーテキスト</label><input type="text" id="tickerHeaderText" value="東京株式市場"></div>
-            <div><label for="tickerScrollText">スクロールテキスト</label><textarea id="tickerScrollText">質問や応援コメントお待ちしています。</textarea></div>
-            <button id="tickerSendButton" class="show-btn" style="width:100%; margin-top:15px;">ティッカー表示・更新</button>
-        </div>
-
-        <div id="breaking-controls" class="controls-panel">
-            <h3>決算速報 設定</h3>
-            <div class="grid-2" style="margin-bottom:15px;">
-                <div><label for="b_header">ヘッダー</label><input type="text" id="b_header" value="決算速報"></div>
-                <div><label for="b_main">メイン</label><input type="text" id="b_main" value="トヨタ自動車 (7203)"></div>
-            </div>
-            <div><label for="b_detail">詳細テキスト (2行目)</label><input type="text" id="b_detail" value="2026年3月期 第3四半期は増収増益で着地。"></div>
-            <div style="display: flex; gap: 10px; margin-top:20px;">
-                <button id="breakingSendButton" class="show-btn" style="flex-grow: 1;">速報表示</button>
-                <button id="hideButton" class="hide-btn">ティッカーに戻る</button>
-            </div>
-        </div>
-    </div>
-
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-    <script>
-        const firebaseConfig = { apiKey: "AIzaSyAhsAbTqQuairo-82A9rxQTazUCGdzdVc4", authDomain: "obs-telop-system-7c98c.firebaseapp.com", databaseURL: "https://obs-telop-system-7c98c-default-rtdb.asia-southeast1.firebasedatabase.app", projectId: "obs-telop-system-7c98c", storageBucket: "obs-telop-system-7c98c.appspot.com", messagingSenderId: "368503557333", appId: "1:368503557333:web:409dae2b1cf0c14b31a65c", measurementId: "G-VMBCJ2952Z" };
-        firebase.initializeApp(firebaseConfig);
-        const database = firebase.database();
-        const liveDataRef = database.ref('live_data');
-
-        // ... (タブUIのロジックは変更なし) ...
-
-        document.getElementById('tickerSendButton').addEventListener('click', () => {
-            liveDataRef.update({
-                'mode': 'ticker',
-                'ticker_content': {
-                    'headerText': document.getElementById('tickerHeaderText').value,
-                    'scrollText': document.getElementById('tickerScrollText').value
-                }
-            });
-            alert('ティッカーを更新しました。');
-        });
-
-        document.getElementById('breakingSendButton').addEventListener('click', () => {
-            liveDataRef.update({
-                'mode': 'breaking',
-                'breaking_content': {
-                    b_header: document.getElementById('b_header').value,
-                    b_main: document.getElementById('b_main').value,
-                    b_detail: document.getElementById('b_detail').value
-                }
-            });
-            alert('速報を送信しました！');
-        });
-        
-        document.getElementById('hideButton').addEventListener('click', () => {
-            liveDataRef.update({ mode: 'ticker' });
-            alert('ティッカー表示に戻します。');
-            document.getElementById('mode-ticker').checked = true;
-            document.getElementById('mode-ticker').dispatchEvent(new Event('change'));
-        });
-    </script>
-</body>
-</html>
+            <div><label for="tickerHeaderText">ヘッダーテキスト</label><input type="text" id="tickerHe
