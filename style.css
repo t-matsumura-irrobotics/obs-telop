@@ -49,8 +49,7 @@ html, body.obs-display {
     box-shadow: 5px 0px 15px rgba(0,0,0,0.4);
 }
 #ticker-header-text {
-    display: inline-block; white-space: nowrap; transform-origin: center center;
-    padding: 0 15px;
+    display: inline-block; white-space: nowrap; transform-origin: center center; padding: 0 15px;
 }
 #ticker-clock {
     position: absolute; right: 0; top: 0; z-index: 2;

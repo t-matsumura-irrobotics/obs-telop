@@ -37,7 +37,7 @@
         const topBar = document.getElementById('top-bar'), header = document.getElementById('header'), companyName = document.getElementById('companyName'), detailText = document.getElementById('detailText');
 
         // ▼▼▼ 変更点: 現在のテキストを保存する変数を追加 ▼▼▼
-        let currentTickerText = ""; 
+        let currentScrollText = ""; 
         
         function updateClock() {
             const now = new Date(); const s = now.getSeconds();
@@ -54,8 +54,6 @@
             if (textWidth > containerWidth) { tickerHeaderText.style.transform = `scaleX(${containerWidth / textWidth})`; }
         }
 
-        // ▼▼▼ 変更点: updateScrollSpeed関数を完全に削除 ▼▼▼
-        
         database.ref('live_data').on('value', (snapshot) => {
             const data = snapshot.val();
             if (!data) return;
@@ -72,12 +70,12 @@
             } else {
                 const content = data.ticker_content || {};
                 tickerHeaderText.innerText = content.headerText || '東京株式市場';
-                const newTickerText = content.scrollText || 'コメントをお待ちしています。';
+                const newScrollText = content.scrollText || 'コメントをお待ちしています。';
 
                 // ▼▼▼ 変更点: テキストが本当に変更された時だけDOMを書き換える ▼▼▼
-                if (newTickerText !== currentTickerText) {
-                    currentTickerText = newTickerText; // 新しいテキストを記憶
-                    tickerContent.innerText = `${currentTickerText}${currentTickerText}`;
+                if (newScrollText !== currentScrollText) {
+                    currentScrollText = newScrollText; // 新しいテキストを記憶
+                    tickerContent.innerText = `${currentScrollText}${currentScrollText}`;
                 }
                 
                 breakingContainer.classList.remove('visible');
