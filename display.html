@@ -1,4 +1,4 @@
-<!-- display.html (更新後) -->
+<!-- display.html (最終修正版) -->
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body class="obs-display">
+    <!-- ▼▼▼ 変更点: 全体をこの固定コンテナで囲む ▼▼▼ -->
     <div id="canvas">
         <div id="ticker-container" class="telop-wrapper">
             <div id="ticker-base-white"></div>
@@ -17,14 +18,23 @@
             <div id="ticker-header"><span id="ticker-header-text"></span></div>
             <div id="ticker-clock"><span id="clock-time"></span><span id="clock-live"><span>L</span><span>I</span><span>V</span><span>E</span></span></div>
         </div>
-        
+
         <div id="breaking-container" class="telop-wrapper">
             <div id="breaking-container-inner">
-                <div class="br-row1">
-                    <div id="br-row1-header"></div>
-                    <div id="br-row1-main"></div>
+                <div class="breaking-row">
+                    <div id="br-row1-header" class="br-row1-header"></div>
+                    <div id="br-row1-main" class="br-row1-main"></div>
                 </div>
-                <div id="br-row2" class="br-row2"></div>
+                <div class="breaking-row br-row2">
+                    <span id="br-row2-item1" class="br-row2-item"></span>
+                    <span id="br-row2-item2" class="br-row2-item"></span>
+                    <span id="br-row2-item3" class="br-row2-item"></span>
+                    <span id="br-row2-item4" class="br-row2-item"></span>
+                </div>
+                <div class="breaking-row">
+                    <div id="br-row3-header" class="br-row3-header"></div>
+                    <div id="br-row3-main" class="br-row3-main"></div>
+                </div>
             </div>
         </div>
     </div>
@@ -35,9 +45,9 @@
         const firebaseConfig = { apiKey: "AIzaSyAhsAbTqQuairo-82A9rxQTazUCGdzdVc4", authDomain: "obs-telop-system-7c98c.firebaseapp.com", databaseURL: "https://obs-telop-system-7c98c-default-rtdb.asia-southeast1.firebasedatabase.app", projectId: "obs-telop-system-7c98c", storageBucket: "obs-telop-system-7c98c.appspot.com", messagingSenderId: "368503557333", appId: "1:368503557333:web:409dae2b1cf0c14b31a65c", measurementId: "G-VMBCJ2952Z" };
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
-        
-        let currentScrollText = "";
 
+        let currentTickerText = ""; 
+        
         function updateClock() {
             const now = new Date(); const s = now.getSeconds();
             document.getElementById('clock-time').textContent = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
@@ -60,19 +70,23 @@
 
             if (data.mode === 'breaking' && data.breaking_content) {
                 const content = data.breaking_content;
-                document.getElementById('br-row1-header').innerText = content.b_header || '';
-                document.getElementById('br-row1-main').innerText = content.b_main || '';
-                document.getElementById('br-row2').innerText = content.b_detail || '';
-                
+                document.getElementById('br-row1-header').innerText = content.b_r1_h || '';
+                document.getElementById('br-row1-main').innerText = content.b_r1_m || '';
+                document.getElementById('br-row2-item1').innerHTML = content.b_r2_i1 || '';
+                document.getElementById('br-row2-item2').innerHTML = content.b_r2_i2 || '';
+                document.getElementById('br-row2-item3').innerHTML = content.b_r2_i3 || '';
+                document.getElementById('br-row2-item4').innerHTML = content.b_r2_i4 || '';
+                document.getElementById('br-row3-header').innerText = content.b_r3_h || '';
+                document.getElementById('br-row3-main').innerText = content.b_r3_m || '';
+
                 document.getElementById('ticker-container').classList.remove('visible');
                 document.getElementById('breaking-container').classList.add('visible');
             } else {
                 const content = data.ticker_content || {};
-                const newScrollText = content.scrollText || 'コメントをお待ちしています。';
-
-                if (newScrollText !== currentScrollText) {
-                    currentScrollText = newScrollText;
-                    document.getElementById('ticker-content').innerText = `${currentScrollText}${currentScrollText}`;
+                const newTickerText = content.scrollText || 'コメントをお待ちしています。';
+                if (newTickerText !== currentTickerText) {
+                    currentTickerText = newTickerText;
+                    document.getElementById('ticker-content').innerText = `${currentTickerText}${currentTickerText}`;
                 }
                 document.getElementById('ticker-header-text').innerText = content.headerText || '東京株式市場';
                 
