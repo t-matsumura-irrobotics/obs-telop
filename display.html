@@ -53,8 +53,9 @@
 
         function updateScrollSpeed() {
             const PIXELS_PER_SECOND = 101;
-            const contentWidth = tickerContent.scrollWidth / 2;
-            const duration = contentWidth / PIXELS_PER_SECOND;
+            // ▼▼▼ 変更点: 待機ありスクロールの計算方法 ▼▼▼
+            const scrollDistance = tickerScrollArea.offsetWidth + tickerContent.offsetWidth;
+            const duration = scrollDistance / PIXELS_PER_SECOND;
             tickerContent.style.animationDuration = `${duration}s`;
         }
 
@@ -73,8 +74,8 @@
             } else {
                 const content = data.ticker_content || {};
                 tickerHeaderText.innerText = content.headerText || '東京株式市場';
-                const scrollText = content.scrollText || 'コメントをお待ちしています。';
-                tickerContent.innerText = `${scrollText}\u00A0\u00A0\u00A0\u00A0\u00A0${scrollText}`; // 複製してシームレスに
+                // ▼▼▼ 変更点: テキストの複製をやめる ▼▼▼
+                tickerContent.innerText = content.scrollText || 'コメントをお待ちしています。';
                 breakingContainer.classList.remove('visible');
                 tickerContainer.classList.add('visible');
                 setTimeout(() => {

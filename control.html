@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="style.css">
     <style>
         body { font-family: sans-serif; padding: 20px; background-color: #f0f0f0; }
-        .wrapper { max-width: 800px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .wrapper { max-width: 800px; margin: 0 auto 20px auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
         h1, h3 { text-align: center; color: #333; }
         h3 { margin-top: 30px; border-bottom: 2px solid #eee; padding-bottom: 10px; }
         .control-group { margin-bottom: 15px; }
@@ -22,8 +22,6 @@
         .draft-btn { background-color: #007bff; color: white; }
         .delete-btn { background-color: #6c757d; color: white; }
         .char-counter { text-align: right; font-size: 12px; color: #666; margin-top: -10px; margin-bottom: 15px; }
-        
-        /* ▼▼▼ 新しいタブUIのスタイル ▼▼▼ */
         .mode-selector { display: flex; border-bottom: 2px solid #ccc; margin-bottom: 20px; }
         .mode-selector label {
             padding: 10px 20px; cursor: pointer; color: #555; position: relative;
@@ -84,7 +82,6 @@
         const liveDataRef = database.ref('live_data');
         const DRAFT_KEY = 'obs-telop-drafts';
         
-        // --- タブUIのロジック ---
         const modeRadios = document.querySelectorAll('input[name="mode"]');
         const tickerControls = document.getElementById('ticker-controls');
         const breakingControls = document.getElementById('breaking-controls');
@@ -101,16 +98,22 @@
         });
 
         // --- 送信ロジック ---
+        // ▼▼▼ 変更点: set()をupdate()に変更 ▼▼▼
         document.getElementById('tickerSendButton').addEventListener('click', () => {
-            liveDataRef.set({ mode: 'ticker', ticker_content: { headerText: document.getElementById('tickerHeaderText').value, scrollText: document.getElementById('tickerScrollText').value } });
+            liveDataRef.update({ 
+                mode: 'ticker',
+                ticker_content: { headerText: document.getElementById('tickerHeaderText').value, scrollText: document.getElementById('tickerScrollText').value } 
+            });
             alert('ティッカーを更新しました。');
         });
         document.getElementById('breakingSendButton').addEventListener('click', () => {
             const breaking_content = {};
             ['themeColor', 'headerText', 'companyName', 'detailText', 'detailColor'].forEach(id => breaking_content[id] = document.getElementById(id).value);
-            liveDataRef.set({ mode: 'breaking', breaking_content });
+            liveDataRef.update({ mode: 'breaking', breaking_content });
             alert('速報を送信しました！');
         });
+        // ▲▲▲ 変更ここまで ▲▲▲
+        
         document.getElementById('hideButton').addEventListener('click', () => {
             liveDataRef.update({ mode: 'ticker' });
             alert('ティッカー表示に戻します。');

@@ -19,7 +19,8 @@ html, body.obs-display {
 #canvas {
     position: relative; width: 1920px; height: 1080px;
 }
-@keyframes seamless-scroll { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+/* ▼▼▼ 変更点: 待機ありのスクロールアニメーション ▼▼▼ */
+@keyframes wait-scroll { 0% { transform: translateX(100%); } 100% { transform: translateX(-100%); } }
 @keyframes bounce {
   0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
   40% { transform: translateY(-15px); }
@@ -50,8 +51,7 @@ html, body.obs-display {
 }
 #ticker-header-text {
     display: inline-block; white-space: nowrap; transform-origin: center center;
-    /* ▼▼▼ 変更点: 余白を調整 ▼▼▼ */
-    padding: 0 15px 0 25px;
+    padding: 0 15px;
 }
 #ticker-clock {
     position: absolute; right: 0; top: 0; z-index: 2;
@@ -70,9 +70,10 @@ html, body.obs-display {
 .ticker-content {
     display: inline-block; font-size: 40px; font-weight: 400; letter-spacing: -0.05em;
     color: #000;
-    animation: seamless-scroll 25s linear infinite;
+    /* ▼▼▼ 変更点: アニメーションを待機ありに変更 ▼▼▼ */
+    padding-left: 100%;
+    animation: wait-scroll 25s linear infinite;
     white-space: nowrap;
-    /* ▼▼▼ 変更点: 行の高さをフォントサイズに合わせる ▼▼▼ */
     line-height: 40px; 
 }
 #clock-time, #clock-live {
