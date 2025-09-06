@@ -19,14 +19,14 @@ html, body.obs-display {
     font-family: 'LINE Seed JP', sans-serif;
     height: 100%; width: 100%;
 }
-#fixed-container {
+#canvas {
     position: relative;
     width: 1920px;
     height: 1080px;
 }
 /* ▲▲▲ 変更ここまで ▲▲▲ */
 
-@keyframes marquee-scroll { 0% { transform: translateX(100%); } 100% { transform: translateX(-100%); } }
+@keyframes marquee-scroll { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
 @keyframes bounce {
   0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
   40% { transform: translateY(-15px); }
@@ -50,7 +50,7 @@ html, body.obs-display {
 }
 .ticker-content {
     display: inline-block; font-size: 40px; font-weight: 400; letter-spacing: -0.05em;
-    padding-left: 100%; animation: marquee-scroll linear infinite;
+    animation: seamless-scroll linear infinite;
 }
 #ticker-header {
     position: absolute; left: 0; top: 0; z-index: 1;
@@ -60,7 +60,7 @@ html, body.obs-display {
     clip-path: polygon(0 0, 100% 0, 90% 100%, 0% 100%);
     font-size: 62px; font-weight: 700;
     text-shadow: 1px 1px 3px rgba(0,0,0,0.4);
-    box-shadow: 5px 0px 15px rgba(0,0,0,0.5);
+    box-shadow: 5px 0px 15px rgba(0,0,0,0.4);
 }
 #ticker-header-text {
     display: inline-block; white-space: nowrap; transform-origin: center center; padding: 0 20px;
@@ -70,7 +70,7 @@ html, body.obs-display {
     width: 162px; height: 100%; background: linear-gradient(to right, #ed949f, #69aef3);
     color: white; display: flex; justify-content: center; align-items: center;
     font-size: 46px; font-weight: bold;
-    box-shadow: -5px 0px 15px rgba(0,0,0,0.5);
+    box-shadow: -5px 0px 15px rgba(0,0,0,0.4);
     overflow: hidden;
 }
 #clock-time, #clock-live {

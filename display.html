@@ -11,7 +11,7 @@
 </head>
 <body class="obs-display">
     <!-- ▼▼▼ 変更点: 全体をこの固定コンテナで囲む ▼▼▼ -->
-    <div id="fixed-container">
+    <div id="canvas">
         <div id="ticker-container" class="telop-wrapper">
             <div id="ticker-scroll-area"><span id="ticker-content" class="ticker-content"></span></div>
             <div id="ticker-header"><span id="ticker-header-text"></span></div>
@@ -54,8 +54,8 @@
 
         function updateScrollSpeed() {
             const PIXELS_PER_SECOND = 101;
-            const scrollDistance = tickerScrollArea.offsetWidth + tickerContent.offsetWidth;
-            const duration = scrollDistance / PIXELS_PER_SECOND;
+            const contentWidth = tickerContent.scrollWidth / 2;
+            const duration = contentWidth / PIXELS_PER_SECOND;
             tickerContent.style.animationDuration = `${duration}s`;
         }
 
@@ -74,7 +74,8 @@
             } else {
                 const content = data.ticker_content || {};
                 tickerHeaderText.innerText = content.headerText || '東京株式市場';
-                tickerContent.innerText = content.scrollText || 'コメントをお待ちしています。';
+                const scrollText = content.scrollText || 'コメントをお待ちしています。';
+                tickerContent.innerText = `${scrollText}　　　${scrollText}`;
                 breakingContainer.classList.remove('visible');
                 tickerContainer.classList.add('visible');
                 setTimeout(() => {
