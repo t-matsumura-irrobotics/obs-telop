@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body class="obs-display">
+    <!-- ▼▼▼ 変更点: 全体をこの固定コンテナで囲む ▼▼▼ -->
     <div id="fixed-container">
         <div id="ticker-container" class="telop-wrapper">
             <div id="ticker-scroll-area"><span id="ticker-content" class="ticker-content"></span></div>
@@ -23,6 +24,8 @@
             </div>
         </div>
     </div>
+    <!-- ▲▲▲ 変更ここまで ▲▲▲ -->
+
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <script>
@@ -51,7 +54,6 @@
 
         function updateScrollSpeed() {
             const PIXELS_PER_SECOND = 101;
-            // ▼▼▼ 変更点: スクロールロジックを確実なものに戻す ▼▼▼
             const scrollDistance = tickerScrollArea.offsetWidth + tickerContent.offsetWidth;
             const duration = scrollDistance / PIXELS_PER_SECOND;
             tickerContent.style.animationDuration = `${duration}s`;
@@ -72,7 +74,6 @@
             } else {
                 const content = data.ticker_content || {};
                 tickerHeaderText.innerText = content.headerText || '東京株式市場';
-                // ▼▼▼ 変更点: テキストの複製をやめる ▼▼▼
                 tickerContent.innerText = content.scrollText || 'コメントをお待ちしています。';
                 breakingContainer.classList.remove('visible');
                 tickerContainer.classList.add('visible');
