@@ -13,20 +13,14 @@
     font-weight: 700; /* bold */
 }
 
-/* ▼▼▼ 変更点: 位置ずれを完全に修正するための設定 ▼▼▼ */
-html, body.obs-display {
-    margin: 0; padding: 0; overflow: hidden; background-color: transparent;
-    height: 100%; width: 100%;
+/* ▼▼▼ 変更点: 最もシンプルな初期の配置方法に戻す ▼▼▼ */
+body.obs-display {
     font-family: 'LINE Seed JP', sans-serif;
-}
-#main-container {
-    position: relative;
-    width: 1920px;
-    height: 1080px;
+    margin: 0; padding: 0; overflow: hidden;
 }
 /* ▲▲▲ 変更ここまで ▲▲▲ */
 
-@keyframes marquee-scroll { 0% { transform: translateX(100%); } 100% { transform: translateX(-100%); } }
+@keyframes marquee-scroll { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
 @keyframes bounce {
   0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
   40% { transform: translateY(-15px); }
@@ -34,7 +28,7 @@ html, body.obs-display {
 }
 
 .telop-wrapper {
-    position: absolute; bottom: 20px; /* main-containerの下部から20pxの位置に配置 */
+    position: absolute; bottom: 20px;
     left: 20px; right: 20px; width: auto; 
     opacity: 0; transition: opacity 0.4s ease-out;
 }
@@ -50,7 +44,7 @@ html, body.obs-display {
 }
 .ticker-content {
     display: inline-block; font-size: 40px; font-weight: 400; letter-spacing: -0.05em;
-    padding-left: 100%; animation: marquee-scroll linear infinite;
+    animation: seamless-scroll linear infinite;
 }
 #ticker-header {
     position: absolute; left: 0; top: 0; z-index: 1;
@@ -69,9 +63,7 @@ html, body.obs-display {
     position: absolute; right: 0; top: 0; z-index: 1;
     width: 162px; height: 100%; background: linear-gradient(to right, #ed949f, #69aef3);
     color: white; display: flex; justify-content: center; align-items: center;
-    /* ▼▼▼ 変更点: サイズを1.2倍に ▼▼▼ */
-    font-size: 55px; /* 46px * 1.2 = 55.2px */
-    font-weight: bold;
+    font-size: 46px; font-weight: bold;
     box-shadow: -5px 0px 15px rgba(0,0,0,0.4);
     overflow: hidden;
 }
@@ -81,9 +73,7 @@ html, body.obs-display {
     width: 100%; text-align: center;
 }
 #clock-live {
-    font-style: italic; transform: translateX(120%);
-    /* ▼▼▼ 変更点: LIVEのサイズを1.2倍に ▼▼▼ */
-    font-size: 66px; /* 55px * 1.2 = 66px */
+    font-style: italic; transform: translateX(120%); font-size: 55px;
 }
 #ticker-clock.show-live #clock-time { transform: translateX(-120%); }
 #ticker-clock.show-live #clock-live { transform: translateX(0); }
@@ -95,7 +85,7 @@ html, body.obs-display {
 #clock-live span:nth-child(3) { animation-delay: 0.3s; }
 #clock-live span:nth-child(4) { animation-delay: 0.4s; }
 
-/* --- 速報テロップのデザイン (位置を自動で下部に) --- */
+/* --- 速報テロップのデザイン (変更なし) --- */
 #breaking-container-inner { box-shadow: 0 6px 15px rgba(0,0,0,0.3); border-radius: 10px; overflow: hidden; }
 .top-bar { display: flex; font-size: 65px; align-items: center; height: 118px; }
 .top-bar-header { background-color: #ffffff; padding: 0 38px; white-space: nowrap; border-right: 3px solid rgba(0, 0, 0, 0.15); font-weight: bold; font-size: 94px; }
