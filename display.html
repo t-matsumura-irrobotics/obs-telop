@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body class="obs-display">
+    <!-- ▼▼▼ 変更点: 全体をこの固定コンテナで囲む ▼▼▼ -->
     <div id="canvas">
         <div id="ticker-container" class="telop-wrapper">
             <div id="ticker-base-white"></div>
@@ -24,7 +25,8 @@
             </div>
         </div>
     </div>
-    
+    <!-- ▲▲▲ 変更ここまで ▲▲▲ -->
+
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <script>
@@ -53,11 +55,9 @@
 
         function updateScrollSpeed() {
             const PIXELS_PER_SECOND = 101;
-            // ▼▼▼ 変更点: シームレススクロールの計算方法に変更 ▼▼▼
             const contentWidth = tickerContent.scrollWidth / 2;
             const duration = contentWidth / PIXELS_PER_SECOND;
             tickerContent.style.animationDuration = `${duration}s`;
-            // ▲▲▲ 変更ここまで ▲▲▲
         }
 
         database.ref('live_data').on('value', (snapshot) => {
@@ -76,7 +76,7 @@
                 const content = data.ticker_content || {};
                 tickerHeaderText.innerText = content.headerText || '東京株式市場';
                 const scrollText = content.scrollText || 'コメントをお待ちしています。';
-                tickerContent.innerText = `${scrollText}　　　${scrollText}`; // テキストを複製してシームレスに
+                tickerContent.innerText = `${scrollText}　　　${scrollText}`;
                 breakingContainer.classList.remove('visible');
                 tickerContainer.classList.add('visible');
                 setTimeout(() => {
