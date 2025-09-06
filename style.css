@@ -13,15 +13,14 @@
     font-weight: 700; /* bold */
 }
 
-/* ▼▼▼ 変更点: 位置ずれを完全に修正するための設定 ▼▼▼ */
+/* ▼▼▼ 変更点: test.htmlと同じ確実な配置方法に変更 ▼▼▼ */
 html, body.obs-display {
     margin: 0; padding: 0; overflow: hidden;
     font-family: 'LINE Seed JP', sans-serif;
+    height: 100%; width: 100%;
 }
 #fixed-container {
-    position: absolute;
-    top: 0;
-    left: 0;
+    position: relative;
     width: 1920px;
     height: 1080px;
 }
