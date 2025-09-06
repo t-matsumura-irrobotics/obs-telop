@@ -17,15 +17,22 @@
             <div id="ticker-header"><span id="ticker-header-text"></span></div>
             <div id="ticker-clock"><span id="clock-time"></span><span id="clock-live"><span>L</span><span>I</span><span>V</span><span>E</span></span></div>
         </div>
+
         <div id="breaking-container" class="telop-wrapper">
             <div id="breaking-container-inner">
-                <!-- ▼▼▼ 変更点: 速報テロップの構造を元に戻す ▼▼▼ -->
-                <div class="top-bar">
-                    <div id="br-top-header" class="top-bar-header"></div>
-                    <div id="br-top-main" class="top-bar-main"></div>
+                <div class="breaking-row">
+                    <div id="br-row1-header" class="br-row1-header"></div>
+                    <div id="br-row1-main" class="br-row1-main"></div>
                 </div>
-                <div class="bottom-bar">
-                    <span id="br-bottom-text"></span>
+                <div class="breaking-row br-row2">
+                    <span id="br-row2-item1" class="br-row2-item"></span>
+                    <span id="br-row2-item2" class="br-row2-item"></span>
+                    <span id="br-row2-item3" class="br-row2-item"></span>
+                    <span id="br-row2-item4" class="br-row2-item"></span>
+                </div>
+                <div class="breaking-row">
+                    <div id="br-row3-header" class="br-row3-header"></div>
+                    <div id="br-row3-main" class="br-row3-main"></div>
                 </div>
             </div>
         </div>
@@ -37,10 +44,12 @@
         const firebaseConfig = { apiKey: "AIzaSyAhsAbTqQuairo-82A9rxQTazUCGdzdVc4", authDomain: "obs-telop-system-7c98c.firebaseapp.com", databaseURL: "https://obs-telop-system-7c98c-default-rtdb.asia-southeast1.firebasedatabase.app", projectId: "obs-telop-system-7c98c", storageBucket: "obs-telop-system-7c98c.appspot.com", messagingSenderId: "368503557333", appId: "1:368503557333:web:409dae2b1cf0c14b31a65c", measurementId: "G-VMBCJ2952Z" };
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
+
+        let currentTickerText = "";
         
-        let currentScrollText = "";
-        
-        // ... (時計、ヘッダー長体処理の補助関数は変更なし) ...
+        function updateClock() { /* ... 変更なし ... */ }
+        function adjustHeaderText() { /* ... 変更なし ... */ }
+        setInterval(updateClock, 1000); updateClock();
 
         database.ref('live_data').on('value', (snapshot) => {
             const data = snapshot.val();
@@ -48,20 +57,23 @@
 
             if (data.mode === 'breaking' && data.breaking_content) {
                 const content = data.breaking_content;
-                document.getElementById('br-top-header').innerText = content.b_header || '';
-                document.getElementById('br-top-main').innerText = content.b_main || '';
-                document.getElementById('br-bottom-text').innerText = content.b_detail || '';
-                document.getElementById('br-top-main').parentElement.className = 'top-bar ' + (content.b_theme || 'theme-yellow');
+                document.getElementById('br-row1-header').innerText = content.b_r1_h || '';
+                document.getElementById('br-row1-main').innerText = content.b_r1_m || '';
+                document.getElementById('br-row2-item1').innerHTML = content.b_r2_i1 || '';
+                document.getElementById('br-row2-item2').innerHTML = content.b_r2_i2 || '';
+                document.getElementById('br-row2-item3').innerHTML = content.b_r2_i3 || '';
+                document.getElementById('br-row2-item4').innerHTML = content.b_r2_i4 || '';
+                document.getElementById('br-row3-header').innerText = content.b_r3_h || '';
+                document.getElementById('br-row3-main').innerText = content.b_r3_m || '';
 
                 document.getElementById('ticker-container').classList.remove('visible');
                 document.getElementById('breaking-container').classList.add('visible');
             } else {
                 const content = data.ticker_content || {};
-                const newScrollText = content.scrollText || 'コメントをお待ちしています。';
-
-                if (newScrollText !== currentScrollText) {
-                    currentScrollText = newScrollText;
-                    document.getElementById('ticker-content').innerText = `${currentScrollText}　　　${currentScrollText}`;
+                const newTickerText = content.scrollText || 'コメントをお待ちしています。';
+                if (newTickerText !== currentTickerText) {
+                    currentTickerText = newTickerText;
+                    document.getElementById('ticker-content').innerText = `${currentTickerText}${currentTickerText}`;
                 }
                 document.getElementById('ticker-header-text').innerText = content.headerText || '東京株式市場';
                 
@@ -70,66 +82,6 @@
                 setTimeout(adjustHeaderText, 50);
             }
         });
-
-        // ... (関数の定義は省略)
-        function updateClock() {
-            const now = new Date(); const s = now.getSeconds();
-            document.getElementById('clock-time').textContent = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
-            const tickerClock = document.getElementById('ticker-clock');
-            if (s >= 30) { tickerClock.classList.add('show-live'); } else { tickerClock.classList.remove('show-live'); }
-        }
-        setInterval(updateClock, 1000); updateClock();
-
-        function adjustHeaderText() {
-            const tickerHeaderText = document.getElementById('ticker-header-text');
-            tickerHeaderText.style.transform = 'scaleX(1)';
-            const containerWidth = tickerHeaderText.parentElement.clientWidth - 40;
-            const textWidth = tickerHeaderText.scrollWidth;
-            if (textWidth > containerWidth) { tickerHeaderText.style.transform = `scaleX(${containerWidth / textWidth})`; }
-        }
     </script>
 </body>
-</html>```
-
-### Step 3: `control.html` の更新
-
-コントローラーを元の「決算速報」用のシンプルなUIに戻します。
-
-```html
-<!-- control.html (更新後) -->
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-    <meta charset="UTF-8">
-    <title>OBS Telop Controller</title>
-    <link rel="stylesheet" href="style.css">
-    <style>
-        body { font-family: sans-serif; padding: 20px; background-color: #f0f0f0; }
-        .wrapper { max-width: 800px; margin: 0 auto 20px auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        h1, h3 { text-align: center; color: #333; }
-        h3 { margin-top: 30px; border-bottom: 2px solid #eee; padding-bottom: 10px; }
-        label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 14px; }
-        input, select, textarea { width: 100%; box-sizing: border-box; padding: 10px; font-size: 16px; border: 1px solid #ccc; border-radius: 4px; }
-        .grid-2 { display: grid; grid-template-columns: 1fr 2fr; gap: 15px; align-items: flex-end; }
-        button { padding: 10px 20px; font-size: 16px; cursor: pointer; border-radius: 4px; border: none; }
-        .show-btn { background-color: #28a745; color: white; }
-        .hide-btn { background-color: #ffc107; color: black; }
-        .mode-selector { display: flex; border-bottom: 2px solid #ccc; margin-bottom: 20px; }
-        .mode-selector label { padding: 10px 20px; cursor: pointer; color: #555; position: relative; }
-        .mode-selector input[type="radio"] { display: none; }
-        .mode-selector input[type="radio"]:checked + label { font-weight: bold; color: #007bff; border-bottom: 3px solid #007bff; }
-        .controls-panel { display: none; }
-        .controls-panel.active { display: block; }
-    </style>
-</head>
-<body>
-    <div class="wrapper">
-        <h1>ライブテロップ コントローラー</h1>
-        <div class="mode-selector">
-            <input type="radio" id="mode-ticker" name="mode" checked><label for="mode-ticker">通常ティッカー</label>
-            <input type="radio" id="mode-breaking" name="mode"><label for="mode-breaking">決算速報</label>
-        </div>
-
-        <div id="ticker-controls" class="controls-panel active">
-            <h3>通常ティッカー 設定</h3>
-            <div><label for="tickerHeaderText">ヘッダーテキスト</label><input type="text" id="tickerHe
+</html>
