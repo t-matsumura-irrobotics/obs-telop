@@ -69,7 +69,7 @@
                 const content = data.ticker_content || {};
                 tickerHeaderText.innerText = content.headerText || '東京株式市場';
                 const scrollText = content.scrollText || 'コメントをお待ちしています。';
-                tickerContent.innerText = `${scrollText}${scrollText}`; // 複製してシームレスに
+                tickerContent.innerText = `${scrollText}${scrollText}`;
                 breakingContainer.classList.remove('visible');
                 tickerContainer.classList.add('visible');
                 setTimeout(() => {
