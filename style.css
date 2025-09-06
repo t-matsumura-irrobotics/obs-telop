@@ -13,12 +13,12 @@
     font-weight: 700; /* bold */
 }
 
+/* ▼▼▼ 変更点: 位置ずれを完全に修正するための設定 ▼▼▼ */
 html, body.obs-display {
     margin: 0; padding: 0; overflow: hidden; background-color: transparent;
     height: 100%; width: 100%;
     font-family: 'LINE Seed JP', sans-serif;
 }
-/* ▼▼▼ 変更点: 位置ずれを完全に修正するための設定 ▼▼▼ */
 #main-container {
     position: relative;
     width: 1920px;
@@ -69,7 +69,9 @@ html, body.obs-display {
     position: absolute; right: 0; top: 0; z-index: 1;
     width: 162px; height: 100%; background: linear-gradient(to right, #ed949f, #69aef3);
     color: white; display: flex; justify-content: center; align-items: center;
-    font-size: 46px; font-weight: bold;
+    /* ▼▼▼ 変更点: サイズを1.2倍に ▼▼▼ */
+    font-size: 55px; /* 46px * 1.2 = 55.2px */
+    font-weight: bold;
     box-shadow: -5px 0px 15px rgba(0,0,0,0.4);
     overflow: hidden;
 }
@@ -79,7 +81,9 @@ html, body.obs-display {
     width: 100%; text-align: center;
 }
 #clock-live {
-    font-style: italic; transform: translateX(120%); font-size: 55px;
+    font-style: italic; transform: translateX(120%);
+    /* ▼▼▼ 変更点: LIVEのサイズを1.2倍に ▼▼▼ */
+    font-size: 66px; /* 55px * 1.2 = 66px */
 }
 #ticker-clock.show-live #clock-time { transform: translateX(-120%); }
 #ticker-clock.show-live #clock-live { transform: translateX(0); }
