@@ -1,4 +1,4 @@
-<!-- display.html (更新後) -->
+<!-- display.html (最終修正版) -->
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -10,13 +10,19 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body class="obs-display">
-    <!-- ▼▼▼ 変更点: 全体をこの固定コンテナで囲む ▼▼▼ -->
     <div id="canvas">
+        <!-- ▼▼▼ 新しいレイヤー構造 ▼▼▼ -->
         <div id="ticker-container" class="telop-wrapper">
+            <!-- レイヤー1: 白い背景 -->
+            <div id="ticker-base-white"></div>
+            <!-- レイヤー2: スクロールテキスト -->
             <div id="ticker-scroll-area"><span id="ticker-content" class="ticker-content"></span></div>
+            <!-- レイヤー3: ヘッダーと時計 -->
             <div id="ticker-header"><span id="ticker-header-text"></span></div>
             <div id="ticker-clock"><span id="clock-time"></span><span id="clock-live"><span>L</span><span>I</span><span>V</span><span>E</span></span></div>
         </div>
+        <!-- ▲▲▲ ここまで ▲▲▲ -->
+
         <div id="breaking-container" class="telop-wrapper">
             <div id="breaking-container-inner">
                 <div id="top-bar" class="top-bar"><div id="header" class="top-bar-header"></div><div id="companyName" class="top-bar-main"></div></div>
@@ -24,8 +30,7 @@
             </div>
         </div>
     </div>
-    <!-- ▲▲▲ 変更ここまで ▲▲▲ -->
-
+    
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <script>
