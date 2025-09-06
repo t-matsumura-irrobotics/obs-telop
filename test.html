@@ -1,0 +1,54 @@
+<!-- test.html -->
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <title>OBS Position Test</title>
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+        #container {
+            position: relative;
+            width: 1920px;
+            height: 1080px;
+            background-color: rgba(0, 255, 0, 0.1); /* 全体が緑色に薄く表示されます */
+        }
+        #bottom_bar {
+            position: absolute;
+            bottom: 20px; /* 下から20pxの位置 */
+            left: 20px;
+            right: 20px;
+            height: 100px;
+            background-color: red;
+            color: white;
+            font-size: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        #top_bar {
+            position: absolute;
+            top: 20px; /* 上から20pxの位置 */
+            left: 20px;
+            right: 20px;
+            height: 100px;
+            background-color: blue;
+            color: white;
+            font-size: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <div id="top_bar">これは上部の青いバーです</div>
+        <div id="bottom_bar">これが下部の赤いバーです</div>
+    </div>
+</body>
+</html>
