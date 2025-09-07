@@ -68,6 +68,7 @@
             });
             alert('ティッカーを更新しました。');
         });
+
         document.getElementById('breakingSendButton').addEventListener('click', () => {
             liveDataRef.update({
                 'mode': 'breaking',
@@ -80,6 +81,7 @@
             });
             alert('速報を送信しました！');
         });
+        
         document.getElementById('hideButton').addEventListener('click', () => {
             liveDataRef.update({ mode: 'ticker' });
             alert('ティッカー表示に戻します。');
