@@ -1,97 +1,332 @@
-<!-- display.html (最終修正版) -->
 <!DOCTYPE html>
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=1920, height=1080">
     <title>OBS Telop Display</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Anton&display=swap" rel="stylesheet">
     
-    <!-- ▼▼▼ 全ての表示用CSSをここに埋め込み ▼▼▼ -->
     <style>
         @font-face {
             font-family: 'LINE Seed JP';
             src: url('fonts/LINESeedJP_OTF_Rg.woff2') format('woff2');
-            font-weight: 400; /* normal */
+            font-weight: 400;
         }
         @font-face {
             font-family: 'LINE Seed JP';
             src: url('fonts/LINESeedJP_OTF_Bd.woff2') format('woff2');
-            font-weight: 700; /* bold */
+            font-weight: 700;
         }
+        
+        /* OBS用の固定サイズ設定 */
         html, body {
-            margin: 0; padding: 0; overflow: hidden;
+            margin: 0;
+            padding: 0;
+            width: 1920px;
+            height: 1080px;
+            overflow: hidden;
             font-family: 'LINE Seed JP', sans-serif;
-            height: 100%; width: 100%;
             background-color: transparent;
+            position: relative;
         }
-        body { position: relative; }
 
-        @keyframes seamless-scroll { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+        @keyframes seamless-scroll {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
         @keyframes bounce {
-          0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
-          40% { transform: translateY(-15px); }
-          60% { transform: translateY(-7px); }
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-15px); }
+            60% { transform: translateY(-7px); }
         }
 
-        .telop-wrapper { position: absolute; bottom: 20px; left: 20px; right: 20px; opacity: 0; transition: opacity 0.4s ease-out; display: none; }
-        .telop-wrapper.visible { opacity: 1; display: block; }
+        /* ティッカーを画面内に収める */
+        .telop-wrapper {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            width: calc(1920px - 40px);
+            max-width: 1880px;
+            opacity: 0;
+            transition: opacity 0.4s ease-out;
+            display: none;
+        }
+        .telop-wrapper.visible {
+            opacity: 1;
+            display: block;
+        }
 
-        #ticker-container { height: 96px; border-radius: 8px; overflow: hidden; position: relative; }
-        #ticker-base-white { width: 100%; height: 100%; background-color: white; }
-        #ticker-header { position: absolute; left: 0; top: 0; z-index: 2; width: 300px; height: 100%; color: white; display: flex; justify-content: flex-start; align-items: center; background: linear-gradient(to right, #ed949f, #69aef3); clip-path: polygon(0 0, 100% 0, 90% 100%, 0% 100%); font-size: 52px; font-weight: 700; text-shadow: 1px 1px 3px rgba(0,0,0,0.4); box-shadow: 5px 0px 15px rgba(0,0,0,0.4); }
-        #ticker-header-text { display: inline-block; white-space: nowrap; transform-origin: left center; padding-left: 40px; }
-        #ticker-clock { position: absolute; right: 0; top: 0; z-index: 3; width: 162px; height: 100%; background: linear-gradient(to right, #ed949f, #69aef3); color: white; display: flex; justify-content: center; align-items: center; font-size: 46px; font-weight: 400; box-shadow: -5px 0px 15px rgba(0,0,0,0.4); overflow: hidden; }
-        #ticker-scroll-area { position: absolute; left: 0; top: 0; z-index: 1; width: 100%; height: 100%; overflow: hidden; line-height: 96px; white-space: nowrap; }
-        .ticker-content { display: inline-block; font-size: 40px; font-weight: 400; letter-spacing: -0.05em; color: #000; vertical-align: middle; animation: seamless-scroll 30s linear infinite; }
-        .speed-slow .ticker-content { animation-duration: 50s; } .speed-normal .ticker-content { animation-duration: 30s; } .speed-fast .ticker-content { animation-duration: 15s; }
+        #ticker-container {
+            height: 96px;
+            border-radius: 8px;
+            overflow: hidden;
+            position: relative;
+            width: 100%;
+        }
+        
+        #ticker-base-white {
+            width: 100%;
+            height: 100%;
+            background-color: white;
+        }
+        
+        #ticker-header {
+            position: absolute;
+            left: 0;
+            top: 0;
+            z-index: 2;
+            width: 300px;
+            height: 100%;
+            color: white;
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            background: linear-gradient(to right, #ed949f, #69aef3);
+            clip-path: polygon(0 0, 100% 0, 90% 100%, 0% 100%);
+            font-size: 52px;
+            font-weight: 700;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.4);
+            box-shadow: 5px 0px 15px rgba(0,0,0,0.4);
+        }
+        
+        #ticker-header-text {
+            display: inline-block;
+            white-space: nowrap;
+            transform-origin: left center;
+            padding-left: 40px;
+        }
+        
+        #ticker-clock {
+            position: absolute;
+            right: 0;
+            top: 0;
+            z-index: 3;
+            width: 162px;
+            height: 100%;
+            background: linear-gradient(to right, #ed949f, #69aef3);
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 46px;
+            font-weight: 400;
+            box-shadow: -5px 0px 15px rgba(0,0,0,0.4);
+            overflow: hidden;
+        }
+        
+        #ticker-scroll-area {
+            position: absolute;
+            left: 300px;
+            top: 0;
+            z-index: 1;
+            width: calc(100% - 462px);
+            height: 100%;
+            overflow: hidden;
+            line-height: 96px;
+            white-space: nowrap;
+        }
+        
+        .ticker-content {
+            display: inline-block;
+            font-size: 40px;
+            font-weight: 400;
+            letter-spacing: -0.05em;
+            color: #000;
+            vertical-align: middle;
+            animation: seamless-scroll 30s linear infinite;
+            padding-right: 100%;
+        }
+        
+        .speed-slow .ticker-content { animation-duration: 50s; }
+        .speed-normal .ticker-content { animation-duration: 30s; }
+        .speed-fast .ticker-content { animation-duration: 15s; }
 
-        #clock-time, #clock-live { position: absolute; font-family: 'Anton', sans-serif; letter-spacing: 0.05em; transform: translateX(0); transition: transform 0.4s cubic-bezier(0.77, 0, 0.175, 1); width: 100%; text-align: center; }
-        #clock-live { font-style: italic; transform: translateX(120%); font-size: 55px; }
+        #clock-time, #clock-live {
+            position: absolute;
+            font-family: 'Anton', sans-serif;
+            letter-spacing: 0.05em;
+            transform: translateX(0);
+            transition: transform 0.4s cubic-bezier(0.77, 0, 0.175, 1);
+            width: 100%;
+            text-align: center;
+        }
+        
+        #clock-live {
+            font-style: italic;
+            transform: translateX(120%);
+            font-size: 55px;
+        }
+        
         #ticker-clock.show-live #clock-time { transform: translateX(-120%); }
         #ticker-clock.show-live #clock-live { transform: translateX(0); }
-        #clock-live span { display: inline-block; animation: bounce 1.5s infinite ease-in-out; will-change: transform; }
-        #clock-live span:nth-child(1) { animation-delay: 0.1s; } #clock-live span:nth-child(2) { animation-delay: 0.2s; } #clock-live span:nth-child(3) { animation-delay: 0.3s; } #clock-live span:nth-child(4) { animation-delay: 0.4s; }
         
-        #breaking-container { height: auto; }
-        #breaking-container-inner { background-color: #e0e0e0; border-radius: 8px; box-shadow: 0 6px 15px rgba(0,0,0,0.3); border-left: 8px solid #c00000; overflow: hidden; }
-        .breaking-row { display: flex; font-weight: bold; }
-        .br-row1-header { background-color: #e0e0e0; color: #000; font-size: 48px; padding: 10px 30px; white-space: nowrap; }
-        .br-row1-main { background-color: #c00000; color: #fff; font-size: 48px; padding: 10px 30px; flex-grow: 1; text-align: center; }
-        .br-row2 { background-color: #222; color: #fff; font-size: 42px; padding: 8px 0; }
-        .br-row2-item { flex-grow: 1; text-align: center; white-space: nowrap; }
-        .br-row2-item + .br-row2-item { border-left: 2px solid #555; }
-        .br-row2-item-value { background-color: #fff; color: #000; padding: 0 15px; margin: 0 10px; border-radius: 4px; }
-        .br-row3-header { background-color: #757575; color: #fff; font-size: 42px; padding: 8px 30px; white-space: nowrap; }
-        .br-row3-main { background-color: #e0e0e0; color: #000; font-size: 42px; padding: 8px 30px; flex-grow: 1; }
+        #clock-live span {
+            display: inline-block;
+            animation: bounce 1.5s infinite ease-in-out;
+            will-change: transform;
+        }
+        #clock-live span:nth-child(1) { animation-delay: 0.1s; }
+        #clock-live span:nth-child(2) { animation-delay: 0.2s; }
+        #clock-live span:nth-child(3) { animation-delay: 0.3s; }
+        #clock-live span:nth-child(4) { animation-delay: 0.4s; }
+        
+        #breaking-container {
+            height: auto;
+            width: 100%;
+        }
+        
+        #breaking-container-inner {
+            background-color: #e0e0e0;
+            border-radius: 8px;
+            box-shadow: 0 6px 15px rgba(0,0,0,0.3);
+            border-left: 8px solid #c00000;
+            overflow: hidden;
+        }
+        
+        .breaking-row {
+            display: flex;
+            font-weight: bold;
+        }
+        
+        .br-row1-header {
+            background-color: #e0e0e0;
+            color: #000;
+            font-size: 48px;
+            padding: 10px 30px;
+            white-space: nowrap;
+        }
+        
+        .br-row1-main {
+            background-color: #c00000;
+            color: #fff;
+            font-size: 48px;
+            padding: 10px 30px;
+            flex-grow: 1;
+            text-align: center;
+        }
+        
+        .br-row2 {
+            background-color: #222;
+            color: #fff;
+            font-size: 42px;
+            padding: 8px 0;
+        }
+        
+        .br-row2-item {
+            flex-grow: 1;
+            text-align: center;
+            white-space: nowrap;
+        }
+        
+        .br-row2-item + .br-row2-item {
+            border-left: 2px solid #555;
+        }
+        
+        .br-row2-item-value {
+            background-color: #fff;
+            color: #000;
+            padding: 0 15px;
+            margin: 0 10px;
+            border-radius: 4px;
+        }
+        
+        .br-row3-header {
+            background-color: #757575;
+            color: #fff;
+            font-size: 42px;
+            padding: 8px 30px;
+            white-space: nowrap;
+        }
+        
+        .br-row3-main {
+            background-color: #e0e0e0;
+            color: #000;
+            font-size: 42px;
+            padding: 8px 30px;
+            flex-grow: 1;
+        }
     </style>
 </head>
 <body>
     <div id="ticker-container" class="telop-wrapper">
         <div id="ticker-base-white"></div>
-        <div id="ticker-scroll-area"><span id="ticker-content" class="ticker-content"></span></div>
-        <div id="ticker-header"><span id="ticker-header-text"></span></div>
-        <div id="ticker-clock"><span id="clock-time"></span><span id="clock-live"><span>L</span><span>I</span><span>V</span><span>E</span></span></div>
+        <div id="ticker-scroll-area">
+            <span id="ticker-content" class="ticker-content"></span>
+        </div>
+        <div id="ticker-header">
+            <span id="ticker-header-text"></span>
+        </div>
+        <div id="ticker-clock">
+            <span id="clock-time"></span>
+            <span id="clock-live">
+                <span>L</span><span>I</span><span>V</span><span>E</span>
+            </span>
+        </div>
     </div>
+    
     <div id="breaking-container" class="telop-wrapper">
         <div id="breaking-container-inner">
-            <div class="breaking-row"><div id="br-row1-header"></div><div id="br-row1-main"></div></div>
-            <div class="breaking-row br-row2"><span id="br-row2-item1"></span><span id="br-row2-item2"></span><span id="br-row2-item3"></span><span id="br-row2-item4"></span></div>
-            <div class="breaking-row"><div id="br-row3-header"></div><div id="br-row3-main"></div></div>
+            <div class="breaking-row">
+                <div id="br-row1-header" class="br-row1-header"></div>
+                <div id="br-row1-main" class="br-row1-main"></div>
+            </div>
+            <div class="breaking-row br-row2">
+                <span id="br-row2-item1" class="br-row2-item"></span>
+                <span id="br-row2-item2" class="br-row2-item"></span>
+                <span id="br-row2-item3" class="br-row2-item"></span>
+                <span id="br-row2-item4" class="br-row2-item"></span>
+            </div>
+            <div class="breaking-row">
+                <div id="br-row3-header" class="br-row3-header"></div>
+                <div id="br-row3-main" class="br-row3-main"></div>
+            </div>
         </div>
     </div>
     
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <script>
-        const firebaseConfig = { apiKey: "AIzaSyAhsAbTqQuairo-82A9rxQTazUCGdzdVc4", authDomain: "obs-telop-system-7c98c.firebaseapp.com", databaseURL: "https://obs-telop-system-7c98c-default-rtdb.asia-southeast1.firebasedatabase.app", projectId: "obs-telop-system-7c98c", storageBucket: "obs-telop-system-7c98c.appspot.com", messagingSenderId: "368503557333", appId: "1:368503557333:web:409dae2b1cf0c14b31a65c", measurementId: "G-VMBCJ2952Z" };
+        const firebaseConfig = {
+            apiKey: "AIzaSyAhsAbTqQuairo-82A9rxQTazUCGdzdVc4",
+            authDomain: "obs-telop-system-7c98c.firebaseapp.com",
+            databaseURL: "https://obs-telop-system-7c98c-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "obs-telop-system-7c98c",
+            storageBucket: "obs-telop-system-7c98c.appspot.com",
+            messagingSenderId: "368503557333",
+            appId: "1:368503557333:web:409dae2b1cf0c14b31a65c",
+            measurementId: "G-VMBCJ2952Z"
+        };
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
         
         let currentScrollText = "";
 
-        // ... (時計、ヘッダー長体処理の補助関数は変更なし) ...
+        function updateClock() {
+            const now = new Date();
+            const s = now.getSeconds();
+            document.getElementById('clock-time').textContent = 
+                `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+            const tickerClock = document.getElementById('ticker-clock');
+            if (s >= 30) {
+                tickerClock.classList.add('show-live');
+            } else {
+                tickerClock.classList.remove('show-live');
+            }
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        function adjustHeaderText() {
+            const tickerHeaderText = document.getElementById('ticker-header-text');
+            tickerHeaderText.style.transform = 'scaleX(1)';
+            const containerWidth = tickerHeaderText.parentElement.clientWidth - 40;
+            const textWidth = tickerHeaderText.scrollWidth;
+            if (textWidth > containerWidth) {
+                tickerHeaderText.style.transform = `scaleX(${containerWidth / textWidth})`;
+            }
+        }
 
         database.ref('live_data').on('value', (snapshot) => {
             const data = snapshot.val();
@@ -116,12 +351,15 @@
 
                 if (newScrollText !== currentScrollText) {
                     currentScrollText = newScrollText;
-                    document.getElementById('ticker-content').innerText = `${currentScrollText}${currentScrollText}`;
+                    // テキストを2回繰り返してシームレスなスクロールを実現
+                    document.getElementById('ticker-content').innerText = 
+                        `${currentScrollText}　　　${currentScrollText}`;
                 }
-                document.getElementById('ticker-header-text').innerText = content.headerText || '東京株式市場';
+                document.getElementById('ticker-header-text').innerText = 
+                    content.headerText || '東京株式市場';
 
                 const tickerScrollArea = document.getElementById('ticker-scroll-area');
-                tickerScrollArea.className = 'ticker-scroll-area';
+                tickerScrollArea.className = '';
                 tickerScrollArea.classList.add(content.scrollSpeed || 'speed-normal');
                 
                 document.getElementById('breaking-container').classList.remove('visible');
@@ -129,21 +367,6 @@
                 setTimeout(adjustHeaderText, 50);
             }
         });
-        function updateClock() {
-            const now = new Date(); const s = now.getSeconds();
-            document.getElementById('clock-time').textContent = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
-            const tickerClock = document.getElementById('ticker-clock');
-            if (s >= 30) { tickerClock.classList.add('show-live'); } else { tickerClock.classList.remove('show-live'); }
-        }
-        setInterval(updateClock, 1000); updateClock();
-
-        function adjustHeaderText() {
-            const tickerHeaderText = document.getElementById('ticker-header-text');
-            tickerHeaderText.style.transform = 'scaleX(1)';
-            const containerWidth = tickerHeaderText.parentElement.clientWidth - 40;
-            const textWidth = tickerHeaderText.scrollWidth;
-            if (textWidth > containerWidth) { tickerHeaderText.style.transform = `scaleX(${containerWidth / textWidth})`; }
-        }
     </script>
 </body>
 </html>
