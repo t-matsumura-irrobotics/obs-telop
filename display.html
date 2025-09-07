@@ -6,26 +6,23 @@
     <title>OBS Telop Display</title>
     <link href="https://fonts.googleapis.com/css2?family=Anton&display=swap" rel="stylesheet">
     <style>
-        @font-face {
-            font-family: 'LINE Seed JP'; src: url('fonts/LINESeedJP_OTF_Rg.woff2') format('woff2'); font-weight: 400;
-        }
-        @font-face {
-            font-family: 'LINE Seed JP'; src: url('fonts/LINESeedJP_OTF_Bd.woff2') format('woff2'); font-weight: 700;
-        }
-        html, body { margin: 0; padding: 0; overflow: hidden; font-family: 'LINE Seed JP', sans-serif; height: 100%; width: 100%; background: transparent; position: relative; }
-        
+        @font-face { font-family: 'LINE Seed JP'; src: url('fonts/LINESeedJP_OTF_Rg.woff2') format('woff2'); font-weight: 400; }
+        @font-face { font-family: 'LINE Seed JP'; src: url('fonts/LINESeedJP_OTF_Bd.woff2') format('woff2'); font-weight: 700; }
+        html, body { margin: 0; padding: 0; overflow: hidden; font-family: 'LINE Seed JP', sans-serif; height: 100%; width: 100%; background: transparent; }
+        body { position: relative; }
         @keyframes seamless-scroll { 0% { transform: translateX(100%); } 100% { transform: translateX(-100%); } }
         @keyframes bounce { 0%, 20%, 50%, 80%, 100% { transform: translateY(0); } 40% { transform: translateY(-15px); } 60% { transform: translateY(-7px); } }
 
-        .telop-wrapper { position: absolute; bottom: 20px; left: 20px; right: 20px; opacity: 0; transition: opacity 0.4s ease-out, transform 0.4s ease-out; transform: translateY(20px); display: none; }
-        .telop-wrapper.visible { opacity: 1; display: block; transform: translateY(0); }
-
+        .telop-wrapper { position: absolute; bottom: 20px; left: 20px; right: 20px; opacity: 0; transition: opacity 0.4s ease-out; display: none; }
+        .telop-wrapper.visible { opacity: 1; display: block; }
+        
         #ticker-container { height: 96px; border-radius: 8px; overflow: hidden; position: relative; background: white; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
-        #ticker-header { position: absolute; left: 0; top: 0; z-index: 10; width: 300px; height: 100%; color: white; display: flex; align-items: center; justify-content: flex-start; background: linear-gradient(135deg, #ed949f, #69aef3); clip-path: polygon(0 0, 100% 0, 90% 100%, 0% 100%); font-size: 52px; font-weight: 700; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); padding: 0 0 0 30px; box-shadow: 5px 0 15px rgba(0,0,0,0.2); }
+        #ticker-header { position: absolute; left: 0; top: 0; z-index: 10; width: 300px; height: 100%; color: white; display: flex; align-items: center; justify-content: flex-start; background: linear-gradient(135deg, #ed949f, #69aef3); clip-path: polygon(0 0, 100% 0, 90% 100%, 0% 100%); font-size: 52px; font-weight: 700; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); padding-left: 30px; box-shadow: 5px 0 15px rgba(0,0,0,0.2); }
         #ticker-header-text { white-space: nowrap; transform-origin: left center; }
         #ticker-clock { position: absolute; right: 0; top: 0; z-index: 10; width: 162px; height: 100%; background: linear-gradient(45deg, #ed949f, #69aef3); color: white; display: flex; justify-content: center; align-items: center; font-size: 46px; font-family: 'Anton', sans-serif; box-shadow: -5px 0 15px rgba(0,0,0,0.2); overflow: hidden; }
         #ticker-scroll-area { position: absolute; left: 280px; right: 162px; top: 0; height: 100%; overflow: hidden; display: flex; align-items: center; }
-        .ticker-content { display: inline-block; white-space: nowrap; font-size: 40px; color: #333; animation: seamless-scroll linear infinite; }
+        .ticker-content { display: inline-block; white-space: nowrap; font-size: 40px; color: #333; animation: seamless-scroll 30s linear infinite; }
+        
         #clock-time, #clock-live { position: absolute; width: 100%; text-align: center; transition: transform 0.4s ease; }
         #clock-live { transform: translateX(200%); font-size: 55px; font-style: italic; }
         #ticker-clock.show-live #clock-time { transform: translateX(-200%); }
@@ -35,7 +32,7 @@
         #clock-live span:nth-child(2) { animation-delay: 0.2s; }
         #clock-live span:nth-child(3) { animation-delay: 0.3s; }
         #clock-live span:nth-child(4) { animation-delay: 0.4s; }
-        
+
         #breaking-container-inner { background: #e0e0e0; border-radius: 8px; border-left: 8px solid #c00000; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
         .breaking-row { display: flex; font-weight: bold; }
         .br-row1-header { background: #e0e0e0; color: #000; font-size: 48px; padding: 10px 30px; white-space: nowrap; }
@@ -49,6 +46,17 @@
     </style>
 </head>
 <body>
-    <!-- (HTMLの構造は、新しい速報デザイン以外は以前の安定版と同じです) -->
+    <div id="ticker-container" class="telop-wrapper visible">
+        <!-- ... (ティッカーのHTML構造) ... -->
+    </div>
+    <div id="breaking-container" class="telop-wrapper">
+        <!-- ... (速報のHTML構造) ... -->
+    </div>
+    
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <script>
+        // (JavaScriptのロジックは前回から変更ありません)
+    </script>
 </body>
 </html>

@@ -4,37 +4,43 @@
 <head>
     <meta charset="UTF-8">
     <title>Live Telop Controller</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <h1>ライブテロップ コントローラー</h1>
-    <div class="main-wrapper">
+    <div class="main-grid">
         <div id="on-air-panel" class="panel">
             <h2>ON AIR</h2>
             <div id="on-air-status">OFFLINE</div>
         </div>
         <div id="preview-panel" class="panel">
             <h2>PREVIEW / EDIT</h2>
-            <div class="tab-selector">
-                <button id="tab-ticker" class="active">通常ティッカー</button>
-                <button id="tab-breaking">緊急速報</button>
+            <div class="tabs">
+                <button id="tab-ticker" class="tab-button active">通常ティッカー</button>
+                <button id="tab-breaking" class="tab-button">緊急速報</button>
             </div>
             <div id="ticker-controls" class="tab-content active">
                 <label>ヘッダーテキスト</label><input type="text" id="tickerHeaderText" value="東京株式市場">
                 <label>スクロールテキスト</label><textarea id="tickerScrollText">質問や応援コメントお待ちしています。</textarea>
             </div>
             <div id="breaking-controls" class="tab-content">
-                 <!-- 新しい速報コントローラー -->
+                 <!-- 3段組速報の入力欄 -->
             </div>
-            <button id="takeButton" class="take-button">TAKE</button>
-            <button id="fallbackButton" class="fallback-button">FALLBACK (TICKER)</button>
+            <div class="button-group">
+                <button id="takeButton" class="btn btn-take">TAKE</button>
+                <button id="fallbackButton" class="btn btn-fallback">FALLBACK (TICKER)</button>
+            </div>
         </div>
         <div id="shots-panel" class="panel">
-             <h2>SAVED SHOTS</h2>
-             <!-- 下書き機能 -->
+             <h2>SAVED SHOTS (速報用)</h2>
+             <ul id="shots-list"></ul>
+             <div class="save-shot">
+                <input type="text" id="shot-name-input" placeholder="下書きの名前...">
+                <button id="save-shot-button" class="btn-load">保存</button>
+             </div>
         </div>
     </div>
-
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <script>
