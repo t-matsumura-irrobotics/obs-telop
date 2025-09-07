@@ -5,24 +5,6 @@
     <meta charset="UTF-8">
     <title>OBS Telop Controller</title>
     <link rel="stylesheet" href="style.css">
-    <style>
-        body { font-family: sans-serif; padding: 20px; background-color: #f0f0f0; }
-        .wrapper { max-width: 800px; margin: 0 auto 20px auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        h1, h3 { text-align: center; color: #333; }
-        h3 { margin-top: 30px; border-bottom: 2px solid #eee; padding-bottom: 10px; }
-        label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 14px; }
-        input, select, textarea { width: 100%; box-sizing: border-box; padding: 10px; font-size: 16px; border: 1px solid #ccc; border-radius: 4px; }
-        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 15px;}
-        button { padding: 10px 20px; font-size: 16px; cursor: pointer; border-radius: 4px; border: none; }
-        .show-btn { background-color: #28a745; color: white; }
-        .hide-btn { background-color: #ffc107; color: black; }
-        .mode-selector { display: flex; border-bottom: 2px solid #ccc; margin-bottom: 20px; }
-        .mode-selector label { padding: 10px 20px; cursor: pointer; color: #555; position: relative; }
-        .mode-selector input[type="radio"] { display: none; }
-        .mode-selector input[type="radio"]:checked + label { font-weight: bold; color: #007bff; border-bottom: 3px solid #007bff; }
-        .controls-panel { display: none; }
-        .controls-panel.active { display: block; }
-    </style>
 </head>
 <body>
     <div class="wrapper">
@@ -86,7 +68,6 @@
             });
             alert('ティッカーを更新しました。');
         });
-
         document.getElementById('breakingSendButton').addEventListener('click', () => {
             liveDataRef.update({
                 'mode': 'breaking',
@@ -99,7 +80,6 @@
             });
             alert('速報を送信しました！');
         });
-        
         document.getElementById('hideButton').addEventListener('click', () => {
             liveDataRef.update({ mode: 'ticker' });
             alert('ティッカー表示に戻します。');
