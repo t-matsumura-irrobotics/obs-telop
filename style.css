@@ -2,44 +2,79 @@
 @import url('https://fonts.googleapis.com/css2?family=Anton&display=swap');
 @font-face {
     font-family: 'LINE Seed JP';
-    src: url('fonts/LINESeedJP_OTF_Rg.woff2') format('woff2'); font-weight: 400;
+    src: url('fonts/LINESeedJP_OTF_Rg.woff2') format('woff2');
+    font-weight: 400; /* normal */
 }
 @font-face {
     font-family: 'LINE Seed JP';
-    src: url('fonts/LINESeedJP_OTF_Bd.woff2') format('woff2'); font-weight: 700;
+    src: url('fonts/LINESeedJP_OTF_Bd.woff2') format('woff2');
+    font-weight: 700; /* bold */
 }
-html, body.obs-display { margin: 0; padding: 0; overflow: hidden; font-family: 'LINE Seed JP', sans-serif; height: 100%; width: 100%; }
-#canvas { position: relative; width: 1920px; height: 1080px; }
-@keyframes seamless-scroll { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
-@keyframes bounce { 0%, 20%, 50%, 80%, 100% { transform: translateY(0); } 40% { transform: translateY(-15px); } 60% { transform: translateY(-7px); } }
 
-.telop-wrapper { position: absolute; bottom: 20px; left: 20px; right: 20px; opacity: 0; transition: opacity 0.4s ease-out; display: none; }
+html, body {
+    margin: 0; padding: 0; overflow: hidden;
+    font-family: 'LINE Seed JP', sans-serif;
+    height: 100%; width: 100%;
+}
+#canvas {
+    position: relative; width: 1920px; height: 1080px;
+}
+@keyframes seamless-scroll { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+@keyframes bounce {
+  0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+  40% { transform: translateY(-15px); }
+  60% { transform: translateY(-7px); }
+}
+
+.telop-wrapper {
+    position: absolute; bottom: 20px; left: 20px; right: 20px;
+    opacity: 0; transition: opacity 0.4s ease-out; display: none;
+}
 .telop-wrapper.visible { opacity: 1; display: block; }
 
-#ticker-container { height: 96px; border-radius: 8px; overflow: hidden; position: relative; }
-#ticker-base-white { width: 100%; height: 100%; background-color: white; }
+#ticker-container {
+    height: 96px; border-radius: 8px; overflow: hidden; position: relative;
+}
+#ticker-base-white {
+    width: 100%; height: 100%; background-color: white;
+}
 #ticker-header {
-    position: absolute; left: 0; top: 0; z-index: 2; width: 300px; height: 100%; color: white; display: flex;
-    justify-content: flex-start; align-items: center; background: linear-gradient(to right, #ed949f, #69aef3);
-    clip-path: polygon(0 0, 100% 0, 90% 100%, 0% 100%); font-size: 56px; font-weight: 700;
+    position: absolute; left: 0; top: 0; z-index: 2;
+    width: 300px; height: 100%; color: white; display: flex;
+    justify-content: flex-start; align-items: center; /* 左揃え */
+    background: linear-gradient(to right, #ed949f, #69aef3);
+    clip-path: polygon(0 0, 100% 0, 90% 100%, 0% 100%);
+    font-size: 52px; font-weight: 700;
     text-shadow: 1px 1px 3px rgba(0,0,0,0.4); box-shadow: 5px 0px 15px rgba(0,0,0,0.4);
 }
 #ticker-header-text { display: inline-block; white-space: nowrap; transform-origin: left center; padding-left: 40px; }
 #ticker-clock {
-    position: absolute; right: 0; top: 0; z-index: 3; width: 162px; height: 100%; background: linear-gradient(to right, #ed949f, #69aef3);
+    position: absolute; right: 0; top: 0; z-index: 3;
+    width: 162px; height: 100%; background: linear-gradient(to right, #ed949f, #69aef3);
     color: white; display: flex; justify-content: center; align-items: center;
     font-size: 46px; font-weight: 400; /* フォントを細く */
-    box-shadow: -5px 0px 15px rgba(0,0,0,0.4); overflow: hidden;
+    box-shadow: -5px 0px 15px rgba(0,0,0,0.4);
+    overflow: hidden;
 }
-#ticker-scroll-area { position: absolute; left: 0; top: 0; z-index: 1; width: 100%; height: 100%; overflow: hidden; white-space: nowrap; line-height: 96px; }
-.ticker-content { display: inline-block; font-size: 40px; font-weight: 400; letter-spacing: -0.05em; color: #000; vertical-align: middle; animation: seamless-scroll linear infinite; }
-
+#ticker-scroll-area {
+    position: absolute; left: 0; top: 0; z-index: 1;
+    width: 100%; height: 100%;
+    overflow: hidden; line-height: 96px; white-space: nowrap;
+}
+.ticker-content {
+    display: inline-block; font-size: 40px; font-weight: 400; letter-spacing: -0.05em; color: #000;
+    vertical-align: middle; animation: seamless-scroll linear infinite;
+}
 /* ▼▼▼ 速度選択用のクラス ▼▼▼ */
-.speed-slow { animation-duration: 50s; }
-.speed-normal { animation-duration: 30s; }
-.speed-fast { animation-duration: 15s; }
+.speed-slow .ticker-content { animation-duration: 50s; }
+.speed-normal .ticker-content { animation-duration: 30s; }
+.speed-fast .ticker-content { animation-duration: 15s; }
 
-#clock-time, #clock-live { position: absolute; font-family: 'Anton', sans-serif; letter-spacing: 0.05em; transform: translateX(0); transition: transform 0.4s cubic-bezier(0.77, 0, 0.175, 1); width: 100%; text-align: center; }
+#clock-time, #clock-live {
+    position: absolute; font-family: 'Anton', sans-serif; letter-spacing: 0.05em;
+    transform: translateX(0); transition: transform 0.4s cubic-bezier(0.77, 0, 0.175, 1);
+    width: 100%; text-align: center;
+}
 #clock-live { font-style: italic; transform: translateX(120%); font-size: 55px; }
 #ticker-clock.show-live #clock-time { transform: translateX(-120%); }
 #ticker-clock.show-live #clock-live { transform: translateX(0); }

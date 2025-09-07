@@ -22,8 +22,8 @@
         <div id="breaking-container" class="telop-wrapper">
             <div id="breaking-container-inner">
                 <div class="breaking-row">
-                    <div id="br-row1-header" class="br-row1-header"></div>
-                    <div id="br-row1-main" class="br-row1-main"></div>
+                    <div id="br-row1-header"></div>
+                    <div id="br-row1-main"></div>
                 </div>
                 <div class="breaking-row br-row2">
                     <span id="br-row2-item1" class="br-row2-item"></span>
@@ -32,8 +32,8 @@
                     <span id="br-row2-item4" class="br-row2-item"></span>
                 </div>
                 <div class="breaking-row">
-                    <div id="br-row3-header" class="br-row3-header"></div>
-                    <div id="br-row3-main" class="br-row3-main"></div>
+                    <div id="br-row3-header"></div>
+                    <div id="br-row3-main"></div>
                 </div>
             </div>
         </div>
@@ -45,11 +45,10 @@
         const firebaseConfig = { apiKey: "AIzaSyAhsAbTqQuairo-82A9rxQTazUCGdzdVc4", authDomain: "obs-telop-system-7c98c.firebaseapp.com", databaseURL: "https://obs-telop-system-7c98c-default-rtdb.asia-southeast1.firebasedatabase.app", projectId: "obs-telop-system-7c98c", storageBucket: "obs-telop-system-7c98c.appspot.com", messagingSenderId: "368503557333", appId: "1:368503557333:web:409dae2b1cf0c14b31a65c", measurementId: "G-VMBCJ2952Z" };
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
-        let currentScrollText = "";
         
-        function updateClock() { /* ... */ } // (省略)
-        function adjustHeaderText() { /* ... */ } // (省略)
-        setInterval(updateClock, 1000); updateClock();
+        let currentScrollText = "";
+
+        // ... (時計、ヘッダー長体処理の補助関数は変更なし) ...
 
         database.ref('live_data').on('value', (snapshot) => {
             const data = snapshot.val();
@@ -78,16 +77,31 @@
                 }
                 document.getElementById('ticker-header-text').innerText = content.headerText || '東京株式市場';
 
-                // ▼▼▼ スピード設定を反映 ▼▼▼
-                const tickerContent = document.getElementById('ticker-content');
-                tickerContent.className = 'ticker-content'; // reset
-                tickerContent.classList.add(content.scrollSpeed || 'speed-normal');
+                const tickerScrollArea = document.getElementById('ticker-scroll-area');
+                tickerScrollArea.className = 'ticker-scroll-area'; // reset
+                tickerScrollArea.classList.add(content.scrollSpeed || 'speed-normal');
                 
                 document.getElementById('breaking-container').classList.remove('visible');
                 document.getElementById('ticker-container').classList.add('visible');
                 setTimeout(adjustHeaderText, 50);
             }
         });
+        
+        function updateClock() {
+            const now = new Date(); const s = now.getSeconds();
+            document.getElementById('clock-time').textContent = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+            const tickerClock = document.getElementById('ticker-clock');
+            if (s >= 30) { tickerClock.classList.add('show-live'); } else { tickerClock.classList.remove('show-live'); }
+        }
+        setInterval(updateClock, 1000); updateClock();
+
+        function adjustHeaderText() {
+            const tickerHeaderText = document.getElementById('ticker-header-text');
+            tickerHeaderText.style.transform = 'scaleX(1)';
+            const containerWidth = tickerHeaderText.parentElement.clientWidth - 40;
+            const textWidth = tickerHeaderText.scrollWidth;
+            if (textWidth > containerWidth) { tickerHeaderText.style.transform = `scaleX(${containerWidth / textWidth})`; }
+        }
     </script>
 </body>
 </html>

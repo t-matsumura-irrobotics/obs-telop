@@ -106,8 +106,7 @@
             document.getElementById('mode-ticker').checked = true;
             document.getElementById('mode-ticker').dispatchEvent(new Event('change'));
         });
-
-        // (タブUIのロジックは変更なし)
+        
         const modeRadios = document.querySelectorAll('input[name="mode"]');
         const tickerControls = document.getElementById('ticker-controls');
         const breakingControls = document.getElementById('breaking-controls');
