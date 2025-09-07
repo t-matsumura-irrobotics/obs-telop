@@ -16,10 +16,7 @@
 
         <div id="ticker-controls" class="controls-panel active">
             <h3>通常ティッカー 設定</h3>
-            <div class="grid-2">
-                <div><label for="tickerHeaderText">ヘッダーテキスト</label><input type="text" id="tickerHeaderText" value="東京株式市場"></div>
-                <div><label for="tickerScrollSpeed">スクロール速度</label><select id="tickerScrollSpeed"><option value="speed-slow">遅い</option><option value="speed-normal" selected>普通</option><option value="speed-fast">速い</option></select></div>
-            </div>
+            <div><label for="tickerHeaderText">ヘッダーテキスト</label><input type="text" id="tickerHeaderText" value="東京株式市場"></div>
             <div style="margin-top:15px;"><label for="tickerScrollText">スクロールテキスト</label><textarea id="tickerScrollText">質問や応援コメントお待ちしています。</textarea></div>
             <button id="tickerSendButton" class="show-btn" style="width:100%; margin-top:15px;">ティッカー表示・更新</button>
         </div>
@@ -62,8 +59,7 @@
                 'mode': 'ticker',
                 'ticker_content': {
                     headerText: document.getElementById('tickerHeaderText').value,
-                    scrollText: document.getElementById('tickerScrollText').value,
-                    scrollSpeed: document.getElementById('tickerScrollSpeed').value,
+                    scrollText: document.getElementById('tickerScrollText').value
                 }
             });
             alert('ティッカーを更新しました。');
