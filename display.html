@@ -3,9 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=1920, height=1080">
-    <title>OBS Telop Display</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <title>OBS Telop Display Bottom</title>
     <link href="https://fonts.googleapis.com/css2?family=Anton&display=swap" rel="stylesheet">
     
     <style>
@@ -20,39 +18,60 @@
             font-weight: 700;
         }
         
-        /* OBS用の固定サイズ設定 */
-        html, body {
+        /* リセットと基本設定 */
+        * {
             margin: 0;
             padding: 0;
+            box-sizing: border-box;
+        }
+        
+        html {
             width: 1920px;
             height: 1080px;
             overflow: hidden;
+        }
+        
+        body {
+            width: 1920px;
+            height: 1080px;
             font-family: 'LINE Seed JP', sans-serif;
-            background-color: transparent;
+            background: transparent;
             position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+        }
+
+        /* メインコンテナ - 下部に固定 */
+        .main-container {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            width: 1920px;
+            padding: 0 20px 20px 20px;
+            box-sizing: border-box;
         }
 
         @keyframes seamless-scroll {
-            0% { transform: translateX(0); }
-            100% { transform: translateX(-50%); }
+            0% { transform: translateX(100%); }
+            100% { transform: translateX(-100%); }
         }
+        
         @keyframes bounce {
             0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
             40% { transform: translateY(-15px); }
             60% { transform: translateY(-7px); }
         }
 
-        /* ティッカーを画面内に収める */
+        /* ティッカーコンテナ */
         .telop-wrapper {
-            position: fixed;
-            bottom: 20px;
-            left: 20px;
-            width: calc(1920px - 40px);
-            max-width: 1880px;
+            width: 100%;
             opacity: 0;
             transition: opacity 0.4s ease-out;
             display: none;
         }
+        
         .telop-wrapper.visible {
             opacity: 1;
             display: block;
@@ -63,126 +82,114 @@
             border-radius: 8px;
             overflow: hidden;
             position: relative;
-            width: 100%;
-        }
-        
-        #ticker-base-white {
-            width: 100%;
-            height: 100%;
-            background-color: white;
+            background: white;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
         }
         
         #ticker-header {
             position: absolute;
             left: 0;
             top: 0;
-            z-index: 2;
+            z-index: 10;
             width: 300px;
             height: 100%;
             color: white;
             display: flex;
-            justify-content: flex-start;
             align-items: center;
-            background: linear-gradient(to right, #ed949f, #69aef3);
+            background: linear-gradient(135deg, #ed949f, #69aef3);
             clip-path: polygon(0 0, 100% 0, 90% 100%, 0% 100%);
             font-size: 52px;
             font-weight: 700;
-            text-shadow: 1px 1px 3px rgba(0,0,0,0.4);
-            box-shadow: 5px 0px 15px rgba(0,0,0,0.4);
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            padding-left: 30px;
+            box-shadow: 5px 0 15px rgba(0,0,0,0.2);
         }
         
         #ticker-header-text {
-            display: inline-block;
             white-space: nowrap;
             transform-origin: left center;
-            padding-left: 40px;
         }
         
         #ticker-clock {
             position: absolute;
             right: 0;
             top: 0;
-            z-index: 3;
+            z-index: 10;
             width: 162px;
             height: 100%;
-            background: linear-gradient(to right, #ed949f, #69aef3);
+            background: linear-gradient(45deg, #ed949f, #69aef3);
             color: white;
             display: flex;
             justify-content: center;
             align-items: center;
             font-size: 46px;
-            font-weight: 400;
-            box-shadow: -5px 0px 15px rgba(0,0,0,0.4);
+            font-family: 'Anton', sans-serif;
+            box-shadow: -5px 0 15px rgba(0,0,0,0.2);
             overflow: hidden;
         }
         
+        /* スクロールエリア */
         #ticker-scroll-area {
             position: absolute;
-            left: 300px;
+            left: 280px;
+            right: 162px;
             top: 0;
-            z-index: 1;
-            width: calc(100% - 462px);
             height: 100%;
             overflow: hidden;
-            line-height: 96px;
-            white-space: nowrap;
+            display: flex;
+            align-items: center;
         }
         
         .ticker-content {
             display: inline-block;
+            white-space: nowrap;
             font-size: 40px;
-            font-weight: 400;
-            letter-spacing: -0.05em;
-            color: #000;
-            vertical-align: middle;
+            color: #333;
+            padding-right: 50px;
             animation: seamless-scroll 30s linear infinite;
-            padding-right: 100%;
         }
         
         .speed-slow .ticker-content { animation-duration: 50s; }
         .speed-normal .ticker-content { animation-duration: 30s; }
         .speed-fast .ticker-content { animation-duration: 15s; }
 
+        /* 時計アニメーション */
         #clock-time, #clock-live {
             position: absolute;
-            font-family: 'Anton', sans-serif;
-            letter-spacing: 0.05em;
-            transform: translateX(0);
-            transition: transform 0.4s cubic-bezier(0.77, 0, 0.175, 1);
             width: 100%;
             text-align: center;
+            transition: transform 0.4s ease;
         }
         
         #clock-live {
-            font-style: italic;
-            transform: translateX(120%);
+            transform: translateX(200%);
             font-size: 55px;
+            font-style: italic;
         }
         
-        #ticker-clock.show-live #clock-time { transform: translateX(-120%); }
+        #ticker-clock.show-live #clock-time { transform: translateX(-200%); }
         #ticker-clock.show-live #clock-live { transform: translateX(0); }
         
         #clock-live span {
             display: inline-block;
             animation: bounce 1.5s infinite ease-in-out;
-            will-change: transform;
         }
         #clock-live span:nth-child(1) { animation-delay: 0.1s; }
         #clock-live span:nth-child(2) { animation-delay: 0.2s; }
         #clock-live span:nth-child(3) { animation-delay: 0.3s; }
         #clock-live span:nth-child(4) { animation-delay: 0.4s; }
         
+        /* 速報コンテナ */
         #breaking-container {
-            height: auto;
             width: 100%;
         }
         
         #breaking-container-inner {
-            background-color: #e0e0e0;
+            background: #e0e0e0;
             border-radius: 8px;
-            box-shadow: 0 6px 15px rgba(0,0,0,0.3);
             border-left: 8px solid #c00000;
             overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
         }
         
         .breaking-row {
@@ -191,7 +198,7 @@
         }
         
         .br-row1-header {
-            background-color: #e0e0e0;
+            background: #e0e0e0;
             color: #000;
             font-size: 48px;
             padding: 10px 30px;
@@ -199,25 +206,26 @@
         }
         
         .br-row1-main {
-            background-color: #c00000;
-            color: #fff;
+            background: #c00000;
+            color: white;
             font-size: 48px;
             padding: 10px 30px;
-            flex-grow: 1;
+            flex: 1;
             text-align: center;
         }
         
         .br-row2 {
-            background-color: #222;
-            color: #fff;
+            background: #222;
+            color: white;
             font-size: 42px;
             padding: 8px 0;
+            display: flex;
         }
         
         .br-row2-item {
-            flex-grow: 1;
+            flex: 1;
             text-align: center;
-            white-space: nowrap;
+            padding: 0 10px;
         }
         
         .br-row2-item + .br-row2-item {
@@ -225,62 +233,64 @@
         }
         
         .br-row2-item-value {
-            background-color: #fff;
+            background: white;
             color: #000;
             padding: 0 15px;
             margin: 0 10px;
             border-radius: 4px;
+            display: inline-block;
         }
         
         .br-row3-header {
-            background-color: #757575;
-            color: #fff;
+            background: #757575;
+            color: white;
             font-size: 42px;
             padding: 8px 30px;
             white-space: nowrap;
         }
         
         .br-row3-main {
-            background-color: #e0e0e0;
+            background: #e0e0e0;
             color: #000;
             font-size: 42px;
             padding: 8px 30px;
-            flex-grow: 1;
+            flex: 1;
         }
     </style>
 </head>
 <body>
-    <div id="ticker-container" class="telop-wrapper">
-        <div id="ticker-base-white"></div>
-        <div id="ticker-scroll-area">
-            <span id="ticker-content" class="ticker-content"></span>
-        </div>
-        <div id="ticker-header">
-            <span id="ticker-header-text"></span>
-        </div>
-        <div id="ticker-clock">
-            <span id="clock-time"></span>
-            <span id="clock-live">
-                <span>L</span><span>I</span><span>V</span><span>E</span>
-            </span>
-        </div>
-    </div>
-    
-    <div id="breaking-container" class="telop-wrapper">
-        <div id="breaking-container-inner">
-            <div class="breaking-row">
-                <div id="br-row1-header" class="br-row1-header"></div>
-                <div id="br-row1-main" class="br-row1-main"></div>
+    <div class="main-container">
+        <div id="ticker-container" class="telop-wrapper">
+            <div id="ticker-scroll-area">
+                <span id="ticker-content" class="ticker-content"></span>
             </div>
-            <div class="breaking-row br-row2">
-                <span id="br-row2-item1" class="br-row2-item"></span>
-                <span id="br-row2-item2" class="br-row2-item"></span>
-                <span id="br-row2-item3" class="br-row2-item"></span>
-                <span id="br-row2-item4" class="br-row2-item"></span>
+            <div id="ticker-header">
+                <span id="ticker-header-text"></span>
             </div>
-            <div class="breaking-row">
-                <div id="br-row3-header" class="br-row3-header"></div>
-                <div id="br-row3-main" class="br-row3-main"></div>
+            <div id="ticker-clock">
+                <span id="clock-time"></span>
+                <span id="clock-live">
+                    <span>L</span><span>I</span><span>V</span><span>E</span>
+                </span>
+            </div>
+        </div>
+        
+        <div id="breaking-container" class="telop-wrapper">
+            <div id="breaking-container-inner">
+                <div class="breaking-row">
+                    <div class="br-row1-header" id="br-row1-header"></div>
+                    <div class="br-row1-main" id="br-row1-main"></div>
+                </div>
+                <div class="breaking-row br-row2">
+                    <div class="br-row2-item" id="br-row2-item1"></div>
+                    <div class="br-row2-item" id="br-row2-item2"></div>
+                    <div class="br-row2-item" id="br-row2-item3"></div>
+                    <div class="br-row2-item" id="br-row2-item4"></div>
+                </div>
+                <div class="breaking-row">
+                    <div class="br-row3-header" id="br-row3-header"></div>
+                    <div class="br-row3-main" id="br-row3-main"></div>
+                </div>
             </div>
         </div>
     </div>
@@ -305,32 +315,41 @@
 
         function updateClock() {
             const now = new Date();
-            const s = now.getSeconds();
-            document.getElementById('clock-time').textContent = 
-                `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            document.getElementById('clock-time').textContent = `${hours}:${minutes}`;
+            
             const tickerClock = document.getElementById('ticker-clock');
-            if (s >= 30) {
+            if (now.getSeconds() >= 30) {
                 tickerClock.classList.add('show-live');
             } else {
                 tickerClock.classList.remove('show-live');
             }
         }
+        
         setInterval(updateClock, 1000);
         updateClock();
 
         function adjustHeaderText() {
-            const tickerHeaderText = document.getElementById('ticker-header-text');
-            tickerHeaderText.style.transform = 'scaleX(1)';
-            const containerWidth = tickerHeaderText.parentElement.clientWidth - 40;
-            const textWidth = tickerHeaderText.scrollWidth;
-            if (textWidth > containerWidth) {
-                tickerHeaderText.style.transform = `scaleX(${containerWidth / textWidth})`;
+            const headerText = document.getElementById('ticker-header-text');
+            const header = document.getElementById('ticker-header');
+            headerText.style.transform = 'scaleX(1)';
+            
+            const maxWidth = header.clientWidth - 60;
+            const textWidth = headerText.scrollWidth;
+            
+            if (textWidth > maxWidth) {
+                const scale = maxWidth / textWidth;
+                headerText.style.transform = `scaleX(${scale})`;
             }
         }
 
         database.ref('live_data').on('value', (snapshot) => {
             const data = snapshot.val();
             if (!data) return;
+
+            const tickerContainer = document.getElementById('ticker-container');
+            const breakingContainer = document.getElementById('breaking-container');
 
             if (data.mode === 'breaking' && data.breaking_content) {
                 const content = data.breaking_content;
@@ -343,28 +362,29 @@
                 document.getElementById('br-row3-header').innerText = content.b_r3_h || '';
                 document.getElementById('br-row3-main').innerText = content.b_r3_m || '';
 
-                document.getElementById('ticker-container').classList.remove('visible');
-                document.getElementById('breaking-container').classList.add('visible');
+                tickerContainer.classList.remove('visible');
+                breakingContainer.classList.add('visible');
             } else {
                 const content = data.ticker_content || {};
                 const newScrollText = content.scrollText || 'コメントをお待ちしています。';
 
                 if (newScrollText !== currentScrollText) {
                     currentScrollText = newScrollText;
-                    // テキストを2回繰り返してシームレスなスクロールを実現
-                    document.getElementById('ticker-content').innerText = 
-                        `${currentScrollText}　　　${currentScrollText}`;
+                    const tickerContent = document.getElementById('ticker-content');
+                    tickerContent.innerText = `${currentScrollText}　　　${currentScrollText}　　　`;
                 }
+                
                 document.getElementById('ticker-header-text').innerText = 
                     content.headerText || '東京株式市場';
 
-                const tickerScrollArea = document.getElementById('ticker-scroll-area');
-                tickerScrollArea.className = '';
-                tickerScrollArea.classList.add(content.scrollSpeed || 'speed-normal');
+                const scrollArea = document.getElementById('ticker-scroll-area');
+                scrollArea.className = '';
+                scrollArea.classList.add(content.scrollSpeed || 'speed-normal');
                 
-                document.getElementById('breaking-container').classList.remove('visible');
-                document.getElementById('ticker-container').classList.add('visible');
-                setTimeout(adjustHeaderText, 50);
+                breakingContainer.classList.remove('visible');
+                tickerContainer.classList.add('visible');
+                
+                setTimeout(adjustHeaderText, 100);
             }
         });
     </script>
