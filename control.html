@@ -12,7 +12,7 @@
         h3 { margin-top: 30px; border-bottom: 2px solid #eee; padding-bottom: 10px; }
         label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 14px; }
         input, select, textarea { width: 100%; box-sizing: border-box; padding: 10px; font-size: 16px; border: 1px solid #ccc; border-radius: 4px; }
-        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 15px;}
         button { padding: 10px 20px; font-size: 16px; cursor: pointer; border-radius: 4px; border: none; }
         .show-btn { background-color: #28a745; color: white; }
         .hide-btn { background-color: #ffc107; color: black; }
@@ -34,7 +34,10 @@
 
         <div id="ticker-controls" class="controls-panel active">
             <h3>通常ティッカー 設定</h3>
-            <div><label for="tickerHeaderText">ヘッダーテキスト</label><input type="text" id="tickerHeaderText" value="東京株式市場"></div>
+            <div class="grid-2">
+                <div><label for="tickerHeaderText">ヘッダーテキスト</label><input type="text" id="tickerHeaderText" value="東京株式市場"></div>
+                <div><label for="tickerScrollSpeed">スクロール速度</label><select id="tickerScrollSpeed"><option value="speed-slow">遅い</option><option value="speed-normal" selected>普通</option><option value="speed-fast">速い</option></select></div>
+            </div>
             <div style="margin-top:15px;"><label for="tickerScrollText">スクロールテキスト</label><textarea id="tickerScrollText">質問や応援コメントお待ちしています。</textarea></div>
             <button id="tickerSendButton" class="show-btn" style="width:100%; margin-top:15px;">ティッカー表示・更新</button>
         </div>
@@ -42,20 +45,20 @@
         <div id="breaking-controls" class="controls-panel">
             <h3>緊急速報 設定</h3>
             <div class="grid-2">
-                <div><label for="b_r1_h">1行目ヘッダー</label><input type="text" id="b_r1_h" value="地震情報"></div>
-                <div><label for="b_r1_m">1行目メイン</label><input type="text" id="b_r1_m" value="海岸から離れてください"></div>
+                <div><label for="b_r1_h">1行目ヘッダー</label><input type="text" id="b_r1_h" value="決算速報"></div>
+                <div><label for="b_r1_m">1行目メイン</label><input type="text" id="b_r1_m" value="トヨタ自動車 (7203)"></div>
             </div>
             <hr>
             <div class="grid-2">
-                <div><label for="b_r2_i1">2行目-1</label><input type="text" id="b_r2_i1" value="最大震度 <span class='br-row2-item-value'>7</span>"></div>
-                <div><label for="b_r2_i2">2行目-2</label><input type="text" id="b_r2_i2" value="M <span class='br-row2-item-value'>7.6</span>"></div>
-                <div><label for="b_r2_i3">2行目-3</label><input type="text" id="b_r2_i3" value="震源 <span class='br-row2-item-value'>石川県能登地方</span>"></div>
-                <div><label for="b_r2_i4">2行目-4</label><input type="text" id="b_r2_i4" value="発生日時 <span class='br-row2-item-value'>16:10頃</span>"></div>
+                <div><label for="b_r2_i1">2行目-1</label><input type="text" id="b_r2_i1" value="売上収益 <span class='br-row2-item-value'>28兆円</span>"></div>
+                <div><label for="b_r2_i2">2行目-2</label><input type="text" id="b_r2_i2" value="営業利益 <span class='br-row2-item-value'>3兆円</span>"></div>
+                <div><label for="b_r2_i3">2行目-3</label><input type="text" id="b_r2_i3" value="経常利益 <span class='br-row2-item-value'>3.2兆円</span>"></div>
+                <div><label for="b_r2_i4">2行目-4</label><input type="text" id="b_r2_i4" value="純利益 <span class='br-row2-item-value'>2.8兆円</span>"></div>
             </div>
             <hr>
             <div class="grid-2">
-                <div><label for="b_r3_h">3行目ヘッダー</label><input type="text" id="b_r3_h" value="震度 5強"></div>
-                <div><label for="b_r3_m">3行目メイン</label><input type="text" id="b_r3_m" value="【富山県】富山市"></div>
+                <div><label for="b_r3_h">3行目ヘッダー</label><input type="text" id="b_r3_h" value="輸送用機器"></div>
+                <div><label for="b_r3_m">3行目メイン</label><input type="text" id="b_r3_m" value="トランプ関税の影響は限定的か"></div>
             </div>
             <div style="display: flex; gap: 10px; margin-top:20px;">
                 <button id="breakingSendButton" class="show-btn" style="flex-grow: 1;">速報表示</button>
@@ -76,8 +79,9 @@
             liveDataRef.update({
                 'mode': 'ticker',
                 'ticker_content': {
-                    'headerText': document.getElementById('tickerHeaderText').value,
-                    'scrollText': document.getElementById('tickerScrollText').value
+                    headerText: document.getElementById('tickerHeaderText').value,
+                    scrollText: document.getElementById('tickerScrollText').value,
+                    scrollSpeed: document.getElementById('tickerScrollSpeed').value,
                 }
             });
             alert('ティッカーを更新しました。');
