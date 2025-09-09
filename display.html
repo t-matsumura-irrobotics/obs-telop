@@ -12,20 +12,18 @@
         @keyframes seamless-scroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
         @keyframes bounce { 0%, 20%, 50%, 80%, 100% { transform: translateY(0); } 40% { transform: translateY(-15px); } 60% { transform: translateY(-7px); } }
 
-        /* ティッカー本体（白ベース部分）のラッパー */
-        .telop-wrapper {
-            position: fixed; bottom: 0; left: 0; right: 0;
-            opacity: 0; transition: opacity 0.4s ease-out; display: none; z-index: 1000;
+        /* ▼▼▼ CSSの .visible クラスを廃止し、JavaScriptで直接制御する方式に変更 ▼▼▼ */
+        .telop-wrapper, .clock-wrapper {
+            position: fixed;
+            bottom: 0;
+            opacity: 0;
+            visibility: hidden; /* display:none の代わりに visibility を使用 */
+            transition: opacity 0.4s ease-out;
+            z-index: 1000;
         }
-        .telop-wrapper.visible { opacity: 1; display: block; }
-        
-        /* ▼▼▼ 時報専用のラッパー（これが重要です） ▼▼▼ */
-        .clock-wrapper {
-            position: fixed; bottom: 0; right: 0;
-            opacity: 0; transition: opacity 0.4s ease-out; display: none; z-index: 1001;
-        }
-        .clock-wrapper.visible { opacity: 1; display: flex; }
-        /* ▲▲▲ 時報専用のラッパー ▲▲▲ */
+        .telop-wrapper { left: 0; right: 0; }
+        .clock-wrapper { right: 0; z-index: 1001; }
+        /* ▲▲▲ CSSの .visible クラスを廃止 ▲▲▲ */
         
         #ticker-container { height: 96px; overflow: hidden; position: relative; background: white; box-shadow: 0 4px 10px rgba(0,0,0,0.3); display: flex; }
         #ticker-header { flex-shrink: 0; width: 300px; height: 100%; color: white; display: flex; align-items: center; background: linear-gradient(135deg, #ed949f, #69aef3); clip-path: polygon(0 0, 100% 0, 90% 100%, 0% 100%); font-size: 52px; font-weight: 700; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); padding-left: 30px; }
@@ -115,9 +113,25 @@
         updateClock();
         setInterval(updateClock, 1000);
 
+        // ▼▼▼ JavaScriptの表示制御ロジックを全面的に修正 ▼▼▼
+
+        // 要素の表示/非表示を直接制御するヘルパー関数
+        function setVisibility(element, isVisible) {
+            if (isVisible) {
+                element.style.visibility = 'visible';
+                element.style.opacity = '1';
+            } else {
+                element.style.opacity = '0';
+                // トランジションが終わった後に非表示にする
+                setTimeout(() => {
+                    element.style.visibility = 'hidden';
+                }, 400); // CSSのtransition時間と合わせる
+            }
+        }
+
         // ■ Firebaseからのデータ受信ロジック
         database.ref('live_data').on('value', (snapshot) => {
-            const data = snapshot.val() || {}; // データがnullでも空オブジェクトとして扱う
+            const data = snapshot.val() || {};
             
             const tickerMainWrapper = document.getElementById('ticker-main-wrapper');
             const breakingContainer = document.getElementById('breaking-container');
@@ -125,14 +139,16 @@
             const tickerClock = document.getElementById('ticker-clock');
 
             // --- 1. 時報の表示を制御 ---
-            // ▼▼▼ このロジックがコントローラーの「時報 ON/OFF」と連携します ▼▼▼
-            clockDisplayWrapper.classList.toggle('visible', !!data.showClock);
+            setVisibility(clockDisplayWrapper, !!data.showClock);
 
             // --- 2. ティッカー本体の表示を制御 ---
-            if (data.mode === 'ticker' && data.ticker_content) {
-                breakingContainer.classList.remove('visible');
-                tickerMainWrapper.classList.add('visible');
-                
+            const showTicker = data.mode === 'ticker' && data.ticker_content;
+            const showBreaking = data.mode === 'breaking' && data.breaking_content;
+
+            setVisibility(tickerMainWrapper, showTicker);
+            setVisibility(breakingContainer, showBreaking);
+
+            if (showTicker) {
                 document.getElementById('ticker-header-text').textContent = data.ticker_content.headerText;
                 
                 const tickerContents = document.querySelectorAll('.ticker-content');
@@ -154,19 +170,13 @@
 
                 tickerClock.classList.toggle('show-live', !!data.ticker_content.isLive);
 
-            } else if (data.mode === 'breaking' && data.breaking_content) {
-                tickerMainWrapper.classList.remove('visible');
-                breakingContainer.classList.add('visible');
-                // (速報データの更新)
+            } else if (showBreaking) {
                 const b = data.breaking_content;
                 document.getElementById('br-r1-h').textContent = b.b_r1_h;
                 document.getElementById('br-r1-m').textContent = b.b_r1_m;
-
-            } else { // 'hidden' または未定義の場合
-                tickerMainWrapper.classList.remove('visible');
-                breakingContainer.classList.remove('visible');
             }
         });
+        // ▲▲▲ JavaScriptの表示制御ロジックを全面的に修正 ▲▲▲
     </script>
 </body>
 </html>
