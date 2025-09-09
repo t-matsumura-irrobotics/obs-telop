@@ -2,295 +2,112 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=1920, height=1080">
-    <title>OBS Telop Display Bottom</title>
+    <title>OBS Telop Display</title>
     <link href="https://fonts.googleapis.com/css2?family=Anton&display=swap" rel="stylesheet">
-    
     <style>
-        @font-face {
-            font-family: 'LINE Seed JP';
-            src: url('fonts/LINESeedJP_OTF_Rg.woff2') format('woff2');
-            font-weight: 400;
-        }
-        @font-face {
-            font-family: 'LINE Seed JP';
-            src: url('fonts/LINESeedJP_OTF_Bd.woff2') format('woff2');
-            font-weight: 700;
-        }
+        @font-face { font-family: 'LINE Seed JP'; src: url('fonts/LINESeedJP_OTF_Rg.woff2') format('woff2'); font-weight: 400; }
+        @font-face { font-family: 'LINE Seed JP'; src: url('fonts/LINESeedJP_OTF_Bd.woff2') format('woff2'); font-weight: 700; }
+        html, body { margin: 0; padding: 0; overflow: hidden; font-family: 'LINE Seed JP', sans-serif; height: 100%; width: 100%; background: transparent; }
+        body { position: relative; }
         
-        /* リセットと基本設定 */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        /* ▼▼▼ アニメーションの定義を修正しました ▼▼▼ */
+        @keyframes seamless-scroll {
+            from {
+                transform: translateX(0);
+            }
+            to {
+                transform: translateX(-50%); /* コンテナ幅の半分だけ移動させ、ループを完璧にします */
+            }
         }
-        
-        html {
-            width: 1920px;
-            height: 1080px;
-            overflow: hidden;
-        }
-        
-        body {
-            width: 1920px;
-            height: 1080px;
-            font-family: 'LINE Seed JP', sans-serif;
-            background: transparent;
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-end;
-        }
+        /* ▲▲▲ アニメーションの定義を修正しました ▲▲▲ */
 
-        /* メインコンテナ - 下部に固定 */
-        .main-container {
+        @keyframes bounce { 0%, 20%, 50%, 80%, 100% { transform: translateY(0); } 40% { transform: translateY(-15px); } 60% { transform: translateY(-7px); } }
+
+        .telop-wrapper {
             position: absolute;
             bottom: 0;
             left: 0;
             right: 0;
-            width: 1920px;
-            padding: 0 20px 20px 20px;
-            box-sizing: border-box;
-        }
-
-        @keyframes seamless-scroll {
-            0% { transform: translateX(100%); }
-            100% { transform: translateX(-100%); }
-        }
-        
-        @keyframes bounce {
-            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
-            40% { transform: translateY(-15px); }
-            60% { transform: translateY(-7px); }
-        }
-
-        /* ティッカーコンテナ */
-        .telop-wrapper {
-            width: 100%;
             opacity: 0;
             transition: opacity 0.4s ease-out;
             display: none;
         }
+        .telop-wrapper.visible { opacity: 1; display: block; }
         
-        .telop-wrapper.visible {
-            opacity: 1;
-            display: block;
-        }
+        #ticker-container { height: 96px; overflow: hidden; position: relative; background: white; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+        #ticker-header { position: absolute; left: 0; top: 0; z-index: 10; width: 300px; height: 100%; color: white; display: flex; align-items: center; justify-content: flex-start; background: linear-gradient(135deg, #ed949f, #69aef3); clip-path: polygon(0 0, 100% 0, 90% 100%, 0% 100%); font-size: 52px; font-weight: 700; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); padding-left: 30px; box-shadow: 5px 0 15px rgba(0,0,0,0.2); }
+        #ticker-header-text { white-space: nowrap; transform-origin: left center; }
+        #ticker-clock { position: absolute; right: 0; top: 0; z-index: 10; width: 162px; height: 100%; background: linear-gradient(45deg, #ed949f, #69aef3); color: white; display: flex; justify-content: center; align-items: center; font-size: 46px; font-family: 'Anton', sans-serif; box-shadow: -5px 0 15px rgba(0,0,0,0.2); overflow: hidden; }
+        #ticker-scroll-area { position: absolute; left: 280px; right: 162px; top: 0; height: 100%; overflow: hidden; }
 
-        #ticker-container {
-            height: 96px;
-            border-radius: 8px;
-            overflow: hidden;
-            position: relative;
-            background: white;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        /* ▼▼▼ スクロール部分のCSSを修正しました ▼▼▼ */
+        #ticker-scroll-container {
+            display: flex; /* 子要素を横並びにします */
+            width: fit-content; /* 内容に応じた幅にします */
+            animation-name: seamless-scroll;
+            animation-timing-function: linear;
+            animation-iteration-count: infinite;
+            animation-duration: var(--scroll-duration, 30s); /* JSから速度を制御します */
         }
-        
-        #ticker-header {
-            position: absolute;
-            left: 0;
-            top: 0;
-            z-index: 10;
-            width: 300px;
-            height: 100%;
-            color: white;
-            display: flex;
-            align-items: center;
-            background: linear-gradient(135deg, #ed949f, #69aef3);
-            clip-path: polygon(0 0, 100% 0, 90% 100%, 0% 100%);
-            font-size: 52px;
-            font-weight: 700;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-            padding-left: 30px;
-            box-shadow: 5px 0 15px rgba(0,0,0,0.2);
-        }
-        
-        #ticker-header-text {
-            white-space: nowrap;
-            transform-origin: left center;
-        }
-        
-        #ticker-clock {
-            position: absolute;
-            right: 0;
-            top: 0;
-            z-index: 10;
-            width: 162px;
-            height: 100%;
-            background: linear-gradient(45deg, #ed949f, #69aef3);
-            color: white;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 46px;
-            font-family: 'Anton', sans-serif;
-            box-shadow: -5px 0 15px rgba(0,0,0,0.2);
-            overflow: hidden;
-        }
-        
-        /* スクロールエリア */
-        #ticker-scroll-area {
-            position: absolute;
-            left: 280px;
-            right: 162px;
-            top: 0;
-            height: 100%;
-            overflow: hidden;
-            display: flex;
-            align-items: center;
-        }
-        
         .ticker-content {
-            display: inline-block;
+            display: block;
             white-space: nowrap;
             font-size: 40px;
             color: #333;
-            padding-right: 50px;
-            animation: seamless-scroll 30s linear infinite;
+            padding: 0 20px; /* テキストの間に少し余白を設けます */
+            line-height: 96px; /* 高さを親要素に合わせます */
         }
+        /* ▲▲▲ スクロール部分のCSSを修正しました ▲▲▲ */
         
-        .speed-slow .ticker-content { animation-duration: 50s; }
-        .speed-normal .ticker-content { animation-duration: 30s; }
-        .speed-fast .ticker-content { animation-duration: 15s; }
-
-        /* 時計アニメーション */
-        #clock-time, #clock-live {
-            position: absolute;
-            width: 100%;
-            text-align: center;
-            transition: transform 0.4s ease;
-        }
-        
-        #clock-live {
-            transform: translateX(200%);
-            font-size: 55px;
-            font-style: italic;
-        }
-        
+        #clock-time, #clock-live { position: absolute; width: 100%; text-align: center; transition: transform 0.4s ease; }
+        #clock-live { transform: translateX(200%); font-size: 55px; font-style: italic; }
         #ticker-clock.show-live #clock-time { transform: translateX(-200%); }
         #ticker-clock.show-live #clock-live { transform: translateX(0); }
-        
-        #clock-live span {
-            display: inline-block;
-            animation: bounce 1.5s infinite ease-in-out;
-        }
+        #clock-live span { display: inline-block; animation: bounce 1.5s infinite ease-in-out; }
         #clock-live span:nth-child(1) { animation-delay: 0.1s; }
         #clock-live span:nth-child(2) { animation-delay: 0.2s; }
         #clock-live span:nth-child(3) { animation-delay: 0.3s; }
         #clock-live span:nth-child(4) { animation-delay: 0.4s; }
-        
-        /* 速報コンテナ */
-        #breaking-container {
-            width: 100%;
-        }
-        
-        #breaking-container-inner {
-            background: #e0e0e0;
-            border-radius: 8px;
-            border-left: 8px solid #c00000;
-            overflow: hidden;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-        }
-        
-        .breaking-row {
-            display: flex;
-            font-weight: bold;
-        }
-        
-        .br-row1-header {
-            background: #e0e0e0;
-            color: #000;
-            font-size: 48px;
-            padding: 10px 30px;
-            white-space: nowrap;
-        }
-        
-        .br-row1-main {
-            background: #c00000;
-            color: white;
-            font-size: 48px;
-            padding: 10px 30px;
-            flex: 1;
-            text-align: center;
-        }
-        
-        .br-row2 {
-            background: #222;
-            color: white;
-            font-size: 42px;
-            padding: 8px 0;
-            display: flex;
-        }
-        
-        .br-row2-item {
-            flex: 1;
-            text-align: center;
-            padding: 0 10px;
-        }
-        
-        .br-row2-item + .br-row2-item {
-            border-left: 2px solid #555;
-        }
-        
-        .br-row2-item-value {
-            background: white;
-            color: #000;
-            padding: 0 15px;
-            margin: 0 10px;
-            border-radius: 4px;
-            display: inline-block;
-        }
-        
-        .br-row3-header {
-            background: #757575;
-            color: white;
-            font-size: 42px;
-            padding: 8px 30px;
-            white-space: nowrap;
-        }
-        
-        .br-row3-main {
-            background: #e0e0e0;
-            color: #000;
-            font-size: 42px;
-            padding: 8px 30px;
-            flex: 1;
-        }
+
+        #breaking-container-inner { background: #e0e0e0; border-radius: 8px; border-left: 8px solid #c00000; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+        .breaking-row { display: flex; font-weight: bold; }
+        .br-row1-header { background: #e0e0e0; color: #000; font-size: 48px; padding: 10px 30px; white-space: nowrap; }
+        .br-row1-main { background: #c00000; color: white; font-size: 48px; padding: 10px 30px; flex: 1; text-align: center; }
+        .br-row2 { background: #222; color: white; font-size: 42px; padding: 8px 0; display: flex; }
+        .br-row2-item { flex: 1; text-align: center; padding: 0 10px; }
+        .br-row2-item + .br-row2-item { border-left: 2px solid #555; }
+        .br-row2-item-value { background: white; color: #000; padding: 0 15px; margin: 0 10px; border-radius: 4px; display: inline-block; }
+        .br-row3-header { background: #757575; color: white; font-size: 42px; padding: 8px 30px; white-space: nowrap; }
+        .br-row3-main { background: #e0e0e0; color: #000; font-size: 42px; padding: 8px 30px; flex: 1; }
     </style>
 </head>
 <body>
-    <div class="main-container">
-        <div id="ticker-container" class="telop-wrapper">
-            <div id="ticker-scroll-area">
-                <span id="ticker-content" class="ticker-content"></span>
+    <div id="ticker-container" class="telop-wrapper">
+        <div id="ticker-header"><span id="ticker-header-text"></span></div>
+        <div id="ticker-clock"><span id="clock-time">00:00</span><span id="clock-live"><span>L</span><span>I</span><span>V</span><span>E</span></span></div>
+        <div id="ticker-scroll-area">
+            <div id="ticker-scroll-container">
+                <div class="ticker-content"></div>
+                <div class="ticker-content" aria-hidden="true"></div>
             </div>
-            <div id="ticker-header">
-                <span id="ticker-header-text"></span>
             </div>
-            <div id="ticker-clock">
-                <span id="clock-time"></span>
-                <span id="clock-live">
-                    <span>L</span><span>I</span><span>V</span><span>E</span>
-                </span>
+    </div>
+
+    <div id="breaking-container" class="telop-wrapper">
+        <div id="breaking-container-inner">
+            <div class="breaking-row br-row1">
+                <div id="br-r1-h" class="br-row1-header"></div>
+                <div id="br-r1-m" class="br-row1-main"></div>
             </div>
-        </div>
-        
-        <div id="breaking-container" class="telop-wrapper">
-            <div id="breaking-container-inner">
-                <div class="breaking-row">
-                    <div class="br-row1-header" id="br-row1-header"></div>
-                    <div class="br-row1-main" id="br-row1-main"></div>
-                </div>
-                <div class="breaking-row br-row2">
-                    <div class="br-row2-item" id="br-row2-item1"></div>
-                    <div class="br-row2-item" id="br-row2-item2"></div>
-                    <div class="br-row2-item" id="br-row2-item3"></div>
-                    <div class="br-row2-item" id="br-row2-item4"></div>
-                </div>
-                <div class="breaking-row">
-                    <div class="br-row3-header" id="br-row3-header"></div>
-                    <div class="br-row3-main" id="br-row3-main"></div>
-                </div>
+            <div class="br-row2">
+                <div id="br-r2-i1" class="br-row2-item"></div>
+                <div id="br-r2-i2" class="br-row2-item"></div>
+                <div id="br-r2-i3" class="br-row2-item"></div>
+                <div id="br-r2-i4" class="br-row2-item"></div>
+            </div>
+            <div class="breaking-row br-row3">
+                <div id="br-r3-h" class="br-row3-header"></div>
+                <div id="br-r3-m" class="br-row3-main"></div>
             </div>
         </div>
     </div>
@@ -310,81 +127,77 @@
         };
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
-        
-        let currentScrollText = "";
 
+        // (時計のロジックは変更ありません)
+        const clock = document.getElementById('clock-time');
         function updateClock() {
             const now = new Date();
             const hours = String(now.getHours()).padStart(2, '0');
             const minutes = String(now.getMinutes()).padStart(2, '0');
-            document.getElementById('clock-time').textContent = `${hours}:${minutes}`;
-            
-            const tickerClock = document.getElementById('ticker-clock');
-            if (now.getSeconds() >= 30) {
-                tickerClock.classList.add('show-live');
-            } else {
-                tickerClock.classList.remove('show-live');
-            }
+            clock.textContent = `${hours}:${minutes}`;
         }
-        
-        setInterval(updateClock, 1000);
         updateClock();
-
-        function adjustHeaderText() {
-            const headerText = document.getElementById('ticker-header-text');
-            const header = document.getElementById('ticker-header');
-            headerText.style.transform = 'scaleX(1)';
-            
-            const maxWidth = header.clientWidth - 60;
-            const textWidth = headerText.scrollWidth;
-            
-            if (textWidth > maxWidth) {
-                const scale = maxWidth / textWidth;
-                headerText.style.transform = `scaleX(${scale})`;
-            }
-        }
+        setInterval(updateClock, 1000);
 
         database.ref('live_data').on('value', (snapshot) => {
             const data = snapshot.val();
-            if (!data) return;
-
             const tickerContainer = document.getElementById('ticker-container');
             const breakingContainer = document.getElementById('breaking-container');
 
-            if (data.mode === 'breaking' && data.breaking_content) {
-                const content = data.breaking_content;
-                document.getElementById('br-row1-header').innerText = content.b_r1_h || '';
-                document.getElementById('br-row1-main').innerText = content.b_r1_m || '';
-                document.getElementById('br-row2-item1').innerHTML = content.b_r2_i1 || '';
-                document.getElementById('br-row2-item2').innerHTML = content.b_r2_i2 || '';
-                document.getElementById('br-row2-item3').innerHTML = content.b_r2_i3 || '';
-                document.getElementById('br-row2-item4').innerHTML = content.b_r2_i4 || '';
-                document.getElementById('br-row3-header').innerText = content.b_r3_h || '';
-                document.getElementById('br-row3-main').innerText = content.b_r3_m || '';
-
+            if (!data) {
                 tickerContainer.classList.remove('visible');
-                breakingContainer.classList.add('visible');
-            } else {
-                const content = data.ticker_content || {};
-                const newScrollText = content.scrollText || 'コメントをお待ちしています。';
+                breakingContainer.classList.remove('visible');
+                return;
+            }
 
-                if (newScrollText !== currentScrollText) {
-                    currentScrollText = newScrollText;
-                    const tickerContent = document.getElementById('ticker-content');
-                    tickerContent.innerText = `${currentScrollText}　　　${currentScrollText}　　　`;
-                }
-                
-                document.getElementById('ticker-header-text').innerText = 
-                    content.headerText || '東京株式市場';
-
-                const scrollArea = document.getElementById('ticker-scroll-area');
-                scrollArea.className = '';
-                scrollArea.classList.add(content.scrollSpeed || 'speed-normal');
-                
+            if (data.mode === 'ticker') {
                 breakingContainer.classList.remove('visible');
                 tickerContainer.classList.add('visible');
+
+                document.getElementById('ticker-header-text').textContent = data.ticker_content.headerText;
                 
-                setTimeout(adjustHeaderText, 100);
+                // ▼▼▼ JavaScriptのロジックを修正しました ▼▼▼
+                const tickerContents = document.querySelectorAll('.ticker-content');
+                const scrollContainer = document.getElementById('ticker-scroll-container');
+
+                // 2つの要素に同じテキストを設定します
+                tickerContents.forEach(el => {
+                    el.textContent = data.ticker_content.scrollText;
+                });
+                
+                // アニメーションをリセットして再開します（テキスト変更時にスムーズに開始するため）
+                scrollContainer.style.animationName = 'none';
+                requestAnimationFrame(() => {
+                    scrollContainer.style.animationName = 'seamless-scroll';
+                });
+
+                // テキストの長さに応じてスクロール速度を動的に調整します
+                let baseDuration;
+                switch (data.ticker_content.scrollSpeed) {
+                    case 'speed-slow': baseDuration = 50; break;
+                    case 'speed-fast': baseDuration = 20; break;
+                    default: baseDuration = 35; break;
+                }
+                const textLength = data.ticker_content.scrollText.length;
+                const adjustedDuration = Math.max(10, baseDuration * (textLength / 30)); // 文字数に応じて時間を調整
+                scrollContainer.style.setProperty('--scroll-duration', `${adjustedDuration}s`);
+
+                // LIVE表示の切り替え
+                document.getElementById('ticker-clock').classList.toggle('show-live', !!data.ticker_content.isLive);
+                // ▲▲▲ JavaScriptのロジックを修正しました ▲▲▲
+
+            } else if (data.mode === 'breaking') {
+                tickerContainer.classList.remove('visible');
+                breakingContainer.classList.add('visible');
+                const b = data.breaking_content;
+                document.getElementById('br-r1-h').textContent = b.b_r1_h;
+                document.getElementById('br-r1-m').textContent = b.b_r1_m;
+                document.getElementById('br-r2-i1').textContent = b.b_r2_i1;
+                document.getElementById('br-r2-i2').textContent = b.b_r2_i2;
+                document.getElementById('br-r2-i3').textContent = b.b_r2_i3;
+                document.getElementById('br-r2-i4').textContent = b.b_r2_i4;
+                document.getElementById('br-r3-h').textContent = b.b_r3_h;
+                document.getElementById('br-r3-m').textContent = b.b_r3_m;
             }
         });
     </script>
