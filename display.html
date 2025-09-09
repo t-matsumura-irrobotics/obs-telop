@@ -7,37 +7,78 @@
     <style>
         @font-face { font-family: 'LINE Seed JP'; src: url('fonts/LINESeedJP_OTF_Rg.woff2') format('woff2'); font-weight: 400; }
         @font-face { font-family: 'LINE Seed JP'; src: url('fonts/LINESeedJP_OTF_Bd.woff2') format('woff2'); font-weight: 700; }
-        html, body { margin: 0; padding: 0; overflow: hidden; font-family: 'LINE Seed JP', sans-serif; height: 100%; width: 100%; background: transparent; }
+        
+        /* ▼▼▼ html, body の修正 ▼▼▼ */
+        html, body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            font-family: 'LINE Seed JP', sans-serif;
+            height: 100%; /* これを明示的に指定することで、fixedが正しく動作します */
+            width: 100%;
+            background: transparent;
+        }
+        /* ▲▲▲ html, body の修正 ▲▲▲ */
+
         body { position: relative; }
         
         @keyframes seamless-scroll {
-            from {
-                transform: translateX(0);
-            }
-            to {
-                transform: translateX(-50%);
-            }
+            from { transform: translateX(0); }
+            to { transform: translateX(-50%); }
         }
 
         @keyframes bounce { 0%, 20%, 50%, 80%, 100% { transform: translateY(0); } 40% { transform: translateY(-15px); } 60% { transform: translateY(-7px); } }
 
+        /* ▼▼▼ telop-wrapper と clock-wrapper の追加修正 ▼▼▼ */
         .telop-wrapper {
-            /* ▼▼▼ こちらを修正しました ▼▼▼ */
-            position: fixed; /* 'absolute' から 'fixed' に変更して、画面下部に確実に固定します */
-            /* ▲▲▲ こちらを修正しました ▲▲▲ */
+            position: fixed;
             bottom: 0;
             left: 0;
             right: 0;
             opacity: 0;
             transition: opacity 0.4s ease-out;
             display: none;
+            z-index: 1000; /* 他の要素より手前に表示されるように */
         }
         .telop-wrapper.visible { opacity: 1; display: block; }
+
+        /* 時報専用のラッパーを追加 */
+        .clock-wrapper {
+            position: fixed;
+            bottom: 0; /* 画面下部に固定 */
+            right: 0;  /* 画面右端に固定 */
+            opacity: 0;
+            transition: opacity 0.4s ease-out;
+            display: none;
+            z-index: 1001; /* ティッカーより少し上に */
+        }
+        .clock-wrapper.visible { opacity: 1; display: flex; /* flexboxで中央寄せ */ }
+        /* ▲▲▲ telop-wrapper と clock-wrapper の追加修正 ▲▲▲ */
         
         #ticker-container { height: 96px; overflow: hidden; position: relative; background: white; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
         #ticker-header { position: absolute; left: 0; top: 0; z-index: 10; width: 300px; height: 100%; color: white; display: flex; align-items: center; justify-content: flex-start; background: linear-gradient(135deg, #ed949f, #69aef3); clip-path: polygon(0 0, 100% 0, 90% 100%, 0% 100%); font-size: 52px; font-weight: 700; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); padding-left: 30px; box-shadow: 5px 0 15px rgba(0,0,0,0.2); }
         #ticker-header-text { white-space: nowrap; transform-origin: left center; }
-        #ticker-clock { position: absolute; right: 0; top: 0; z-index: 10; width: 162px; height: 100%; background: linear-gradient(45deg, #ed949f, #69aef3); color: white; display: flex; justify-content: center; align-items: center; font-size: 46px; font-family: 'Anton', sans-serif; box-shadow: -5px 0 15px rgba(0,0,0,0.2); overflow: hidden; }
+        
+        /* ▼▼▼ 時報部分のCSSを修正しました ▼▼▼ */
+        #ticker-clock { 
+            /* #ticker-clock 自体は clock-wrapper の子になるので、position: absolute; は不要 */
+            /* width: 162px; */ /* 幅は clock-wrapper で調整 */
+            height: 100%; 
+            background: linear-gradient(45deg, #ed949f, #69aef3); 
+            color: white; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            font-size: 46px; 
+            font-family: 'Anton', sans-serif; 
+            box-shadow: -5px 0 15px rgba(0,0,0,0.2); 
+            overflow: hidden;
+            padding: 0 20px; /* 左右にパディングを追加して幅を確保 */
+            min-width: 120px; /* 最小幅を確保 */
+            box-sizing: border-box; /* paddingを含めた幅にする */
+        }
+        /* ▲▲▲ 時報部分のCSSを修正しました ▲▲▲ */
+
         #ticker-scroll-area { position: absolute; left: 280px; right: 162px; top: 0; height: 100%; overflow: hidden; }
 
         #ticker-scroll-container {
@@ -80,17 +121,24 @@
     </style>
 </head>
 <body>
-    <div id="ticker-container" class="telop-wrapper">
-        <div id="ticker-header"><span id="ticker-header-text"></span></div>
-        <div id="ticker-clock"><span id="clock-time">00:00</span><span id="clock-live"><span>L</span><span>I</span><span>V</span><span>E</span></span></div>
-        <div id="ticker-scroll-area">
-            <div id="ticker-scroll-container">
-                <div class="ticker-content"></div>
-                <div class="ticker-content" aria-hidden="true"></div>
+    <div id="ticker-main-wrapper" class="telop-wrapper">
+        <div id="ticker-container">
+            <div id="ticker-header"><span id="ticker-header-text"></span></div>
+            <div id="ticker-scroll-area">
+                <div id="ticker-scroll-container">
+                    <div class="ticker-content"></div>
+                    <div class="ticker-content" aria-hidden="true"></div>
+                </div>
             </div>
         </div>
     </div>
 
+    <div id="clock-display-wrapper" class="clock-wrapper">
+        <div id="ticker-clock">
+            <span id="clock-time">00:00</span>
+            <span id="clock-live"><span>L</span><span>I</span><span>V</span><span>E</span></span>
+        </div>
+    </div>
     <div id="breaking-container" class="telop-wrapper">
         <div id="breaking-container-inner">
             <div class="breaking-row br-row1">
@@ -98,7 +146,7 @@
                 <div id="br-r1-m" class="br-row1-main"></div>
             </div>
             <div class="br-row2">
-                <div id="br-r2-i1" class="br-r2-item"></div>
+                <div id="br-r2-i1" class="br-row2-item"></div>
                 <div id="br-r2-i2" class="br-r2-item"></div>
                 <div id="br-r2-i3" class="br-r2-item"></div>
                 <div id="br-r2-i4" class="br-r2-item"></div>
@@ -126,31 +174,37 @@
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
-        const clock = document.getElementById('clock-time');
+        // (時計のロジックは変更ありません)
+        const clockTimeEl = document.getElementById('clock-time');
         function updateClock() {
             const now = new Date();
             const hours = String(now.getHours()).padStart(2, '0');
             const minutes = String(now.getMinutes()).padStart(2, '0');
-            clock.textContent = `${hours}:${minutes}`;
+            clockTimeEl.textContent = `${hours}:${minutes}`;
         }
         updateClock();
         setInterval(updateClock, 1000);
 
         database.ref('live_data').on('value', (snapshot) => {
             const data = snapshot.val();
-            const tickerContainer = document.getElementById('ticker-container');
-            const breakingContainer = document.getElementById('breaking-container');
+            const tickerMainWrapper = document.getElementById('ticker-main-wrapper'); // ティッカー本体
+            const breakingContainer = document.getElementById('breaking-container'); // 緊急速報
+            const clockDisplayWrapper = document.getElementById('clock-display-wrapper'); // 時報
 
             if (!data) {
-                tickerContainer.classList.remove('visible');
+                tickerMainWrapper.classList.remove('visible');
                 breakingContainer.classList.remove('visible');
+                clockDisplayWrapper.classList.remove('visible');
                 return;
             }
 
+            // 時報の表示・非表示を常にチェック
+            clockDisplayWrapper.classList.toggle('visible', !!data.showClock);
+
             if (data.mode === 'ticker') {
                 breakingContainer.classList.remove('visible');
-                tickerContainer.classList.add('visible');
-
+                tickerMainWrapper.classList.add('visible'); // ティッカー本体は表示
+                
                 document.getElementById('ticker-header-text').textContent = data.ticker_content.headerText;
                 
                 const tickerContents = document.querySelectorAll('.ticker-content');
@@ -175,11 +229,13 @@
                 const adjustedDuration = Math.max(10, baseDuration * (textLength / 30));
                 scrollContainer.style.setProperty('--scroll-duration', `${adjustedDuration}s`);
 
+                // 時報内のLIVE表示は、ティッカーのisLive設定に連動
                 document.getElementById('ticker-clock').classList.toggle('show-live', !!data.ticker_content.isLive);
 
             } else if (data.mode === 'breaking') {
-                tickerContainer.classList.remove('visible');
-                breakingContainer.classList.add('visible');
+                tickerMainWrapper.classList.remove('visible'); // ティッカー本体は非表示
+                breakingContainer.classList.add('visible'); // 緊急速報は表示
+                
                 const b = data.breaking_content;
                 document.getElementById('br-r1-h').textContent = b.b_r1_h;
                 document.getElementById('br-r1-m').textContent = b.b_r1_m;
@@ -189,6 +245,10 @@
                 document.getElementById('br-r2-i4').textContent = b.b_r2_i4;
                 document.getElementById('br-r3-h').textContent = b.b_r3_h;
                 document.getElementById('br-r3-m').textContent = b.b_r3_m;
+            } else {
+                // どのモードでもない場合はすべて非表示
+                tickerMainWrapper.classList.remove('visible');
+                breakingContainer.classList.remove('visible');
             }
         });
     </script>

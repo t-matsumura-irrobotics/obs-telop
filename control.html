@@ -33,7 +33,12 @@
                 
                 <label>スクロールテキスト</label>
                 <textarea id="tickerScrollText">質問や応援コメントお待ちしています。</textarea>
-            </div>
+                
+                <div style="margin-top: 15px;">
+                    <input type="checkbox" id="isLiveCheckbox">
+                    <label for="isLiveCheckbox" style="display: inline-block;">ティッカーにLIVE表示</label>
+                </div>
+                </div>
 
             <div id="breaking-controls" class="tab-content">
                 <div class="breaking-grid">
@@ -74,7 +79,8 @@
             <div class="button-group">
                 <button id="takeButton" class="btn btn-take">TAKE</button>
                 <button id="fallbackButton" class="btn btn-fallback">FALLBACK (TICKER)</button>
-            </div>
+                <button id="toggleClockButton" class="btn btn-clock-toggle">時報 ON/OFF</button>
+                </div>
         </div>
         <div id="shots-panel" class="panel">
              <h2>SAVED SHOTS (速報用)</h2>
@@ -89,9 +95,6 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <script>
-        // --- ▼ここからが追加したJavaScriptです▼ ---
-
-        // ■ 1. Firebaseの初期設定
         const firebaseConfig = {
             apiKey: "AIzaSyAhsAbTqQuairo-82A9rxQTazUCGdzdVc4",
             authDomain: "obs-telop-system-7c98c.firebaseapp.com",
@@ -112,6 +115,18 @@
         const breakingControls = document.getElementById('breaking-controls');
         const takeButton = document.getElementById('takeButton');
         const fallbackButton = document.getElementById('fallbackButton');
+        const isLiveCheckbox = document.getElementById('isLiveCheckbox'); // 追加
+        const toggleClockButton = document.getElementById('toggleClockButton'); // 追加
+
+        // 時報表示状態をFirebaseから取得・保持
+        let currentShowClockStatus = false;
+        database.ref('live_data/showClock').on('value', (snapshot) => {
+            currentShowClockStatus = snapshot.val() || false;
+            // ボタンの表示を更新
+            toggleClockButton.textContent = currentShowClockStatus ? '時報 OFF' : '時報 ON';
+            toggleClockButton.classList.toggle('active', currentShowClockStatus);
+        });
+
 
         // ■ 3. タブ切り替え機能
         tabTicker.addEventListener('click', () => {
@@ -130,133 +145,21 @@
 
         // ■ 4. TAKEボタンの機能
         takeButton.addEventListener('click', () => {
-            let liveData = {};
+            let liveData = {
+                showClock: currentShowClockStatus // 時報の状態も送信
+            };
             // 表示中のタブに応じて送信するデータを切り替える
             if (tabTicker.classList.contains('active')) {
-                liveData = {
-                    mode: 'ticker',
-                    ticker_content: {
-                        headerText: document.getElementById('tickerHeaderText').value,
-                        scrollText: document.getElementById('tickerScrollText').value,
-                        scrollSpeed: document.getElementById('tickerScrollSpeed').value
-                    }
-                };
-            } else {
-                liveData = {
-                    mode: 'breaking',
-                    breaking_content: {
-                        b_r1_h: document.getElementById('br-r1-h-input').value,
-                        b_r1_m: document.getElementById('br-r1-m-input').value,
-                        b_r2_i1: document.getElementById('br-r2-i1-input').value,
-                        b_r2_i2: document.getElementById('br-r2-i2-input').value,
-                        b_r2_i3: document.getElementById('br-r2-i3-input').value,
-                        b_r2_i4: document.getElementById('br-r2-i4-input').value,
-                        b_r3_h: document.getElementById('br-r3-h-input').value,
-                        b_r3_m: document.getElementById('br-r3-m-input').value,
-                    }
-                };
-            }
-            // Firebaseにデータを送信！
-            database.ref('live_data').set(liveData);
-        });
-        
-        // ■ 5. FALLBACKボタンの機能 (強制的にティッカーに戻す)
-        fallbackButton.addEventListener('click', () => {
-             const liveData = {
-                mode: 'ticker',
-                ticker_content: {
+                liveData.mode = 'ticker';
+                liveData.ticker_content = {
                     headerText: document.getElementById('tickerHeaderText').value,
                     scrollText: document.getElementById('tickerScrollText').value,
-                    scrollSpeed: document.getElementById('tickerScrollSpeed').value
-                }
-            };
-            database.ref('live_data').set(liveData);
-        });
-
-        // ■ 6. ON AIRステータスの表示
-        const onAirStatus = document.getElementById('on-air-status');
-        database.ref('live_data').on('value', (snapshot) => {
-            const data = snapshot.val();
-            if (data) {
-                onAirStatus.textContent = JSON.stringify(data, null, 2);
+                    scrollSpeed: document.getElementById('tickerScrollSpeed').value,
+                    isLive: isLiveCheckbox.checked // LIVEチェックボックスの状態
+                };
             } else {
-                onAirStatus.textContent = 'OFFLINE';
-            }
-        });
-
-        // ■ 7. 速報の下書き保存・読込・削除機能
-        const saveShotButton = document.getElementById('save-shot-button');
-        const shotNameInput = document.getElementById('shot-name-input');
-        const shotsList = document.getElementById('shots-list');
-
-        // 保存ボタン
-        saveShotButton.addEventListener('click', () => {
-            const shotName = shotNameInput.value.trim();
-            if (!shotName) {
-                alert('下書きの名前を入力してください。');
-                return;
-            }
-            const shotData = {
-                name: shotName,
-                content: {
+                liveData.mode = 'breaking';
+                liveData.breaking_content = {
                     b_r1_h: document.getElementById('br-r1-h-input').value,
                     b_r1_m: document.getElementById('br-r1-m-input').value,
-                    b_r2_i1: document.getElementById('br-r2-i1-input').value,
-                    b_r2_i2: document.getElementById('br-r2-i2-input').value,
-                    b_r2_i3: document.getElementById('br-r2-i3-input').value,
-                    b_r2_i4: document.getElementById('br-r2-i4-input').value,
-                    b_r3_h: document.getElementById('br-r3-h-input').value,
-                    b_r3_m: document.getElementById('br-r3-m-input').value,
-                }
-            };
-            database.ref('saved_shots').push(shotData);
-            shotNameInput.value = '';
-        });
-
-        // 保存済みリストの描画
-        function renderShots(shots) {
-            shotsList.innerHTML = '';
-            for (const key in shots) {
-                const shot = shots[key];
-                const li = document.createElement('li');
-                li.className = 'shot-item';
-                li.innerHTML = `
-                    <span class="shot-name">${shot.name}</span>
-                    <div class="shot-actions">
-                        <button class="btn-load">読込</button>
-                        <button class="btn-delete">削除</button>
-                    </div>
-                `;
-                // 読込ボタンの機能
-                li.querySelector('.btn-load').addEventListener('click', () => {
-                    const content = shot.content;
-                    document.getElementById('br-r1-h-input').value = content.b_r1_h;
-                    document.getElementById('br-r1-m-input').value = content.b_r1_m;
-                    document.getElementById('br-r2-i1-input').value = content.b_r2_i1;
-                    document.getElementById('br-r2-i2-input').value = content.b_r2_i2;
-                    document.getElementById('br-r2-i3-input').value = content.b_r2_i3;
-                    document.getElementById('br-r2-i4-input').value = content.b_r2_i4;
-                    document.getElementById('br-r3-h-input').value = content.b_r3_h;
-                    document.getElementById('br-r3-m-input').value = content.b_r3_m;
-                    // 自動で速報タブに切り替え
-                    tabBreaking.click(); 
-                });
-                // 削除ボタンの機能
-                li.querySelector('.btn-delete').addEventListener('click', () => {
-                    if (confirm(`「${shot.name}」を削除しますか？`)) {
-                        database.ref('saved_shots/' + key).remove();
-                    }
-                });
-                shotsList.appendChild(li);
-            }
-        }
-        
-        // Firebaseから下書きリストを取得して表示
-        database.ref('saved_shots').on('value', (snapshot) => {
-            renderShots(snapshot.val());
-        });
-
-        // --- ▲ここまでが追加したJavaScriptです▲ ---
-    </script>
-</body>
-</html>
+                    b_
