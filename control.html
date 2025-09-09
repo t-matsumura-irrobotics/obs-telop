@@ -85,6 +85,7 @@
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
+        // UI要素の取得
         const tabTicker = document.getElementById('tab-ticker');
         const tabBreaking = document.getElementById('tab-breaking');
         const tickerControls = document.getElementById('ticker-controls');
@@ -92,7 +93,7 @@
         const takeButton = document.getElementById('takeButton');
         const fallbackButton = document.getElementById('fallbackButton');
         const isLiveCheckbox = document.getElementById('isLiveCheckbox');
-        const toggleClockButton = document.getElementById('toggleClockButton');
+        const toggleClockButton = document.getElementById('toggleClockButton'); // 新しいボタン
         const hideTickerButton = document.getElementById('hideTickerButton'); // 新しいボタン
 
         let currentShowClockStatus = false;
@@ -109,9 +110,9 @@
             // ON AIRステータスの表示を更新
             const onAirStatus = document.getElementById('on-air-status');
             let displayHtml = '';
-            if (data.mode === 'ticker') {
+            if (data.mode === 'ticker' && data.ticker_content) {
                 displayHtml = `<b>本体: 通常ティッカー</b><br>ヘッダー: ${data.ticker_content.headerText}<br>LIVE: ${data.ticker_content.isLive ? 'ON' : 'OFF'}`;
-            } else if (data.mode === 'breaking') {
+            } else if (data.mode === 'breaking' && data.breaking_content) {
                 displayHtml = `<b>本体: 緊急速報</b><br>ヘッダー: ${data.breaking_content.b_r1_h}`;
             } else {
                 displayHtml = '<b>本体: OFF</b>';
