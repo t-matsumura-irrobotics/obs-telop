@@ -2,12 +2,12 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <title>Live Telop Controller</title>
+    <title>Live Telop Controller (Debug Mode)</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <h1>ライブテロップ コントローラー</h1>
+    <h1>ライブテロップ コントローラー (デバッグモード)</h1>
     <div class="main-grid">
         <div id="on-air-panel" class="panel">
             <h2>ON AIR (現在の表示内容)</h2>
@@ -38,7 +38,7 @@
                     <input type="checkbox" id="isLiveCheckbox">
                     <label for="isLiveCheckbox" style="display: inline-block;">ティッカーにLIVE表示</label>
                 </div>
-                </div>
+            </div>
 
             <div id="breaking-controls" class="tab-content">
                 <div class="breaking-grid">
@@ -80,7 +80,7 @@
                 <button id="takeButton" class="btn btn-take">TAKE</button>
                 <button id="fallbackButton" class="btn btn-fallback">FALLBACK (TICKER)</button>
                 <button id="toggleClockButton" class="btn btn-clock-toggle">時報 ON/OFF</button>
-                </div>
+            </div>
         </div>
         <div id="shots-panel" class="panel">
              <h2>SAVED SHOTS (速報用)</h2>
@@ -95,6 +95,9 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <script>
+        // ▼▼▼ ここからデバッグ用のコードです ▼▼▼
+        console.log("天使のデバッグログ：スクリプトを開始します👼");
+
         const firebaseConfig = {
             apiKey: "AIzaSyAhsAbTqQuairo-82A9rxQTazUCGdzdVc4",
             authDomain: "obs-telop-system-7c98c.firebaseapp.com",
@@ -105,30 +108,59 @@
             appId: "1:368503557333:web:409dae2b1cf0c14b31a65c",
             measurementId: "G-VMBCJ2952Z"
         };
-        firebase.initializeApp(firebaseConfig);
+        
+        try {
+            firebase.initializeApp(firebaseConfig);
+            console.log("天使のデバッグログ：Firebaseの初期化に成功しました！");
+        } catch (e) {
+            console.error("天使のデバッグログ：Firebaseの初期化でエラーが発生しました！", e);
+        }
+        
         const database = firebase.database();
 
-        // ■ 2. UI要素の取得
+        // UI要素の取得
+        const takeButton = document.getElementById('takeButton');
+        const fallbackButton = document.getElementById('fallbackButton');
+        const toggleClockButton = document.getElementById('toggleClockButton');
+        
+        // TAKEボタンの機能
+        takeButton.addEventListener('click', () => {
+            console.log("天使のデバッグログ：TAKEボタンがクリックされました！");
+            let liveData = { /* ... */ }; // (データ作成ロジックは省略)
+            // ...
+            console.log("天使のデバッグログ：Firebaseにこのデータを送信します ->", liveData);
+            database.ref('live_data').set(liveData)
+                .then(() => console.log("天使のデバッグログ：データの送信に成功しました！✨"))
+                .catch((error) => console.error("天使のデバッグログ：データの送信に失敗しました！", error));
+        });
+        
+        // 時報表示切り替えボタンの機能
+        toggleClockButton.addEventListener('click', () => {
+            console.log("天使のデバッグログ：時報 ON/OFF ボタンがクリックされました！");
+            const newStatus = !currentShowClockStatus;
+            console.log(`天使のデバッグログ：時報の状態を ${newStatus} に変更して送信します。`);
+            database.ref('live_data/showClock').set(newStatus)
+                .then(() => console.log("天使のデバッグログ：時報の状態を送信しました！"))
+                .catch((error) => console.error("天使のデバッグログ：時報の状態送信に失敗しました！", error));
+        });
+        
+        // (他のコードは省略)
+        // ▲▲▲ ここまでデバッグ用のコードです ▲▲▲
+
+        // (元のJavaScriptコードはここに続きます)
         const tabTicker = document.getElementById('tab-ticker');
         const tabBreaking = document.getElementById('tab-breaking');
         const tickerControls = document.getElementById('ticker-controls');
         const breakingControls = document.getElementById('breaking-controls');
-        const takeButton = document.getElementById('takeButton');
-        const fallbackButton = document.getElementById('fallbackButton');
-        const isLiveCheckbox = document.getElementById('isLiveCheckbox'); // 追加
-        const toggleClockButton = document.getElementById('toggleClockButton'); // 追加
+        const isLiveCheckbox = document.getElementById('isLiveCheckbox');
 
-        // 時報表示状態をFirebaseから取得・保持
         let currentShowClockStatus = false;
         database.ref('live_data/showClock').on('value', (snapshot) => {
             currentShowClockStatus = snapshot.val() || false;
-            // ボタンの表示を更新
             toggleClockButton.textContent = currentShowClockStatus ? '時報 OFF' : '時報 ON';
             toggleClockButton.classList.toggle('active', currentShowClockStatus);
         });
 
-
-        // ■ 3. タブ切り替え機能
         tabTicker.addEventListener('click', () => {
             tabTicker.classList.add('active');
             tabBreaking.classList.remove('active');
@@ -143,23 +175,110 @@
             tickerControls.classList.remove('active');
         });
 
-        // ■ 4. TAKEボタンの機能
         takeButton.addEventListener('click', () => {
-            let liveData = {
-                showClock: currentShowClockStatus // 時報の状態も送信
-            };
-            // 表示中のタブに応じて送信するデータを切り替える
+            let liveData = { showClock: currentShowClockStatus };
             if (tabTicker.classList.contains('active')) {
                 liveData.mode = 'ticker';
                 liveData.ticker_content = {
                     headerText: document.getElementById('tickerHeaderText').value,
                     scrollText: document.getElementById('tickerScrollText').value,
                     scrollSpeed: document.getElementById('tickerScrollSpeed').value,
-                    isLive: isLiveCheckbox.checked // LIVEチェックボックスの状態
+                    isLive: isLiveCheckbox.checked
                 };
             } else {
                 liveData.mode = 'breaking';
                 liveData.breaking_content = {
                     b_r1_h: document.getElementById('br-r1-h-input').value,
                     b_r1_m: document.getElementById('br-r1-m-input').value,
-                    b_
+                    b_r2_i1: document.getElementById('br-r2-i1-input').value,
+                    b_r2_i2: document.getElementById('br-r2-i2-input').value,
+                    b_r2_i3: document.getElementById('br-r2-i3-input').value,
+                    b_r2_i4: document.getElementById('br-r2-i4-input').value,
+                    b_r3_h: document.getElementById('br-r3-h-input').value,
+                    b_r3_m: document.getElementById('br-r3-m-input').value,
+                };
+            }
+            database.ref('live_data').set(liveData);
+        });
+        
+        fallbackButton.addEventListener('click', () => {
+             const liveData = {
+                mode: 'ticker',
+                ticker_content: {
+                    headerText: document.getElementById('tickerHeaderText').value,
+                    scrollText: document.getElementById('tickerScrollText').value,
+                    scrollSpeed: document.getElementById('tickerScrollSpeed').value,
+                    isLive: isLiveCheckbox.checked
+                },
+                showClock: currentShowClockStatus
+            };
+            database.ref('live_data').set(liveData);
+        });
+
+        toggleClockButton.addEventListener('click', () => {
+            currentShowClockStatus = !currentShowClockStatus;
+            database.ref('live_data/showClock').set(currentShowClockStatus);
+        });
+
+        const onAirStatus = document.getElementById('on-air-status');
+        database.ref('live_data').on('value', (snapshot) => {
+            const data = snapshot.val();
+            if (data) {
+                let displayHtml = '';
+                if (data.mode === 'ticker') {
+                    displayHtml = `<b>現在: 通常ティッカー</b><br>ヘッダー: ${data.ticker_content.headerText}<br>スクロール: ${data.ticker_content.scrollText}<br>LIVE表示: ${data.ticker_content.isLive ? 'ON' : 'OFF'}`;
+                } else if (data.mode === 'breaking') {
+                    const b = data.breaking_content;
+                    displayHtml = `<b>現在: 緊急速報</b><br>ヘッダー: ${b.b_r1_h} - ${b.b_r1_m}`;
+                }
+                displayHtml += `<br>時報: ${data.showClock ? 'ON' : 'OFF'}`;
+                onAirStatus.innerHTML = displayHtml;
+            } else {
+                onAirStatus.innerHTML = '<b>OFFLINE</b><br>データがありません';
+            }
+        });
+        
+        // (下書き保存機能のコードは省略)
+        const saveShotButton = document.getElementById('save-shot-button');
+        const shotNameInput = document.getElementById('shot-name-input');
+        const shotsList = document.getElementById('shots-list');
+
+        saveShotButton.addEventListener('click', () => {
+            const shotName = shotNameInput.value.trim();
+            if (!shotName) { alert('下書きの名前を入力してください。'); return; }
+            const shotData = { name: shotName, content: { b_r1_h: document.getElementById('br-r1-h-input').value, b_r1_m: document.getElementById('br-r1-m-input').value, b_r2_i1: document.getElementById('br-r2-i1-input').value, b_r2_i2: document.getElementById('br-r2-i2-input').value, b_r2_i3: document.getElementById('br-r2-i3-input').value, b_r2_i4: document.getElementById('br-r2-i4-input').value, b_r3_h: document.getElementById('br-r3-h-input').value, b_r3_m: document.getElementById('br-r3-m-input').value, } };
+            database.ref('saved_shots').push(shotData);
+            shotNameInput.value = '';
+        });
+
+        function renderShots(shots) {
+            shotsList.innerHTML = '';
+            for (const key in shots) {
+                const shot = shots[key];
+                const li = document.createElement('li');
+                li.className = 'shot-item';
+                li.innerHTML = `<span class="shot-name">${shot.name}</span><div class="shot-actions"><button class="btn-load">読込</button><button class="btn-delete">削除</button></div>`;
+                li.querySelector('.btn-load').addEventListener('click', () => {
+                    const content = shot.content;
+                    document.getElementById('br-r1-h-input').value = content.b_r1_h;
+                    document.getElementById('br-r1-m-input').value = content.b_r1_m;
+                    document.getElementById('br-r2-i1-input').value = content.b_r2_i1;
+                    document.getElementById('br-r2-i2-input').value = content.b_r2_i2;
+                    document.getElementById('br-r2-i3-input').value = content.b_r2_i3;
+                    document.getElementById('br-r2-i4-input').value = content.b_r2_i4;
+                    document.getElementById('br-r3-h-input').value = content.b_r3_h;
+                    document.getElementById('br-r3-m-input').value = content.b_r3_m;
+                    tabBreaking.click(); 
+                });
+                li.querySelector('.btn-delete').addEventListener('click', () => {
+                    if (confirm(`「${shot.name}」を削除しますか？`)) {
+                        database.ref('saved_shots/' + key).remove();
+                    }
+                });
+                shotsList.appendChild(li);
+            }
+        }
+        database.ref('saved_shots').on('value', (snapshot) => { renderShots(snapshot.val()); });
+    </script>
+</body>
+</html>
