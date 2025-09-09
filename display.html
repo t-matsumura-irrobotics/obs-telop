@@ -12,17 +12,20 @@
         @keyframes seamless-scroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
         @keyframes bounce { 0%, 20%, 50%, 80%, 100% { transform: translateY(0); } 40% { transform: translateY(-15px); } 60% { transform: translateY(-7px); } }
 
+        /* ティッカー本体（白ベース部分）のラッパー */
         .telop-wrapper {
             position: fixed; bottom: 0; left: 0; right: 0;
             opacity: 0; transition: opacity 0.4s ease-out; display: none; z-index: 1000;
         }
         .telop-wrapper.visible { opacity: 1; display: block; }
         
+        /* ▼▼▼ 時報専用のラッパー（これが重要です） ▼▼▼ */
         .clock-wrapper {
             position: fixed; bottom: 0; right: 0;
             opacity: 0; transition: opacity 0.4s ease-out; display: none; z-index: 1001;
         }
         .clock-wrapper.visible { opacity: 1; display: flex; }
+        /* ▲▲▲ 時報専用のラッパー ▲▲▲ */
         
         #ticker-container { height: 96px; overflow: hidden; position: relative; background: white; box-shadow: 0 4px 10px rgba(0,0,0,0.3); display: flex; }
         #ticker-header { flex-shrink: 0; width: 300px; height: 100%; color: white; display: flex; align-items: center; background: linear-gradient(135deg, #ed949f, #69aef3); clip-path: polygon(0 0, 100% 0, 90% 100%, 0% 100%); font-size: 52px; font-weight: 700; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); padding-left: 30px; }
@@ -81,7 +84,7 @@
     <div id="breaking-container" class="telop-wrapper">
         <div id="breaking-container-inner">
             <div class="breaking-row br-row1"><div id="br-r1-h" class="br-row1-header"></div><div id="br-r1-m" class="br-row1-main"></div></div>
-            <div class="br-row2"><div id="br-r2-i1" class="br-row2-item"></div><div id="br-r2-i2" class="br-row2-item"></div><div id="br-r2-i3" class="br-row2-item"></div><div id="br-r2-i4" class="br-r2-item"></div></div>
+            <div class="br-row2"><div id="br-r2-i1" class="br-row2-item"></div><div id="br-r2-i2" class="br-row2-item"></div><div id="br-r2-i3" class="br-row2-item"></div><div id="br-r2-i4" class="br-row2-item"></div></div>
             <div class="breaking-row br-row3"><div id="br-r3-h" class="br-row3-header"></div><div id="br-r3-m" class="br-row3-main"></div></div>
         </div>
     </div>
@@ -114,7 +117,7 @@
 
         // ■ Firebaseからのデータ受信ロジック
         database.ref('live_data').on('value', (snapshot) => {
-            const data = snapshot.val() || {};
+            const data = snapshot.val() || {}; // データがnullでも空オブジェクトとして扱う
             
             const tickerMainWrapper = document.getElementById('ticker-main-wrapper');
             const breakingContainer = document.getElementById('breaking-container');
@@ -122,6 +125,7 @@
             const tickerClock = document.getElementById('ticker-clock');
 
             // --- 1. 時報の表示を制御 ---
+            // ▼▼▼ このロジックがコントローラーの「時報 ON/OFF」と連携します ▼▼▼
             clockDisplayWrapper.classList.toggle('visible', !!data.showClock);
 
             // --- 2. ティッカー本体の表示を制御 ---
@@ -144,7 +148,7 @@
                     case 'speed-fast': baseDuration = 20; break;
                     default: baseDuration = 35; break;
                 }
-                const textLength = data.ticker_content.scrollText.length;
+                const textLength = (data.ticker_content.scrollText || '').length;
                 const adjustedDuration = Math.max(10, baseDuration * (textLength / 30));
                 scrollContainer.style.setProperty('--scroll-duration', `${adjustedDuration}s`);
 
@@ -153,11 +157,11 @@
             } else if (data.mode === 'breaking' && data.breaking_content) {
                 tickerMainWrapper.classList.remove('visible');
                 breakingContainer.classList.add('visible');
-
+                // (速報データの更新)
                 const b = data.breaking_content;
                 document.getElementById('br-r1-h').textContent = b.b_r1_h;
                 document.getElementById('br-r1-m').textContent = b.b_r1_m;
-                // (他の速報要素の更新)
+
             } else { // 'hidden' または未定義の場合
                 tickerMainWrapper.classList.remove('visible');
                 breakingContainer.classList.remove('visible');
