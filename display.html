@@ -1,4 +1,3 @@
-<!-- display.html (最終修正版) -->
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -13,10 +12,22 @@
         @keyframes seamless-scroll { 0% { transform: translateX(100%); } 100% { transform: translateX(-100%); } }
         @keyframes bounce { 0%, 20%, 50%, 80%, 100% { transform: translateY(0); } 40% { transform: translateY(-15px); } 60% { transform: translateY(-7px); } }
 
-        .telop-wrapper { position: absolute; bottom: 20px; left: 20px; right: 20px; opacity: 0; transition: opacity 0.4s ease-out; display: none; }
+        /* ▼▼▼ こちらを修正しました ▼▼▼ */
+        .telop-wrapper {
+            position: absolute;
+            bottom: 0; /* 画面の最下部に配置 */
+            left: 0;   /* 画面の左端に配置 */
+            right: 0;  /* 画面の右端に配置 */
+            opacity: 0;
+            transition: opacity 0.4s ease-out;
+            display: none;
+        }
+        /* ▲▲▲ こちらを修正しました ▲▲▲ */
+
         .telop-wrapper.visible { opacity: 1; display: block; }
         
-        #ticker-container { height: 96px; border-radius: 8px; overflow: hidden; position: relative; background: white; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+        #ticker-container { height: 96px; overflow: hidden; position: relative; background: white; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+        /* ティッカーの角丸が必要な場合は border-radius: 8px; を復活させてください */
         #ticker-header { position: absolute; left: 0; top: 0; z-index: 10; width: 300px; height: 100%; color: white; display: flex; align-items: center; justify-content: flex-start; background: linear-gradient(135deg, #ed949f, #69aef3); clip-path: polygon(0 0, 100% 0, 90% 100%, 0% 100%); font-size: 52px; font-weight: 700; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); padding-left: 30px; box-shadow: 5px 0 15px rgba(0,0,0,0.2); }
         #ticker-header-text { white-space: nowrap; transform-origin: left center; }
         #ticker-clock { position: absolute; right: 0; top: 0; z-index: 10; width: 162px; height: 100%; background: linear-gradient(45deg, #ed949f, #69aef3); color: white; display: flex; justify-content: center; align-items: center; font-size: 46px; font-family: 'Anton', sans-serif; box-shadow: -5px 0 15px rgba(0,0,0,0.2); overflow: hidden; }
@@ -47,16 +58,14 @@
 </head>
 <body>
     <div id="ticker-container" class="telop-wrapper visible">
-        <!-- ... (ティッカーのHTML構造) ... -->
-    </div>
+        </div>
     <div id="breaking-container" class="telop-wrapper">
-        <!-- ... (速報のHTML構造) ... -->
-    </div>
+        </div>
     
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <script>
-        // (JavaScriptのロジックは前回から変更ありません)
+        // (JavaScriptのロジックは変更ありません)
     </script>
 </body>
 </html>
