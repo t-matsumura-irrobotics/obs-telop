@@ -14,20 +14,20 @@
             <div><label for="r1_h">1行目ヘッダー</label><input type="text" id="r1_h" value="地震情報"></div>
             <div><label for="r1_m">1行目メイン</label><input type="text" id="r1_m" value="海岸から離れてください"></div>
         </div>
-        <hr style="margin: 20px 0; border-color: #333;">
+        <hr>
         <div class="grid-2">
-            <div><label for="r2_i1">2行目-1</label><input type="text" id="r2_i1" value="最大震度 <span class='br-row2-item-value'>7</span>"></div>
-            <div><label for="r2_i2">2行目-2</label><input type="text" id="r2_i2" value="M <span class='br-row2-item-value'>7.6</span>"></div>
-            <div><label for="r2_i3">2行目-3</label><input type="text" id="r2_i3" value="震源 <span class='br-row2-item-value'>石川県能登地方</span>"></div>
-            <div><label for="r2_i4">2行目-4</label><input type="text" id="r2_i4" value="発生日時 <span class='br-row2-item-value'>16:10頃</span>"></div>
+            <div><label>2行目-1 (値は< >で囲む)</label><input type="text" id="r2_i1" value="最大震度 <span class='br-row2-item-value'>7</span>"></div>
+            <div><label>2行目-2</label><input type="text" id="r2_i2" value="M <span class='br-row2-item-value'>7.6</span>"></div>
+            <div><label>2行目-3</label><input type="text" id="r2_i3" value="震源 <span class='br-row2-item-value'>石川県能登地方</span>"></div>
+            <div><label>2行目-4</label><input type="text" id="r2_i4" value="発生日時 <span class='br-row2-item-value'>16:10頃</span>"></div>
         </div>
-        <hr style="margin: 20px 0; border-color: #333;">
+        <hr>
         <div class="grid-2">
             <div><label for="r3_h">3行目ヘッダー</label><input type="text" id="r3_h" value="震度 5強"></div>
             <div><label for="r3_m">3行目メイン</label><input type="text" id="r3_m" value="【富山県】富山市"></div>
         </div>
-        <div style="display: flex; gap: 10px; margin-top: 30px;">
-            <button id="showButton" class="show-btn" style="flex-grow: 1;">速報 表示</button>
+        <div class="button-group">
+            <button id="showButton" class="show-btn">速報 表示</button>
             <button id="hideButton" class="hide-btn">速報 非表示</button>
         </div>
     </div>
