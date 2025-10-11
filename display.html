@@ -3,26 +3,19 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <title>OBS Breaking News Display</title>
+    <title>OBS Playlist Display</title>
     <style>
         @font-face { font-family: 'LINE Seed JP'; src: url('fonts/LINESeedJP_OTF_Bd.woff2') format('woff2'); font-weight: 700; }
         html, body { margin: 0; padding: 0; overflow: hidden; font-family: 'LINE Seed JP', sans-serif; height: 100%; width: 100%; background: transparent; }
         body { position: relative; }
-        
-        /* ▼▼▼ 変更点: アニメーションの定義を修正 ▼▼▼ */
         .telop-wrapper {
             position: absolute; bottom: 20px; left: 20px; right: 20px;
-            transform: translateX(-120%); /* 初期位置は完全に画面外 */
-            opacity: 0;
-            transition: transform 0.5s ease-out, opacity 0.5s ease-out;
+            opacity: 0; transform: translateX(-100%);
+            transition: opacity 0.5s ease-out, transform 0.5s ease-out;
             visibility: hidden;
         }
-        .telop-wrapper.visible {
-            transform: translateX(0); /* 表示位置 */
-            opacity: 1;
-            visibility: visible;
-        }
-        /* ▲▲▲ 変更ここまで ▲▲▲ */
+        .telop-wrapper.visible { opacity: 1; transform: translateX(0); visibility: visible; }
+        .telop-wrapper.hiding { transform: translateX(100%); }
         
         #breaking-container-inner { background: #e0e0e0; border-radius: 8px; border-left: 8px solid #c00000; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
         .breaking-row { display: flex; font-weight: bold; }
@@ -48,7 +41,6 @@
             </div>
         </div>
     </div>
-    
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <script>
@@ -56,23 +48,53 @@
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
         const breakingContainer = document.getElementById('breaking-container');
+        let playlistTimer = null;
+        let currentIndex = 0;
 
-        // ▼▼▼ 変更点: JavaScriptのロジックを最もシンプルな形に戻す ▼▼▼
-        database.ref('breaking_news').on('value', (snapshot) => {
-            const data = snapshot.val();
-            
-            if (data && data.visible) {
-                document.getElementById('r1_h').innerText = data.r1_h || '';
-                document.getElementById('r1_m').innerText = data.r1_m || '';
-                document.getElementById('r2_i1').innerHTML = data.r2_i1 || '';
-                document.getElementById('r2_i2').innerHTML = data.r2_i2 || '';
-                document.getElementById('r2_i3').innerHTML = data.r2_i3 || '';
-                breakingContainer.classList.add('visible');
-            } else {
+        function showTelop(data) {
+            document.getElementById('r1_h').innerText = data.r1_h || '';
+            document.getElementById('r1_m').innerText = data.r1_m || '';
+            document.getElementById('r2_i1').innerHTML = data.r2_i1 || '';
+            document.getElementById('r2_i2').innerHTML = data.r2_i2 || '';
+            document.getElementById('r2_i3').innerHTML = data.r2_i3 || '';
+            breakingContainer.classList.remove('hiding');
+            breakingContainer.classList.add('visible');
+        }
+
+        function hideTelop(onHidden) {
+            if (breakingContainer.classList.contains('visible')) {
+                breakingContainer.classList.add('hiding');
                 breakingContainer.classList.remove('visible');
+                setTimeout(onHidden, 600);
+            } else {
+                onHidden();
+            }
+        }
+
+        function playNext(playlist) {
+            if (playlist.length === 0) return;
+            if (currentIndex >= playlist.length) currentIndex = 0;
+            
+            const nextData = playlist[currentIndex];
+            hideTelop(() => {
+                showTelop(nextData);
+                currentIndex++;
+            });
+        }
+        
+        database.ref('playlist_control').on('value', (snapshot) => {
+            const data = snapshot.val();
+            clearInterval(playlistTimer); // 既存のタイマーをクリア
+
+            if (data && data.status === 'playing' && data.playlist && data.playlist.length > 0) {
+                const interval = (data.interval || 10) * 1000;
+                currentIndex = data.currentIndex || 0;
+                playNext(data.playlist); // すぐに最初の表示を開始
+                playlistTimer = setInterval(() => playNext(data.playlist), interval);
+            } else {
+                hideTelop(() => {}); // 再生停止なら非表示に
             }
         });
-        // ▲▲▲ 変更ここまで ▲▲▲
     </script>
 </body>
 </html>

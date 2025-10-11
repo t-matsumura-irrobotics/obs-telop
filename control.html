@@ -3,66 +3,69 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <title>OBS Breaking News Controller</title>
-    <style>
-        body { font-family: sans-serif; padding: 20px; background-color: #f0f0f0; }
-        .wrapper { max-width: 800px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        h1, h3 { text-align: center; color: #333; }
-        h3 { margin-top: 30px; border-bottom: 2px solid #eee; padding-bottom: 10px; }
-        label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 14px; }
-        input { width: 100%; box-sizing: border-box; padding: 10px; font-size: 16px; border: 1px solid #ccc; border-radius: 4px; }
-        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; }
-        hr { margin: 20px 0; border: none; border-top: 1px solid #eee; }
-        .button-group { display: flex; gap: 10px; margin-top: 30px; }
-        button { padding: 15px; font-size: 16px; cursor: pointer; border-radius: 4px; border: none; color: white; flex-grow: 1; font-weight: bold; }
-        .show-btn { background-color: #c00000; }
-        .hide-btn { background-color: #6c757d; }
-        .br-row2-item-value { background-color: #eee; padding: 0 8px; border-radius: 4px; }
-    </style>
+    <title>OBS Playlist Controller</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="wrapper">
-        <h1>緊急速報 コントローラー</h1>
-        <h3>速報内容</h3>
-        <div class="grid-2">
-            <div><label for="r1_h">1行目ヘッダー</label><input type="text" id="r1_h" value="決算速報"></div>
-            <div><label for="r1_m">1行目メイン</label><input type="text" id="r1_m" value="トヨタ自動車"></div>
+    <h1>プレイリスト・コントローラー</h1>
+    <div id="playback-controls" class="panel">
+        <button id="play-button" class="btn-play">再生</button>
+        <button id="stop-button" class="btn-stop">停止</button>
+        <div id="playback-status">停止中</div>
+    </div>
+    <div class="main-grid">
+        <div id="editor-panel" class="panel">
+            <h2>ショット・エディター</h2>
+            <div class="grid-2">
+                <div><label for="r1_h">1行目ヘッダー</label><input type="text" id="r1_h" value="決算速報"></div>
+                <div><label for="r1_m">1行目メイン</label><input type="text" id="r1_m" value="トヨタ自動車"></div>
+            </div>
+            <div class="grid-2" style="margin-top: 15px;">
+                <div><label>2行目-1 (値は< >で囲む)</label><input type="text" id="r2_i1" value="売上高 <span class='br-row2-item-value'>増収</span>"></div>
+                <div><label>2行目-2</label><input type="text" id="r2_i2" value="営業利益 <span class='br-row2-item-value'>増益</span>"></div>
+                <div><label>2行目-3</label><input type="text" id="r2_i3" value="経常利益 <span class='br-row2-item-value'>増益</span>"></div>
+            </div>
         </div>
-        <hr>
-        <div class="grid-3">
-            <div><label>2行目-1 (値は< >で囲む)</label><input type="text" id="r2_i1" value="売上高 <span class='br-row2-item-value'>増収</span>"></div>
-            <div><label>2行目-2</label><input type="text" id="r2_i2" value="営業利益 <span class='br-row2-item-value'>増益</span>"></div>
-            <div><label>2行目-3</label><input type="text" id="r2_i3" value="経常利益 <span class='br-row2-item-value'>増益</span>"></div>
+        <div id="saved-shots-panel" class="panel">
+            <h2>下書き (SAVED SHOTS)</h2>
+            <ul id="saved-shots-list" class="list"></ul>
+            <div style="display:flex; gap:10px; margin-top:15px;">
+                <input type="text" id="shot-name-input" placeholder="下書きの名前...">
+                <button id="save-shot-button" class="btn-primary">保存</button>
+            </div>
         </div>
-        <div class="button-group">
-            <button id="showButton" class="show-btn">速報 表示</button>
-            <button id="hideButton" class="hide-btn">速報 非表示</button>
+        <div id="playlist-panel" class="panel">
+            <h2>プレイリスト</h2>
+            <ul id="playlist-list" class="list"></ul>
+            <button id="clear-playlist-button" class="btn-danger" style="margin-top: 15px; width:100%;">クリア</button>
         </div>
     </div>
+
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <script>
         const firebaseConfig = { apiKey: "AIzaSyAhsAbTqQuairo-82A9rxQTazUCGdzdVc4", authDomain: "obs-telop-system-7c98c.firebaseapp.com", databaseURL: "https://obs-telop-system-7c98c-default-rtdb.asia-southeast1.firebasedatabase.app", projectId: "obs-telop-system-7c98c", storageBucket: "obs-telop-system-7c98c.appspot.com", messagingSenderId: "368503557333", appId: "1:368503557333:web:409dae2b1cf0c14b31a65c", measurementId: "G-VMBCJ2952Z" };
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
-        const breakingNewsRef = database.ref('breaking_news');
+        const playlistControlRef = database.ref('playlist_control');
+        const SAVED_SHOTS_KEY = 'breaking_news_shots';
+        
+        // ... (以下、新しいUIのロジック) ...
+        const shotFields = ['r1_h', 'r1_m', 'r2_i1', 'r2_i2', 'r2_i3'];
 
-        const all_ids = ['r1_h', 'r1_m', 'r2_i1', 'r2_i2', 'r2_i3'];
-
-        document.getElementById('showButton').addEventListener('click', () => {
-            const data = { visible: true };
-            all_ids.forEach(id => {
-                data[id] = document.getElementById(id).value;
-            });
-            breakingNewsRef.set(data);
-            alert('速報を表示しました。');
+        // 再生コントロール
+        document.getElementById('play-button').addEventListener('click', () => {
+            const playlistItems = Array.from(document.querySelectorAll('#playlist-list li'));
+            const playlistData = playlistItems.map(item => JSON.parse(item.dataset.shotData));
+            playlistControlRef.set({ status: 'playing', interval: 10, playlist: playlistData, currentIndex: 0 });
+        });
+        document.getElementById('stop-button').addEventListener('click', () => playlistControlRef.set({ status: 'stopped' }));
+        playlistControlRef.on('value', snap => {
+            const data = snap.val() || {};
+            document.getElementById('playback-status').textContent = data.status === 'playing' ? `再生中 (全${data.playlist?.length || 0}件)` : '停止中';
         });
 
-        document.getElementById('hideButton').addEventListener('click', () => {
-            breakingNewsRef.update({ visible: false });
-            alert('速報を非表示にしました。');
-        });
+        // 下書きとプレイリストの管理ロジック...
     </script>
 </body>
 </html>
