@@ -58,6 +58,7 @@
 
         const breakingContainer = document.getElementById('breaking-container');
 
+        // ▼▼▼ 変更点: 'live_data' から 'breaking_news' に修正 ▼▼▼
         database.ref('breaking_news').on('value', (snapshot) => {
             const data = snapshot.val();
             
