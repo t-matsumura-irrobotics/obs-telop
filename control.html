@@ -105,8 +105,7 @@
             const list = document.getElementById('playlist-list'); list.innerHTML = '';
             playlist.forEach((shot, index) => {
                 const li = document.createElement('li'); li.className = 'list-item';
-                const nameSpan = document.createElement('span'); nameSpan.className = 'item-name';
-                nameSpan.textContent = `${index + 1}: ${shot.r1_m}`; li.appendChild(nameSpan);
+                const nameSpan = document.createElement('span'); nameSpan.className = 'item-name'; nameSpan.textContent = `${index + 1}: ${shot.r1_m}`; li.appendChild(nameSpan);
                 
                 const actionsDiv = document.createElement('div'); actionsDiv.className = 'item-actions';
                 if(index > 0) {
@@ -151,9 +150,19 @@
             renderPlaylist();
             updateFirebasePlaylistIfPlaying();
         });
+        
+        // ▼▼▼ 変更点: TAKEボタンのロジックを修正 ▼▼▼
         document.getElementById('take-button').addEventListener('click', () => {
-            playlistControlRef.set({ status: 'playing', interval: 99999, playlist: [getCurrentEditorData()], currentIndex: 0 });
+            const dataToSend = {
+                status: 'playing',
+                interval: 99999, // 非常に長いインターバルで、事実上の単発再生
+                playlist: [getCurrentEditorData()],
+                currentIndex: 0
+            };
+            playlistControlRef.set(dataToSend);
         });
+        // ▲▲▲ 変更ここまで ▲▲▲
+
         document.getElementById('clear-playlist-button').addEventListener('click', () => { if (!confirm('プレイリストをクリアしますか？')) return; playlist = []; renderPlaylist(); updateFirebasePlaylistIfPlaying(); });
         document.getElementById('play-button').addEventListener('click', () => { if (playlist.length === 0) return alert('プレイリストにショットを追加してください。'); playlistControlRef.set({ status: 'playing', interval: 10, playlist: playlist, currentIndex: 0 }); });
         document.getElementById('stop-button').addEventListener('click', () => playlistControlRef.set({ status: 'stopped' }));
