@@ -4,7 +4,22 @@
 <head>
     <meta charset="UTF-8">
     <title>OBS Breaking News Controller</title>
-    <link rel="stylesheet" href="style.css">
+    <style>
+        body { font-family: sans-serif; padding: 20px; background-color: #f0f0f0; }
+        .wrapper { max-width: 800px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        h1, h3 { text-align: center; color: #333; }
+        h3 { margin-top: 30px; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 14px; }
+        input { width: 100%; box-sizing: border-box; padding: 10px; font-size: 16px; border: 1px solid #ccc; border-radius: 4px; }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; }
+        hr { margin: 20px 0; border: none; border-top: 1px solid #eee; }
+        .button-group { display: flex; gap: 10px; margin-top: 30px; }
+        button { padding: 15px; font-size: 16px; cursor: pointer; border-radius: 4px; border: none; color: white; flex-grow: 1; font-weight: bold; }
+        .show-btn { background-color: #c00000; }
+        .hide-btn { background-color: #6c757d; }
+        .br-row2-item-value { background-color: #eee; padding: 0 8px; border-radius: 4px; }
+    </style>
 </head>
 <body>
     <div class="wrapper">
@@ -25,7 +40,6 @@
             <button id="hideButton" class="hide-btn">速報 非表示</button>
         </div>
     </div>
-
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <script>

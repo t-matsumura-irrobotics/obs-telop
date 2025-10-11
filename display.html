@@ -1,4 +1,4 @@
-<!-- display.html (更新後) -->
+<!-- display.html (最終修正版) -->
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -9,18 +9,22 @@
         html, body { margin: 0; padding: 0; overflow: hidden; font-family: 'LINE Seed JP', sans-serif; height: 100%; width: 100%; background: transparent; }
         body { position: relative; }
         
-        /* ▼▼▼ 変更点: アニメーションを横スライドに変更 ▼▼▼ */
         .telop-wrapper {
             position: absolute; bottom: 20px; left: 20px; right: 20px;
             opacity: 0;
-            transform: translateX(-100%); /* 初期位置を画面の左外に設定 */
-            transition: opacity 0.5s ease-out, transform 0.5s ease-out;
-            visibility: hidden; /* 表示されていない時は完全に隠す */
+            transform: translateX(-100%);
+            transition: transform 0.5s ease-out, opacity 0.5s ease-out;
+            visibility: hidden;
         }
         .telop-wrapper.visible {
             opacity: 1;
-            transform: translateX(0); /* 最終位置を画面内に設定 */
+            transform: translateX(0);
             visibility: visible;
+        }
+        /* ▼▼▼ 右にスライドアウトさせるためのクラス ▼▼▼ */
+        .telop-wrapper.hiding {
+            opacity: 0;
+            transform: translateX(100%);
         }
         /* ▲▲▲ 変更ここまで ▲▲▲ */
         
@@ -57,6 +61,13 @@
         const database = firebase.database();
         const breakingContainer = document.getElementById('breaking-container');
 
+        // アニメーション終了後にhidingクラスを削除するリスナー
+        breakingContainer.addEventListener('transitionend', () => {
+            if (breakingContainer.classList.contains('hiding')) {
+                breakingContainer.classList.remove('hiding');
+            }
+        });
+
         database.ref('breaking_news').on('value', (snapshot) => {
             const data = snapshot.val();
             
@@ -66,8 +77,17 @@
                 document.getElementById('r2_i1').innerHTML = data.r2_i1 || '';
                 document.getElementById('r2_i2').innerHTML = data.r2_i2 || '';
                 document.getElementById('r2_i3').innerHTML = data.r2_i3 || '';
+
+                // hidingクラスが付いていれば削除してから表示
+                if (breakingContainer.classList.contains('hiding')) {
+                    breakingContainer.classList.remove('hiding');
+                }
                 breakingContainer.classList.add('visible');
             } else {
+                // visibleクラスが付いている場合のみhidingアニメーションを実行
+                if (breakingContainer.classList.contains('visible')) {
+                    breakingContainer.classList.add('hiding');
+                }
                 breakingContainer.classList.remove('visible');
             }
         });
