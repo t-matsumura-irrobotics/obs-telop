@@ -6,6 +6,11 @@
     <title>決算速報 送出コントローラー</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
+    <!-- ▼▼▼ SortableJSライブラリを読み込み ▼▼▼ -->
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+    <style>
+        .handle { cursor: move; color: #888; margin-right: 15px; }
+    </style>
 </head>
 <body>
     <h1>決算速報 送出コントローラー</h1>
@@ -88,11 +93,14 @@
                 const li = document.createElement('li'); li.className = 'list-item';
                 const nameSpan = document.createElement('span'); nameSpan.className = 'item-name'; nameSpan.textContent = name; li.appendChild(nameSpan);
                 const actionsDiv = document.createElement('div'); actionsDiv.className = 'item-actions';
-                
                 const loadBtn = document.createElement('button');
                 loadBtn.textContent = '読込'; loadBtn.className = 'btn btn-primary';
                 loadBtn.onclick = () => loadDataToEditor(data);
                 actionsDiv.appendChild(loadBtn);
+                const addBtn = document.createElement('button');
+                addBtn.textContent = '+ Playlist'; addBtn.className = 'btn btn-secondary';
+                addBtn.onclick = () => { playlist.push({ name, ...data }); renderPlaylist(); };
+                actionsDiv.appendChild(addBtn);
                 const deleteBtn = document.createElement('button');
                 deleteBtn.textContent = '削除'; deleteBtn.className = 'btn btn-danger';
                 deleteBtn.onclick = () => { if (!confirm(`「${name}」を削除しますか？`)) return; const s = getSavedShots(); delete s[name]; saveShots(s); renderSavedShots(); };
@@ -101,36 +109,24 @@
             }
         }
         
-        // ▼▼▼ 変更点: renderPlaylist関数を修正 ▼▼▼
         function renderPlaylist() {
             const list = document.getElementById('playlist-list'); list.innerHTML = '';
             playlist.forEach((shot, index) => {
                 const li = document.createElement('li'); li.className = 'list-item';
+                li.dataset.index = index;
+                const handle = document.createElement('span'); handle.className = 'handle'; handle.innerHTML = '&#9776;'; li.appendChild(handle);
                 const nameSpan = document.createElement('span'); nameSpan.className = 'item-name';
                 nameSpan.textContent = `${index + 1}: ${shot.r1_m}`; li.appendChild(nameSpan);
-                
                 const actionsDiv = document.createElement('div'); actionsDiv.className = 'item-actions';
-                if(index > 0) {
-                    const upBtn = document.createElement('button'); upBtn.textContent = '↑'; upBtn.className = 'btn';
-                    upBtn.onclick = () => { [playlist[index-1], playlist[index]] = [playlist[index], playlist[index-1]]; renderPlaylist(); updateFirebasePlaylistIfPlaying(); };
-                    actionsDiv.appendChild(upBtn);
-                }
-                if(index < playlist.length - 1) {
-                    const downBtn = document.createElement('button'); downBtn.textContent = '↓'; downBtn.className = 'btn';
-                    downBtn.onclick = () => { [playlist[index+1], playlist[index]] = [playlist[index], playlist[index+1]]; renderPlaylist(); updateFirebasePlaylistIfPlaying(); };
-                    actionsDiv.appendChild(downBtn);
-                }
                 const deleteBtn = document.createElement('button');
                 deleteBtn.textContent = '削除'; deleteBtn.className = 'btn btn-danger';
                 deleteBtn.onclick = () => { playlist.splice(index, 1); renderPlaylist(); updateFirebasePlaylistIfPlaying(); };
                 li.appendChild(deleteBtn);
                 li.appendChild(actionsDiv);
-
                 list.appendChild(li);
             });
             localStorage.setItem(PLAYLIST_KEY, JSON.stringify(playlist));
         }
-        // ▲▲▲ 変更ここまで ▲▲▲
 
         function updateFirebasePlaylistIfPlaying() {
             if (isPlaying) {
@@ -165,6 +161,19 @@
             const data = snap.val() || {};
             isPlaying = data.status === 'playing';
             document.getElementById('playback-status').textContent = isPlaying ? `再生中 (全${data.playlist?.length || 0}件)` : '停止中';
+        });
+        
+        // ▼▼▼ SortableJSの初期化 ▼▼▼
+        const playlistEl = document.getElementById('playlist-list');
+        new Sortable(playlistEl, {
+            animation: 150,
+            handle: '.handle',
+            onEnd: function (evt) {
+                const itemEl = playlist.splice(evt.oldIndex, 1)[0];
+                playlist.splice(evt.newIndex, 0, itemEl);
+                renderPlaylist();
+                updateFirebasePlaylistIfPlaying();
+            }
         });
         
         renderSavedShots();
