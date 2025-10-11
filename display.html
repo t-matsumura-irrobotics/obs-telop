@@ -1,53 +1,22 @@
+<!-- display.html (最終修正版) -->
 <!DOCTYPE html>
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <title>OBS Telop Display</title>
-    <link href="https://fonts.googleapis.com/css2?family=Anton&display=swap" rel="stylesheet">
+    <title>OBS Breaking News Display</title>
     <style>
-        @font-face { font-family: 'LINE Seed JP'; src: url('fonts/LINESeedJP_OTF_Rg.woff2') format('woff2'); font-weight: 400; }
         @font-face { font-family: 'LINE Seed JP'; src: url('fonts/LINESeedJP_OTF_Bd.woff2') format('woff2'); font-weight: 700; }
         html, body { margin: 0; padding: 0; overflow: hidden; font-family: 'LINE Seed JP', sans-serif; height: 100%; width: 100%; background: transparent; }
         body { position: relative; }
-        @keyframes seamless-scroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
-        @keyframes bounce { 0%, 20%, 50%, 80%, 100% { transform: translateY(0); } 40% { transform: translateY(-15px); } 60% { transform: translateY(-7px); } }
-
-        /* ▼▼▼ CSSの .visible クラスを廃止し、JavaScriptで直接制御する方式に変更 ▼▼▼ */
-        .telop-wrapper, .clock-wrapper {
-            position: fixed;
-            bottom: 0;
-            opacity: 0;
-            visibility: hidden; /* display:none の代わりに visibility を使用 */
-            transition: opacity 0.4s ease-out;
-            z-index: 1000;
+        
+        .telop-wrapper {
+            position: absolute; bottom: 20px; left: 20px; right: 20px;
+            opacity: 0; transform: translateY(20px);
+            transition: opacity 0.4s ease-out, transform 0.4s ease-out;
+            display: none;
         }
-        .telop-wrapper { left: 0; right: 0; }
-        .clock-wrapper { right: 0; z-index: 1001; }
-        /* ▲▲▲ CSSの .visible クラスを廃止 ▲▲▲ */
+        .telop-wrapper.visible { opacity: 1; transform: translateY(0); display: block; }
         
-        #ticker-container { height: 96px; overflow: hidden; position: relative; background: white; box-shadow: 0 4px 10px rgba(0,0,0,0.3); display: flex; }
-        #ticker-header { flex-shrink: 0; width: 300px; height: 100%; color: white; display: flex; align-items: center; background: linear-gradient(135deg, #ed949f, #69aef3); clip-path: polygon(0 0, 100% 0, 90% 100%, 0% 100%); font-size: 52px; font-weight: 700; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); padding-left: 30px; }
-        #ticker-header-text { white-space: nowrap; transform-origin: left center; }
-        
-        #ticker-scroll-area { flex-grow: 1; height: 100%; overflow: hidden; }
-        #ticker-scroll-container { display: flex; width: fit-content; animation-name: seamless-scroll; animation-timing-function: linear; animation-iteration-count: infinite; animation-duration: var(--scroll-duration, 30s); }
-        .ticker-content { display: block; white-space: nowrap; font-size: 40px; color: #333; padding: 0 20px; line-height: 96px; }
-        
-        #ticker-clock { 
-            flex-shrink: 0; height: 100%; background: linear-gradient(45deg, #ed949f, #69aef3); color: white; 
-            display: flex; justify-content: center; align-items: center; font-size: 46px; 
-            font-family: 'Anton', sans-serif; box-shadow: -5px 0 15px rgba(0,0,0,0.2); 
-            overflow: hidden; padding: 0 20px; min-width: 120px; box-sizing: border-box; position: relative;
-        }
-        
-        #clock-time, #clock-live { position: absolute; width: 100%; text-align: center; transition: transform 0.4s ease; }
-        #clock-live { transform: translateX(200%); font-size: 55px; font-style: italic; }
-        #ticker-clock.show-live #clock-time { transform: translateX(-200%); }
-        #ticker-clock.show-live #clock-live { transform: translateX(0); }
-        #clock-live span { display: inline-block; animation: bounce 1.5s infinite ease-in-out; }
-        #clock-live span:nth-child(1) { animation-delay: 0.1s; } #clock-live span:nth-child(2) { animation-delay: 0.2s; }
-        #clock-live span:nth-child(3) { animation-delay: 0.3s; } #clock-live span:nth-child(4) { animation-delay: 0.4s; }
-
         #breaking-container-inner { background: #e0e0e0; border-radius: 8px; border-left: 8px solid #c00000; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
         .breaking-row { display: flex; font-weight: bold; }
         .br-row1-header { background: #e0e0e0; color: #000; font-size: 48px; padding: 10px 30px; white-space: nowrap; }
@@ -55,128 +24,57 @@
         .br-row2 { background: #222; color: white; font-size: 42px; padding: 8px 0; display: flex; }
         .br-row2-item { flex: 1; text-align: center; padding: 0 10px; }
         .br-row2-item + .br-row2-item { border-left: 2px solid #555; }
+        .br-row2-item-value { background: white; color: #000; padding: 0 15px; margin: 0 10px; border-radius: 4px; display: inline-block; }
         .br-row3-header { background: #757575; color: white; font-size: 42px; padding: 8px 30px; white-space: nowrap; }
         .br-row3-main { background: #e0e0e0; color: #000; font-size: 42px; padding: 8px 30px; flex: 1; }
     </style>
 </head>
 <body>
-    <div id="ticker-main-wrapper" class="telop-wrapper">
-        <div id="ticker-container">
-            <div id="ticker-header"><span id="ticker-header-text"></span></div>
-            <div id="ticker-scroll-area">
-                <div id="ticker-scroll-container">
-                    <div class="ticker-content"></div>
-                    <div class="ticker-content" aria-hidden="true"></div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div id="clock-display-wrapper" class="clock-wrapper">
-        <div id="ticker-clock">
-            <span id="clock-time">00:00</span>
-            <span id="clock-live"><span>L</span><span>I</span><span>V</span><span>E</span></span>
-        </div>
-    </div>
-    
     <div id="breaking-container" class="telop-wrapper">
         <div id="breaking-container-inner">
-            <div class="breaking-row br-row1"><div id="br-r1-h" class="br-row1-header"></div><div id="br-r1-m" class="br-row1-main"></div></div>
-            <div class="br-row2"><div id="br-r2-i1" class="br-row2-item"></div><div id="br-r2-i2" class="br-row2-item"></div><div id="br-r2-i3" class="br-row2-item"></div><div id="br-r2-i4" class="br-row2-item"></div></div>
-            <div class="breaking-row br-row3"><div id="br-r3-h" class="br-row3-header"></div><div id="br-r3-m" class="br-row3-main"></div></div>
+            <div class="breaking-row">
+                <div class="br-row1-header" id="br-row1-header"></div>
+                <div class="br-row1-main" id="br-row1-main"></div>
+            </div>
+            <div class="breaking-row br-row2">
+                <div class="br-row2-item" id="br-row2-item1"></div>
+                <div class="br-row2-item" id="br-row2-item2"></div>
+                <div class="br-row2-item" id="br-row2-item3"></div>
+                <div class="br-row2-item" id="br-row2-item4"></div>
+            </div>
+            <div class="breaking-row">
+                <div class="br-row3-header" id="br-row3-header"></div>
+                <div class="br-row3-main" id="br-row3-main"></div>
+            </div>
         </div>
     </div>
     
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyAhsAbTqQuairo-82A9rxQTazUCGdzdVc4",
-            authDomain: "obs-telop-system-7c98c.firebaseapp.com",
-            databaseURL: "https://obs-telop-system-7c98c-default-rtdb.asia-southeast1.firebasedatabase.app",
-            projectId: "obs-telop-system-7c98c",
-            storageBucket: "obs-telop-system-7c98c.appspot.com",
-            messagingSenderId: "368503557333",
-            appId: "1:368503557333:web:409dae2b1cf0c14b31a65c",
-            measurementId: "G-VMBCJ2952Z"
-        };
+        const firebaseConfig = { apiKey: "AIzaSyAhsAbTqQuairo-82A9rxQTazUCGdzdVc4", authDomain: "obs-telop-system-7c98c.firebaseapp.com", databaseURL: "https://obs-telop-system-7c98c-default-rtdb.asia-southeast1.firebasedatabase.app", projectId: "obs-telop-system-7c98c", storageBucket: "obs-telop-system-7c98c.appspot.com", messagingSenderId: "368503557333", appId: "1:368503557333:web:409dae2b1cf0c14b31a65c", measurementId: "G-VMBCJ2952Z" };
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
-        const clockTimeEl = document.getElementById('clock-time');
-        function updateClock() {
-            const now = new Date();
-            const hours = String(now.getHours()).padStart(2, '0');
-            const minutes = String(now.getMinutes()).padStart(2, '0');
-            clockTimeEl.textContent = `${hours}:${minutes}`;
-        }
-        updateClock();
-        setInterval(updateClock, 1000);
+        const breakingContainer = document.getElementById('breaking-container');
 
-        // ▼▼▼ JavaScriptの表示制御ロジックを全面的に修正 ▼▼▼
-
-        // 要素の表示/非表示を直接制御するヘルパー関数
-        function setVisibility(element, isVisible) {
-            if (isVisible) {
-                element.style.visibility = 'visible';
-                element.style.opacity = '1';
-            } else {
-                element.style.opacity = '0';
-                // トランジションが終わった後に非表示にする
-                setTimeout(() => {
-                    element.style.visibility = 'hidden';
-                }, 400); // CSSのtransition時間と合わせる
-            }
-        }
-
-        // ■ Firebaseからのデータ受信ロジック
-        database.ref('live_data').on('value', (snapshot) => {
-            const data = snapshot.val() || {};
+        database.ref('breaking_news').on('value', (snapshot) => {
+            const data = snapshot.val();
             
-            const tickerMainWrapper = document.getElementById('ticker-main-wrapper');
-            const breakingContainer = document.getElementById('breaking-container');
-            const clockDisplayWrapper = document.getElementById('clock-display-wrapper');
-            const tickerClock = document.getElementById('ticker-clock');
-
-            // --- 1. 時報の表示を制御 ---
-            setVisibility(clockDisplayWrapper, !!data.showClock);
-
-            // --- 2. ティッカー本体の表示を制御 ---
-            const showTicker = data.mode === 'ticker' && data.ticker_content;
-            const showBreaking = data.mode === 'breaking' && data.breaking_content;
-
-            setVisibility(tickerMainWrapper, showTicker);
-            setVisibility(breakingContainer, showBreaking);
-
-            if (showTicker) {
-                document.getElementById('ticker-header-text').textContent = data.ticker_content.headerText;
-                
-                const tickerContents = document.querySelectorAll('.ticker-content');
-                const scrollContainer = document.getElementById('ticker-scroll-container');
-                tickerContents.forEach(el => { el.textContent = data.ticker_content.scrollText; });
-                
-                scrollContainer.style.animationName = 'none';
-                requestAnimationFrame(() => { scrollContainer.style.animationName = 'seamless-scroll'; });
-
-                let baseDuration;
-                switch (data.ticker_content.scrollSpeed) {
-                    case 'speed-slow': baseDuration = 50; break;
-                    case 'speed-fast': baseDuration = 20; break;
-                    default: baseDuration = 35; break;
-                }
-                const textLength = (data.ticker_content.scrollText || '').length;
-                const adjustedDuration = Math.max(10, baseDuration * (textLength / 30));
-                scrollContainer.style.setProperty('--scroll-duration', `${adjustedDuration}s`);
-
-                tickerClock.classList.toggle('show-live', !!data.ticker_content.isLive);
-
-            } else if (showBreaking) {
-                const b = data.breaking_content;
-                document.getElementById('br-r1-h').textContent = b.b_r1_h;
-                document.getElementById('br-r1-m').textContent = b.b_r1_m;
+            if (data && data.visible) {
+                document.getElementById('br-row1-header').innerText = data.r1_h || '';
+                document.getElementById('br-row1-main').innerText = data.r1_m || '';
+                document.getElementById('br-row2-item1').innerHTML = data.r2_i1 || '';
+                document.getElementById('br-row2-item2').innerHTML = data.r2_i2 || '';
+                document.getElementById('br-row2-item3').innerHTML = data.r2_i3 || '';
+                document.getElementById('br-row2-item4').innerHTML = data.r2_i4 || '';
+                document.getElementById('br-row3-header').innerText = data.r3_h || '';
+                document.getElementById('br-row3-main').innerText = data.r3_m || '';
+                breakingContainer.classList.add('visible');
+            } else {
+                breakingContainer.classList.remove('visible');
             }
         });
-        // ▲▲▲ JavaScriptの表示制御ロジックを全面的に修正 ▲▲▲
     </script>
 </body>
 </html>

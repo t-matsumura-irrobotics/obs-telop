@@ -1,184 +1,60 @@
+<!-- control.html (更新後) -->
 <!DOCTYPE html>
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <title>Live Telop Controller</title>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
+    <title>OBS Breaking News Controller</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <h1>ライブテロップ コントローラー</h1>
-    <div class="main-grid">
-        <div id="on-air-panel" class="panel">
-            <h2>ON AIR (現在の表示内容)</h2>
-            <div id="on-air-status">OFFLINE</div>
+    <div class="wrapper">
+        <h1>緊急速報 コントローラー</h1>
+        <h3>速報内容</h3>
+        <div class="grid-2">
+            <div><label for="r1_h">1行目ヘッダー</label><input type="text" id="r1_h" value="地震情報"></div>
+            <div><label for="r1_m">1行目メイン</label><input type="text" id="r1_m" value="海岸から離れてください"></div>
         </div>
-        <div id="preview-panel" class="panel">
-            <h2>PREVIEW / EDIT</h2>
-            <div class="tabs">
-                <button id="tab-ticker" class="tab-button active">通常ティッカー</button>
-                <button id="tab-breaking" class="tab-button">緊急速報</button>
-            </div>
-
-            <div id="ticker-controls" class="tab-content active">
-                <label>ヘッダーテキスト</label>
-                <input type="text" id="tickerHeaderText" value="東京株式市場">
-                
-                <label>スクロール速度</label>
-                <select id="tickerScrollSpeed">
-                    <option value="speed-slow">遅い</option>
-                    <option value="speed-normal" selected>普通</option>
-                    <option value="speed-fast">速い</option>
-                </select>
-                
-                <label>スクロールテキスト</label>
-                <textarea id="tickerScrollText">質問や応援コメントお待ちしています。</textarea>
-                
-                <div style="margin-top: 15px;">
-                    <input type="checkbox" id="isLiveCheckbox">
-                    <label for="isLiveCheckbox" style="display: inline-block;">ティッカーにLIVE表示</label>
-                </div>
-            </div>
-
-            <div id="breaking-controls" class="tab-content">
-                <div class="breaking-grid">
-                    <div class="grid-item full-width"><label>速報ヘッダー</label><input type="text" id="br-r1-h-input" value="速報"></div>
-                    <div class="grid-item full-width"><label>速報メイン</label><input type="text" id="br-r1-m-input" value="関東地方で強い揺れ"></div>
-                    <div class="grid-item"><label>情報1</label><input type="text" id="br-r2-i1-input" value="震源地: 東京湾"></div>
-                    <div class="grid-item"><label>情報2</label><input type="text" id="br-r2-i2-input" value="最大震度: 5強"></div>
-                    <div class="grid-item"><label>情報3</label><input type="text" id="br-r2-i3-input" value="M: 7.1"></div>
-                    <div class="grid-item"><label>情報4</label><input type="text" id="br-r2-i4-input" value="津波の心配なし"></div>
-                    <div class="grid-item full-width"><label>補足ヘッダー</label><input type="text" id="br-r3-h-input" value="[今後の情報]"></div>
-                    <div class="grid-item full-width"><label>補足メイン</label><input type="text" id="br-r3-m-input" value="テレビ・ラジオの情報に注意してください。"></div>
-                </div>
-            </div>
-            <div class="button-group">
-                <button id="takeButton" class="btn btn-take">TAKE</button>
-                <button id="fallbackButton" class="btn btn-fallback">FALLBACK (TICKER)</button>
-                <button id="hideTickerButton" class="btn btn-hide">ティッカー本体 OFF</button>
-                <button id="toggleClockButton" class="btn btn-clock-toggle">時報 ON/OFF</button>
-            </div>
+        <hr style="margin: 20px 0; border-color: #333;">
+        <div class="grid-2">
+            <div><label for="r2_i1">2行目-1</label><input type="text" id="r2_i1" value="最大震度 <span class='br-row2-item-value'>7</span>"></div>
+            <div><label for="r2_i2">2行目-2</label><input type="text" id="r2_i2" value="M <span class='br-row2-item-value'>7.6</span>"></div>
+            <div><label for="r2_i3">2行目-3</label><input type="text" id="r2_i3" value="震源 <span class='br-row2-item-value'>石川県能登地方</span>"></div>
+            <div><label for="r2_i4">2行目-4</label><input type="text" id="r2_i4" value="発生日時 <span class='br-row2-item-value'>16:10頃</span>"></div>
         </div>
-        <div id="shots-panel" class="panel">
-             <h2>SAVED SHOTS (速報用)</h2>
-             <ul id="shots-list"></ul>
-             <div class="save-shot">
-                <input type="text" id="shot-name-input" placeholder="下書きの名前...">
-                <button id="save-shot-button" class="btn-save">保存</button>
-             </div>
+        <hr style="margin: 20px 0; border-color: #333;">
+        <div class="grid-2">
+            <div><label for="r3_h">3行目ヘッダー</label><input type="text" id="r3_h" value="震度 5強"></div>
+            <div><label for="r3_m">3行目メイン</label><input type="text" id="r3_m" value="【富山県】富山市"></div>
+        </div>
+        <div style="display: flex; gap: 10px; margin-top: 30px;">
+            <button id="showButton" class="show-btn" style="flex-grow: 1;">速報 表示</button>
+            <button id="hideButton" class="hide-btn">速報 非表示</button>
         </div>
     </div>
-    
+
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyAhsAbTqQuairo-82A9rxQTazUCGdzdVc4",
-            authDomain: "obs-telop-system-7c98c.firebaseapp.com",
-            databaseURL: "https://obs-telop-system-7c98c-default-rtdb.asia-southeast1.firebasedatabase.app",
-            projectId: "obs-telop-system-7c98c",
-            storageBucket: "obs-telop-system-7c98c.appspot.com",
-            messagingSenderId: "368503557333",
-            appId: "1:368503557333:web:409dae2b1cf0c14b31a65c",
-            measurementId: "G-VMBCJ2952Z"
-        };
+        const firebaseConfig = { apiKey: "AIzaSyAhsAbTqQuairo-82A9rxQTazUCGdzdVc4", authDomain: "obs-telop-system-7c98c.firebaseapp.com", databaseURL: "https://obs-telop-system-7c98c-default-rtdb.asia-southeast1.firebasedatabase.app", projectId: "obs-telop-system-7c98c", storageBucket: "obs-telop-system-7c98c.appspot.com", messagingSenderId: "368503557333", appId: "1:368503557333:web:409dae2b1cf0c14b31a65c", measurementId: "G-VMBCJ2952Z" };
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
+        const breakingNewsRef = database.ref('breaking_news');
 
-        const tabTicker = document.getElementById('tab-ticker');
-        const tabBreaking = document.getElementById('tab-breaking');
-        const tickerControls = document.getElementById('ticker-controls');
-        const breakingControls = document.getElementById('breaking-controls');
-        const takeButton = document.getElementById('takeButton');
-        const fallbackButton = document.getElementById('fallbackButton');
-        const isLiveCheckbox = document.getElementById('isLiveCheckbox');
-        const toggleClockButton = document.getElementById('toggleClockButton');
-        const hideTickerButton = document.getElementById('hideTickerButton');
+        const all_ids = ['r1_h', 'r1_m', 'r2_i1', 'r2_i2', 'r2_i3', 'r2_i4', 'r3_h', 'r3_m'];
 
-        let currentShowClockStatus = false;
-        
-        // ■ Firebaseから現在の状態を監視
-        database.ref('live_data').on('value', (snapshot) => {
-            const data = snapshot.val() || {};
-            currentShowClockStatus = data.showClock || false;
-            
-            toggleClockButton.textContent = currentShowClockStatus ? '時報 OFF' : '時報 ON';
-            toggleClockButton.classList.toggle('active', currentShowClockStatus);
-
-            const onAirStatus = document.getElementById('on-air-status');
-            let displayHtml = '';
-            if (data.mode === 'ticker' && data.ticker_content) {
-                displayHtml = `<b>本体: 通常ティッカー</b><br>ヘッダー: ${data.ticker_content.headerText}<br>LIVE: ${data.ticker_content.isLive ? 'ON' : 'OFF'}`;
-            } else if (data.mode === 'breaking' && data.breaking_content) {
-                displayHtml = `<b>本体: 緊急速報</b><br>ヘッダー: ${data.breaking_content.b_r1_h}`;
-            } else {
-                displayHtml = '<b>本体: OFF</b>';
-            }
-            displayHtml += `<br><b>時報: ${currentShowClockStatus ? 'ON' : 'OFF'}</b>`;
-            onAirStatus.innerHTML = displayHtml;
+        document.getElementById('showButton').addEventListener('click', () => {
+            const data = { visible: true };
+            all_ids.forEach(id => {
+                data[id] = document.getElementById(id).value;
+            });
+            breakingNewsRef.set(data);
+            alert('速報を表示しました。');
         });
 
-        // ■ タブ切り替え機能
-        tabTicker.addEventListener('click', () => {
-            tabTicker.classList.add('active'); tabBreaking.classList.remove('active');
-            tickerControls.classList.add('active'); breakingControls.classList.remove('active');
+        document.getElementById('hideButton').addEventListener('click', () => {
+            breakingNewsRef.update({ visible: false });
+            alert('速報を非表示にしました。');
         });
-
-        tabBreaking.addEventListener('click', () => {
-            tabBreaking.classList.add('active'); tabTicker.classList.remove('active');
-            breakingControls.classList.add('active'); tickerControls.classList.remove('active');
-        });
-
-        // ■ TAKEボタンの機能
-        takeButton.addEventListener('click', () => {
-            let updateData = {};
-            if (tabTicker.classList.contains('active')) {
-                updateData.mode = 'ticker';
-                updateData.ticker_content = {
-                    headerText: document.getElementById('tickerHeaderText').value,
-                    scrollText: document.getElementById('tickerScrollText').value,
-                    scrollSpeed: document.getElementById('tickerScrollSpeed').value,
-                    isLive: isLiveCheckbox.checked
-                };
-            } else {
-                updateData.mode = 'breaking';
-                updateData.breaking_content = {
-                    b_r1_h: document.getElementById('br-r1-h-input').value, b_r1_m: document.getElementById('br-r1-m-input').value,
-                    b_r2_i1: document.getElementById('br-r2-i1-input').value, b_r2_i2: document.getElementById('br-r2-i2-input').value,
-                    b_r2_i3: document.getElementById('br-r2-i3-input').value, b_r2_i4: document.getElementById('br-r2-i4-input').value,
-                    b_r3_h: document.getElementById('br-r3-h-input').value, b_r3_m: document.getElementById('br-r3-m-input').value,
-                };
-            }
-            database.ref('live_data').update(updateData);
-        });
-        
-        // ■ FALLBACKボタンの機能
-        fallbackButton.addEventListener('click', () => {
-             const updateData = {
-                mode: 'ticker',
-                ticker_content: {
-                    headerText: document.getElementById('tickerHeaderText').value,
-                    scrollText: document.getElementById('tickerScrollText').value,
-                    scrollSpeed: document.getElementById('tickerScrollSpeed').value,
-                    isLive: isLiveCheckbox.checked
-                }
-            };
-            database.ref('live_data').update(updateData);
-        });
-        
-        // ■ ティッカー本体 OFF ボタンの機能
-        hideTickerButton.addEventListener('click', () => {
-            database.ref('live_data').update({ mode: 'hidden' });
-        });
-
-        // ■ 時報 ON/OFF ボタンの機能
-        toggleClockButton.addEventListener('click', () => {
-            const newStatus = !currentShowClockStatus;
-            database.ref('live_data').update({ showClock: newStatus });
-        });
-
-        // ■ 速報の下書き保存・読込・削除機能 (省略)
-        // ... (この部分は変更ありません)
     </script>
 </body>
 </html>
