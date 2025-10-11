@@ -8,22 +8,23 @@
         @font-face { font-family: 'LINE Seed JP'; src: url('fonts/LINESeedJP_OTF_Bd.woff2') format('woff2'); font-weight: 700; }
         html, body { margin: 0; padding: 0; overflow: hidden; font-family: 'LINE Seed JP', sans-serif; height: 100%; width: 100%; background: transparent; }
         body { position: relative; }
-
-        /* ▼▼▼ 変更点: アニメーションの値を修正 ▼▼▼ */
+        
+        /* ▼▼▼ 変更点: アニメーションの定義を修正 ▼▼▼ */
         .telop-wrapper {
             position: absolute; bottom: 20px; left: 20px; right: 20px;
+            transform: translateX(100%); /* 初期位置・非表示位置を右外に */
             opacity: 0;
-            transform: translateX(-100%); /* 表示前の初期位置を左外に */
-            transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+            transition: transform 0.5s ease-out, opacity 0.5s ease-out;
             visibility: hidden;
         }
-        .telop-wrapper.visible {
-            opacity: 1;
-            transform: translateX(0); /* 表示位置 */
-            visibility: visible;
+        .telop-wrapper.prepare {
+            transition: none; /* 準備中はアニメーションを無効に */
+            transform: translateX(-100%); /* 表示前の待機位置を左外に */
         }
-        .telop-wrapper.hiding {
-            transform: translateX(100%); /* 非表示時に右外へ */
+        .telop-wrapper.visible {
+            transform: translateX(0); /* 表示位置 */
+            opacity: 1;
+            visibility: visible;
         }
         /* ▲▲▲ 変更ここまで ▲▲▲ */
         
@@ -60,26 +61,39 @@
         const breakingContainer = document.getElementById('breaking-container');
         let playlistTimer = null;
         let currentIndex = 0;
+        let isTelopVisible = false;
 
+        // ▼▼▼ 変更点: 新しいアニメーション制御ロジック ▼▼▼
         function showTelop(data) {
+            // 1. 内容を書き換える
             document.getElementById('r1_h').innerText = data.r1_h || '';
             document.getElementById('r1_m').innerText = data.r1_m || '';
             document.getElementById('r2_i1').innerHTML = data.r2_i1 || '';
             document.getElementById('r2_i2').innerHTML = data.r2_i2 || '';
             document.getElementById('r2_i3').innerHTML = data.r2_i3 || '';
-            breakingContainer.classList.remove('hiding');
-            breakingContainer.classList.add('visible');
+
+            // 2. アニメーションなしで左外に瞬間移動させる
+            breakingContainer.classList.add('prepare');
+            
+            // 3. ブラウザが描画するのを待ってから、スライドアニメーションを開始
+            requestAnimationFrame(() => {
+                breakingContainer.classList.remove('prepare');
+                breakingContainer.classList.add('visible');
+            });
+            isTelopVisible = true;
         }
 
-        function hideTelop(onHidden) {
-            if (breakingContainer.classList.contains('visible')) {
-                breakingContainer.classList.add('hiding');
+        function hideTelop(onHiddenCallback) {
+            if (isTelopVisible) {
                 breakingContainer.classList.remove('visible');
-                setTimeout(onHidden, 600); // アニメーションが終わるのを待つ
+                // アニメーションが終わるのを待ってからコールバックを実行
+                setTimeout(onHiddenCallback, 600); 
             } else {
-                onHidden();
+                onHiddenCallback();
             }
+            isTelopVisible = false;
         }
+        // ▲▲▲ 変更ここまで ▲▲▲
 
         function playNext(playlist) {
             if (!playlist || playlist.length === 0) return;
