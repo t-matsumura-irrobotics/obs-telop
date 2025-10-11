@@ -11,20 +11,14 @@
         <h1>緊急速報 コントローラー</h1>
         <h3>速報内容</h3>
         <div class="grid-2">
-            <div><label for="r1_h">1行目ヘッダー</label><input type="text" id="r1_h" value="地震情報"></div>
-            <div><label for="r1_m">1行目メイン</label><input type="text" id="r1_m" value="海岸から離れてください"></div>
+            <div><label for="r1_h">1行目ヘッダー</label><input type="text" id="r1_h" value="決算速報"></div>
+            <div><label for="r1_m">1行目メイン</label><input type="text" id="r1_m" value="トヨタ自動車"></div>
         </div>
         <hr>
-        <div class="grid-2">
-            <div><label>2行目-1 (値は< >で囲む)</label><input type="text" id="r2_i1" value="最大震度 <span class='br-row2-item-value'>7</span>"></div>
-            <div><label>2行目-2</label><input type="text" id="r2_i2" value="M <span class='br-row2-item-value'>7.6</span>"></div>
-            <div><label>2行目-3</label><input type="text" id="r2_i3" value="震源 <span class='br-row2-item-value'>石川県能登地方</span>"></div>
-            <div><label>2行目-4</label><input type="text" id="r2_i4" value="発生日時 <span class='br-row2-item-value'>16:10頃</span>"></div>
-        </div>
-        <hr>
-        <div class="grid-2">
-            <div><label for="r3_h">3行目ヘッダー</label><input type="text" id="r3_h" value="震度 5強"></div>
-            <div><label for="r3_m">3行目メイン</label><input type="text" id="r3_m" value="【富山県】富山市"></div>
+        <div class="grid-3">
+            <div><label>2行目-1 (値は< >で囲む)</label><input type="text" id="r2_i1" value="売上高 <span class='br-row2-item-value'>増収</span>"></div>
+            <div><label>2行目-2</label><input type="text" id="r2_i2" value="営業利益 <span class='br-row2-item-value'>増益</span>"></div>
+            <div><label>2行目-3</label><input type="text" id="r2_i3" value="経常利益 <span class='br-row2-item-value'>増益</span>"></div>
         </div>
         <div class="button-group">
             <button id="showButton" class="show-btn">速報 表示</button>
@@ -40,7 +34,7 @@
         const database = firebase.database();
         const breakingNewsRef = database.ref('breaking_news');
 
-        const all_ids = ['r1_h', 'r1_m', 'r2_i1', 'r2_i2', 'r2_i3', 'r2_i4', 'r3_h', 'r3_m'];
+        const all_ids = ['r1_h', 'r1_m', 'r2_i1', 'r2_i2', 'r2_i3'];
 
         document.getElementById('showButton').addEventListener('click', () => {
             const data = { visible: true };
