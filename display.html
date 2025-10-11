@@ -9,18 +9,22 @@
         html, body { margin: 0; padding: 0; overflow: hidden; font-family: 'LINE Seed JP', sans-serif; height: 100%; width: 100%; background: transparent; }
         body { position: relative; }
         
-        /* ▼▼▼ 変更点: 最もシンプルで確実なアニメーション定義 ▼▼▼ */
+        /* ▼▼▼ 変更点: アニメーションの定義を修正 ▼▼▼ */
         .telop-wrapper {
             position: absolute; bottom: 20px; left: 20px; right: 20px;
-            transform: translateX(-100%); /* 初期位置は左外 */
             opacity: 0;
-            transition: transform 0.5s ease-out, opacity 0.5s ease-out;
-            visibility: hidden;
+            transform: translateX(-100%); /* 表示前の初期位置を左外に設定 */
+            transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+            visibility: hidden; /* 表示されていない時は完全に隠す */
         }
         .telop-wrapper.visible {
-            transform: translateX(0); /* 表示位置 */
             opacity: 1;
+            transform: translateX(0); /* 表示位置 */
             visibility: visible;
+        }
+        .telop-wrapper.hiding {
+            opacity: 0;
+            transform: translateX(100%); /* 非表示時に右外へスライド */
         }
         /* ▲▲▲ 変更ここまで ▲▲▲ */
         
@@ -59,21 +63,46 @@
         let currentIndex = 0;
         let isTelopVisible = false;
 
-        // ▼▼▼ 変更点: 新しいアニメーション制御ロジック ▼▼▼
+        // アニメーション終了後にhidingクラスを削除するリスナー
+        breakingContainer.addEventListener('transitionend', (event) => {
+            // transformプロパティのアニメーション終了時のみ処理を実行
+            if (event.propertyName === 'transform' && breakingContainer.classList.contains('hiding')) {
+                breakingContainer.classList.remove('hiding');
+                // 非表示完了後のコールバックがあれば実行
+                // （現在はプレイリストロジック内で直接コールバックを管理しているので不要だが、将来的な拡張性のため）
+            }
+        });
+
         function showTelop(data) {
             document.getElementById('r1_h').innerText = data.r1_h || '';
             document.getElementById('r1_m').innerText = data.r1_m || '';
             document.getElementById('r2_i1').innerHTML = data.r2_i1 || '';
             document.getElementById('r2_i2').innerHTML = data.r2_i2 || '';
             document.getElementById('r2_i3').innerHTML = data.r2_i3 || '';
-            breakingContainer.classList.add('visible');
-            isTelopVisible = true;
+
+            // まず右外に瞬間移動させ、visibleクラスで左からスライドインさせる
+            breakingContainer.classList.remove('visible'); // visibleを一旦外す
+            breakingContainer.classList.remove('hiding');  // hidingも確実に外す
+            breakingContainer.style.transition = 'none'; // 瞬間移動のためにトランジションを一時停止
+            breakingContainer.style.transform = 'translateX(-100%)'; // 左外へ瞬間移動
+            
+            // DOMの変更が適用されるのを待ってからアニメーション開始
+            requestAnimationFrame(() => {
+                breakingContainer.style.transition = ''; // トランジションを元に戻す
+                breakingContainer.classList.add('visible');
+                isTelopVisible = true;
+            });
         }
 
         function hideTelop(onHiddenCallback) {
             if (isTelopVisible) {
+                breakingContainer.classList.add('hiding'); // 右にスライドアウト
                 breakingContainer.classList.remove('visible');
-                setTimeout(onHiddenCallback, 600); // アニメーションが終わるのを待つ
+                // アニメーションが終わるのを待ってからコールバックを実行
+                setTimeout(() => {
+                    onHiddenCallback();
+                    breakingContainer.classList.remove('hiding'); // hidingクラスを削除して次回の表示に備える
+                }, 600); 
             } else {
                 onHiddenCallback();
             }
@@ -81,7 +110,10 @@
         }
 
         function playNext(playlist) {
-            if (!playlist || playlist.length === 0) return;
+            if (!playlist || playlist.length === 0) {
+                hideTelop(() => {}); // プレイリストが空なら非表示
+                return;
+            }
             if (currentIndex >= playlist.length) currentIndex = 0;
             
             const nextData = playlist[currentIndex];
@@ -108,7 +140,6 @@
                 hideTelop(() => {});
             }
         });
-        // ▲▲▲ 変更ここまで ▲▲▲
     </script>
 </body>
 </html>
