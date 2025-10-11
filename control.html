@@ -53,6 +53,7 @@
         const SAVED_SHOTS_KEY = 'breaking_news_shots_playlist';
 
         const shotFields = ['r1_h', 'r1_m', 'r2_i1', 'r2_i2', 'r2_i3'];
+        let playlist = [];
 
         function getCurrentEditorData() {
             const data = {};
@@ -81,23 +82,15 @@
         }
         
         function addShotToList(list, name, data, isEditing = false) {
-            const li = document.createElement('li');
-            li.className = 'list-item';
-            li.dataset.shotData = JSON.stringify(data);
-            li.dataset.shotName = name;
-
-            const nameSpan = document.createElement('span');
-            nameSpan.className = 'item-name';
-            nameSpan.textContent = name;
+            const li = document.createElement('li'); li.className = 'list-item';
+            const nameSpan = document.createElement('span'); nameSpan.className = 'item-name'; nameSpan.textContent = name;
             li.appendChild(nameSpan);
 
-            const actionsDiv = document.createElement('div');
-            actionsDiv.className = 'item-actions';
+            const actionsDiv = document.createElement('div'); actionsDiv.className = 'item-actions';
             
             if (isEditing) {
                 const takeBtn = document.createElement('button');
-                takeBtn.textContent = 'TAKE (単発)';
-                takeBtn.className = 'btn btn-take-single';
+                takeBtn.textContent = 'TAKE (単発)'; takeBtn.className = 'btn btn-secondary';
                 takeBtn.onclick = () => {
                     const singleShotPlaylist = [getCurrentEditorData()];
                     playlistControlRef.set({ status: 'playing', interval: 99999, playlist: singleShotPlaylist, currentIndex: 0 });
@@ -105,27 +98,22 @@
                 actionsDiv.appendChild(takeBtn);
             } else {
                 const loadBtn = document.createElement('button');
-                loadBtn.textContent = '読込';
-                loadBtn.className = 'btn btn-load';
+                loadBtn.textContent = '読込'; loadBtn.className = 'btn btn-load';
                 loadBtn.onclick = () => { loadDataToEditor(data); renderSavedShots(); };
                 actionsDiv.appendChild(loadBtn);
 
                 const deleteBtn = document.createElement('button');
-                deleteBtn.textContent = '削除';
-                deleteBtn.className = 'btn btn-danger';
+                deleteBtn.textContent = '削除'; deleteBtn.className = 'btn btn-danger';
                 deleteBtn.onclick = () => {
                     if (!confirm(`「${name}」を削除しますか？`)) return;
-                    const shots = getSavedShots();
-                    delete shots[name];
-                    saveShots(shots);
-                    renderSavedShots();
+                    const shots = getSavedShots(); delete shots[name];
+                    saveShots(shots); renderSavedShots();
                 };
                 actionsDiv.appendChild(deleteBtn);
             }
             
             const addBtn = document.createElement('button');
-            addBtn.textContent = '+ Playlist';
-            addBtn.className = 'btn btn-primary';
+            addBtn.textContent = '+ Playlist'; addBtn.className = 'btn btn-primary';
             addBtn.onclick = () => addShotToPlaylist(name, data);
             actionsDiv.appendChild(addBtn);
 
@@ -133,10 +121,46 @@
             list.appendChild(li);
         }
 
-        function addShotToPlaylist(name, data) {
-            // ... (プレイリスト追加機能)
+        // ▼▼▼ プレイリスト関連のロジックを実装 ▼▼▼
+        function renderPlaylist() {
+            const list = document.getElementById('playlist-list');
+            list.innerHTML = '';
+            playlist.forEach((shot, index) => {
+                const li = document.createElement('li'); li.className = 'list-item';
+                const nameSpan = document.createElement('span'); nameSpan.className = 'item-name';
+                nameSpan.textContent = `${index + 1}: ${shot.name}`;
+                li.appendChild(nameSpan);
+                const deleteBtn = document.createElement('button');
+                deleteBtn.textContent = '削除'; deleteBtn.className = 'btn btn-danger';
+                deleteBtn.onclick = () => { playlist.splice(index, 1); renderPlaylist(); };
+                li.appendChild(deleteBtn);
+                list.appendChild(li);
+            });
         }
         
+        function addShotToPlaylist(name, data) {
+            playlist.push({ name, ...data });
+            renderPlaylist();
+        }
+
+        document.getElementById('clear-playlist-button').addEventListener('click', () => {
+            if (!confirm('プレイリストをクリアしますか？')) return;
+            playlist = [];
+            renderPlaylist();
+        });
+
+        // ▼▼▼ 再生コントロールのロジックを実装 ▼▼▼
+        document.getElementById('play-button').addEventListener('click', () => {
+            if (playlist.length === 0) return alert('プレイリストにショットを追加してください。');
+            playlistControlRef.set({ status: 'playing', interval: 10, playlist: playlist, currentIndex: 0 });
+        });
+        document.getElementById('stop-button').addEventListener('click', () => playlistControlRef.set({ status: 'stopped' }));
+        playlistControlRef.on('value', snap => {
+            const data = snap.val() || {};
+            document.getElementById('playback-status').textContent = data.status === 'playing' ? `再生中 (全${data.playlist?.length || 0}件)` : '停止中';
+        });
+        // ▲▲▲ 実装ここまで ▲▲▲
+
         document.getElementById('save-shot-button').addEventListener('click', () => {
             const name = document.getElementById('shot-name-input').value;
             if (!name) return alert('下書きの名前を入力してください。');
@@ -150,7 +174,6 @@
         document.querySelectorAll('#editor-panel input').forEach(input => input.addEventListener('input', renderSavedShots));
         
         renderSavedShots();
-
     </script>
 </body>
 </html>
