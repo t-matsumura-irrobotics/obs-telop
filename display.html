@@ -9,22 +9,18 @@
         html, body { margin: 0; padding: 0; overflow: hidden; font-family: 'LINE Seed JP', sans-serif; height: 100%; width: 100%; background: transparent; }
         body { position: relative; }
         
+        /* ▼▼▼ 変更点: アニメーションの定義を修正 ▼▼▼ */
         .telop-wrapper {
             position: absolute; bottom: 20px; left: 20px; right: 20px;
+            transform: translateX(-120%); /* 初期位置は完全に画面外 */
             opacity: 0;
-            transform: translateX(-100%);
             transition: transform 0.5s ease-out, opacity 0.5s ease-out;
             visibility: hidden;
         }
         .telop-wrapper.visible {
+            transform: translateX(0); /* 表示位置 */
             opacity: 1;
-            transform: translateX(0);
             visibility: visible;
-        }
-        /* ▼▼▼ 右にスライドアウトさせるためのクラス ▼▼▼ */
-        .telop-wrapper.hiding {
-            opacity: 0;
-            transform: translateX(100%);
         }
         /* ▲▲▲ 変更ここまで ▲▲▲ */
         
@@ -61,13 +57,7 @@
         const database = firebase.database();
         const breakingContainer = document.getElementById('breaking-container');
 
-        // アニメーション終了後にhidingクラスを削除するリスナー
-        breakingContainer.addEventListener('transitionend', () => {
-            if (breakingContainer.classList.contains('hiding')) {
-                breakingContainer.classList.remove('hiding');
-            }
-        });
-
+        // ▼▼▼ 変更点: JavaScriptのロジックを最もシンプルな形に戻す ▼▼▼
         database.ref('breaking_news').on('value', (snapshot) => {
             const data = snapshot.val();
             
@@ -77,20 +67,12 @@
                 document.getElementById('r2_i1').innerHTML = data.r2_i1 || '';
                 document.getElementById('r2_i2').innerHTML = data.r2_i2 || '';
                 document.getElementById('r2_i3').innerHTML = data.r2_i3 || '';
-
-                // hidingクラスが付いていれば削除してから表示
-                if (breakingContainer.classList.contains('hiding')) {
-                    breakingContainer.classList.remove('hiding');
-                }
                 breakingContainer.classList.add('visible');
             } else {
-                // visibleクラスが付いている場合のみhidingアニメーションを実行
-                if (breakingContainer.classList.contains('visible')) {
-                    breakingContainer.classList.add('hiding');
-                }
                 breakingContainer.classList.remove('visible');
             }
         });
+        // ▲▲▲ 変更ここまで ▲▲▲
     </script>
 </body>
 </html>
