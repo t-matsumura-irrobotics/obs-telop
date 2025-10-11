@@ -101,80 +101,14 @@
             }
         }
         
+        // ▼▼▼ 変更点: renderPlaylist関数を修正 ▼▼▼
         function renderPlaylist() {
             const list = document.getElementById('playlist-list'); list.innerHTML = '';
             playlist.forEach((shot, index) => {
                 const li = document.createElement('li'); li.className = 'list-item';
-                const nameSpan = document.createElement('span'); nameSpan.className = 'item-name'; nameSpan.textContent = `${index + 1}: ${shot.r1_m}`; li.appendChild(nameSpan);
+                const nameSpan = document.createElement('span'); nameSpan.className = 'item-name';
+                nameSpan.textContent = `${index + 1}: ${shot.r1_m}`; li.appendChild(nameSpan);
                 
                 const actionsDiv = document.createElement('div'); actionsDiv.className = 'item-actions';
                 if(index > 0) {
-                    const upBtn = document.createElement('button'); upBtn.textContent = '↑'; upBtn.className = 'btn';
-                    upBtn.onclick = () => { [playlist[index-1], playlist[index]] = [playlist[index], playlist[index-1]]; renderPlaylist(); updateFirebasePlaylistIfPlaying(); };
-                    actionsDiv.appendChild(upBtn);
-                }
-                if(index < playlist.length - 1) {
-                    const downBtn = document.createElement('button'); downBtn.textContent = '↓'; downBtn.className = 'btn';
-                    downBtn.onclick = () => { [playlist[index+1], playlist[index]] = [playlist[index], playlist[index+1]]; renderPlaylist(); updateFirebasePlaylistIfPlaying(); };
-                    actionsDiv.appendChild(downBtn);
-                }
-                const deleteBtn = document.createElement('button');
-                deleteBtn.textContent = '削除'; deleteBtn.className = 'btn btn-danger';
-                deleteBtn.onclick = () => { playlist.splice(index, 1); renderPlaylist(); updateFirebasePlaylistIfPlaying(); };
-                li.appendChild(deleteBtn);
-
-                list.appendChild(li);
-            });
-            localStorage.setItem(PLAYLIST_KEY, JSON.stringify(playlist));
-        }
-
-        function updateFirebasePlaylistIfPlaying() {
-            if (isPlaying) {
-                playlistControlRef.update({ playlist: playlist });
-            }
-        }
-        
-        document.getElementById('save-shot-button').addEventListener('click', () => {
-            const name = document.getElementById('r1_m').value;
-            if (!name) return alert('「1行目メイン」に名前を入力してください。');
-            const shots = getSavedShots();
-            shots[name] = getCurrentEditorData();
-            saveShots(shots);
-            renderSavedShots();
-            alert(`「${name}」を保存しました。`);
-        });
-        document.getElementById('add-to-playlist-button').addEventListener('click', () => {
-            const data = getCurrentEditorData();
-            if (!data.r1_m) return alert('「1行目メイン」に名前を入力してください。');
-            playlist.push(data);
-            renderPlaylist();
-            updateFirebasePlaylistIfPlaying();
-        });
-        
-        // ▼▼▼ 変更点: TAKEボタンのロジックを修正 ▼▼▼
-        document.getElementById('take-button').addEventListener('click', () => {
-            const dataToSend = {
-                status: 'playing',
-                interval: 99999, // 非常に長いインターバルで、事実上の単発再生
-                playlist: [getCurrentEditorData()],
-                currentIndex: 0
-            };
-            playlistControlRef.set(dataToSend);
-        });
-        // ▲▲▲ 変更ここまで ▲▲▲
-
-        document.getElementById('clear-playlist-button').addEventListener('click', () => { if (!confirm('プレイリストをクリアしますか？')) return; playlist = []; renderPlaylist(); updateFirebasePlaylistIfPlaying(); });
-        document.getElementById('play-button').addEventListener('click', () => { if (playlist.length === 0) return alert('プレイリストにショットを追加してください。'); playlistControlRef.set({ status: 'playing', interval: 10, playlist: playlist, currentIndex: 0 }); });
-        document.getElementById('stop-button').addEventListener('click', () => playlistControlRef.set({ status: 'stopped' }));
-
-        playlistControlRef.on('value', snap => {
-            const data = snap.val() || {};
-            isPlaying = data.status === 'playing';
-            document.getElementById('playback-status').textContent = isPlaying ? `再生中 (全${data.playlist?.length || 0}件)` : '停止中';
-        });
-        
-        renderSavedShots();
-        renderPlaylist();
-    </script>
-</body>
-</html>
+                    const upBtn = docu
