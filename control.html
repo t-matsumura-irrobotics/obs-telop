@@ -37,7 +37,6 @@
                 <div><label>値</label><input type="text" id="r2_v3" value="減益"></div>
                 <div><label>色</label><select id="r2_c3"><option value="text-black">黒</option><option value="text-red" selected>赤</option><option value="text-blue">青</option></select></div>
             </div>
-            <!-- ▼▼▼ 変更点: 新しいボタン配置 ▼▼▼ -->
             <div class="button-group" style="margin-top: auto;">
                 <button id="take-button" class="btn btn-secondary">TAKE (単発表示)</button>
                 <button id="add-to-playlist-button" class="btn btn-primary">+ PLAYLIST</button>
@@ -47,8 +46,7 @@
              <h2>下書き (SAVED SHOTS)</h2>
              <ul id="saved-shots-list" class="list"></ul>
              <div class="save-controls">
-                <input type="text" id="shot-name-input" placeholder="下書きの名前...">
-                <button id="save-shot-button" class="btn-primary">保存</button>
+                <button id="save-shot-button" class="btn-primary" style="width:100%">現在のエディター内容を保存</button>
              </div>
         </div>
         <div id="playlist-panel" class="panel">
@@ -64,7 +62,7 @@
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
         const playlistControlRef = database.ref('playlist_control');
-        const SAVED_SHOTS_KEY = 'breaking_news_shots_playlist_v2';
+        const SAVED_SHOTS_KEY = 'breaking_news_shots_playlist_v3';
         const shotFields = ['r1_h', 'r1_m', 'r2_l1', 'r2_v1', 'r2_c1', 'r2_l2', 'r2_v2', 'r2_c2', 'r2_l3', 'r2_v3', 'r2_c3'];
         let playlist = [];
 
@@ -92,7 +90,6 @@
                 loadBtn.textContent = '読込'; loadBtn.className = 'btn btn-primary';
                 loadBtn.onclick = () => loadDataToEditor(data);
                 actionsDiv.appendChild(loadBtn);
-
                 const deleteBtn = document.createElement('button');
                 deleteBtn.textContent = '削除'; deleteBtn.className = 'btn btn-danger';
                 deleteBtn.onclick = () => { if (!confirm(`「${name}」を削除しますか？`)) return; const s = getSavedShots(); delete s[name]; saveShots(s); renderSavedShots(); };
@@ -105,8 +102,7 @@
             const list = document.getElementById('playlist-list'); list.innerHTML = '';
             playlist.forEach((shot, index) => {
                 const li = document.createElement('li'); li.className = 'list-item';
-                const nameSpan = document.createElement('span'); nameSpan.className = 'item-name';
-                nameSpan.textContent = `${index + 1}: ${shot.name || 'Untitled'}`; li.appendChild(nameSpan);
+                const nameSpan = document.createElement('span'); nameSpan.className = 'item-name'; nameSpan.textContent = `${index + 1}: ${shot.r1_m}`; li.appendChild(nameSpan);
                 const deleteBtn = document.createElement('button');
                 deleteBtn.textContent = '削除'; deleteBtn.className = 'btn btn-danger';
                 deleteBtn.onclick = () => { playlist.splice(index, 1); renderPlaylist(); };
@@ -114,15 +110,17 @@
             });
         }
         
-        // --- ボタンのイベントリスナー ---
         document.getElementById('save-shot-button').addEventListener('click', () => {
-            const name = document.getElementById('shot-name-input').value; if (!name) return alert('下書きの名前を入力してください。');
-            const shots = getSavedShots(); shots[name] = getCurrentEditorData();
-            saveShots(shots); renderSavedShots(); document.getElementById('shot-name-input').value = '';
+            const name = document.getElementById('r1_m').value;
+            if (!name) return alert('「1行目メイン」に名前を入力してください。');
+            const shots = getSavedShots();
+            shots[name] = getCurrentEditorData();
+            saveShots(shots);
+            renderSavedShots();
+            alert(`「${name}」を保存しました。`);
         });
         document.getElementById('add-to-playlist-button').addEventListener('click', () => {
-            const name = document.getElementById('shot-name-input').value || 'Untitled Shot';
-            playlist.push({ name, ...getCurrentEditorData() });
+            playlist.push(getCurrentEditorData());
             renderPlaylist();
         });
         document.getElementById('take-button').addEventListener('click', () => {
