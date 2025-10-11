@@ -8,14 +8,24 @@
         @font-face { font-family: 'LINE Seed JP'; src: url('fonts/LINESeedJP_OTF_Bd.woff2') format('woff2'); font-weight: 700; }
         html, body { margin: 0; padding: 0; overflow: hidden; font-family: 'LINE Seed JP', sans-serif; height: 100%; width: 100%; background: transparent; }
         body { position: relative; }
+
+        /* ▼▼▼ 変更点: アニメーションの値を修正 ▼▼▼ */
         .telop-wrapper {
             position: absolute; bottom: 20px; left: 20px; right: 20px;
-            opacity: 0; transform: translateX(-100%);
+            opacity: 0;
+            transform: translateX(-100%); /* 表示前の初期位置を左外に */
             transition: opacity 0.5s ease-out, transform 0.5s ease-out;
             visibility: hidden;
         }
-        .telop-wrapper.visible { opacity: 1; transform: translateX(0); visibility: visible; }
-        .telop-wrapper.hiding { transform: translateX(100%); }
+        .telop-wrapper.visible {
+            opacity: 1;
+            transform: translateX(0); /* 表示位置 */
+            visibility: visible;
+        }
+        .telop-wrapper.hiding {
+            transform: translateX(100%); /* 非表示時に右外へ */
+        }
+        /* ▲▲▲ 変更ここまで ▲▲▲ */
         
         #breaking-container-inner { background: #e0e0e0; border-radius: 8px; border-left: 8px solid #c00000; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
         .breaking-row { display: flex; font-weight: bold; }
@@ -65,14 +75,14 @@
             if (breakingContainer.classList.contains('visible')) {
                 breakingContainer.classList.add('hiding');
                 breakingContainer.classList.remove('visible');
-                setTimeout(onHidden, 600);
+                setTimeout(onHidden, 600); // アニメーションが終わるのを待つ
             } else {
                 onHidden();
             }
         }
 
         function playNext(playlist) {
-            if (playlist.length === 0) return;
+            if (!playlist || playlist.length === 0) return;
             if (currentIndex >= playlist.length) currentIndex = 0;
             
             const nextData = playlist[currentIndex];
@@ -84,15 +94,15 @@
         
         database.ref('playlist_control').on('value', (snapshot) => {
             const data = snapshot.val();
-            clearInterval(playlistTimer); // 既存のタイマーをクリア
+            clearInterval(playlistTimer);
 
             if (data && data.status === 'playing' && data.playlist && data.playlist.length > 0) {
                 const interval = (data.interval || 10) * 1000;
                 currentIndex = data.currentIndex || 0;
-                playNext(data.playlist); // すぐに最初の表示を開始
+                playNext(data.playlist);
                 playlistTimer = setInterval(() => playNext(data.playlist), interval);
             } else {
-                hideTelop(() => {}); // 再生停止なら非表示に
+                hideTelop(() => {});
             }
         });
     </script>
