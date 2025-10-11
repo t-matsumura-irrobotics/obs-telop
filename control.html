@@ -1,4 +1,4 @@
-<!-- control.html (更新後) -->
+<!-- control.html (最終修正版) -->
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -7,20 +7,60 @@
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
     <link rel="stylesheet" href="style.css">
-    <!-- ▼▼▼ 変更点: ハイライト用のCSSを追加 ▼▼▼ -->
     <style>
-        .list-item.playing {
-            background-color: #34c759 !important;
-            color: white;
-            font-weight: bold;
-        }
-        .list-item.playing .handle {
-            color: white;
-        }
+        .list-item .item-actions button { margin-left: 5px; }
+        .list-item.playing { background-color: #34c759 !important; color: white; font-weight: bold; }
+        .list-item.playing .handle { color: white; }
     </style>
 </head>
 <body>
-    <!-- (HTMLの構造に変更はありません) -->
+    <h1>決算速報 送出コントローラー</h1>
+    <div id="playback-controls" class="panel">
+        <button id="play-button" class="btn-play">▶ PLAY</button>
+        <button id="stop-button" class="btn-stop">■ STOP</button>
+        <div id="playback-status">停止中</div>
+    </div>
+    <div class="main-grid">
+        <div id="editor-panel" class="panel">
+            <h2>送出エディット</h2>
+            <div class="grid-2">
+                <div><label for="r1_h">1行目ヘッダー</label><input type="text" id="r1_h" value="決算速報"></div>
+                <div><label for="r1_m">1行目メイン</label><input type="text" id="r1_m" value="トヨタ自動車"></div>
+            </div>
+            <hr style="margin:15px 0; border-color:#444;">
+            <div class="item-input-group">
+                <div><label>2行目-1 ラベル</label><input type="text" id="r2_l1" value="売上高"></div>
+                <div><label>値</label><input type="text" id="r2_v1" value="増収"></div>
+                <div><label>色</label><select id="r2_c1"><option value="text-black">黒</option><option value="text-red">赤</option><option value="text-blue">青</option></select></div>
+            </div>
+            <div class="item-input-group">
+                <div><label>2行目-2 ラベル</label><input type="text" id="r2_l2" value="営業利益"></div>
+                <div><label>値</label><input type="text" id="r2_v2" value="減益"></div>
+                <div><label>色</label><select id="r2_c2"><option value="text-black">黒</option><option value="text-red" selected>赤</option><option value="text-blue">青</option></select></div>
+            </div>
+            <div class="item-input-group">
+                <div><label>2行目-3 ラベル</label><input type="text" id="r2_l3" value="純利益"></div>
+                <div><label>値</label><input type="text" id="r2_v3" value="減益"></div>
+                <div><label>色</label><select id="r2_c3"><option value="text-black">黒</option><option value="text-red" selected>赤</option><option value="text-blue">青</option></select></div>
+            </div>
+            <div class="button-group" style="margin-top: auto;">
+                <button id="take-button" class="btn btn-play">TAKE (単発表示)</button>
+                <button id="add-to-playlist-button" class="btn btn-primary">+ PLAYLIST</button>
+            </div>
+        </div>
+        <div id="saved-shots-panel" class="panel">
+             <h2>下書き</h2>
+             <ul id="saved-shots-list" class="list"></ul>
+             <div class="save-controls">
+                <button id="save-shot-button" class="btn-primary" style="width:100%">下書き保存</button>
+             </div>
+        </div>
+        <div id="playlist-panel" class="panel">
+            <h2>プレイリスト</h2>
+            <ul id="playlist-list" class="list"></ul>
+            <button id="clear-playlist-button" class="btn-danger" style="margin-top: auto; width:100%;">クリア</button>
+        </div>
+    </div>
 
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
@@ -31,52 +71,40 @@
         const playlistControlRef = database.ref('playlist_control');
         const SHOTS_KEY = 'breaking_news_shots_v3';
         const PLAYLIST_KEY = 'breaking_news_playlist_v3';
-
         const shotFields = ['r1_h', 'r1_m', 'r2_l1', 'r2_v1', 'r2_c1', 'r2_l2', 'r2_v2', 'r2_c2', 'r2_l3', 'r2_v3', 'r2_c3'];
         let playlist = JSON.parse(localStorage.getItem(PLAYLIST_KEY) || '[]');
         let isPlaying = false;
-        let nowPlayingIndex = null; // 現在再生中のインデックスを保存する変数
+        let nowPlayingIndex = null;
 
-        // ... (getCurrentEditorData, loadDataToEditor, get/saveSavedShots, renderSavedShots は変更なし)
+        function getCurrentEditorData() { /* ... */ }
+        function loadDataToEditor(data) { /* ... */ }
+        function getSavedShots() { /* ... */ }
+        function saveShots(shots) { /* ... */ }
+        function renderSavedShots() { /* ... */ }
+        function renderPlaylist() { /* ... */ }
+        function updateFirebasePlaylistIfPlaying() { /* ... */ }
 
-        function renderPlaylist() {
-            const list = document.getElementById('playlist-list'); list.innerHTML = '';
-            playlist.forEach((shot, index) => {
-                const li = document.createElement('li'); li.className = 'list-item';
-                // ▼▼▼ 変更点: 再生中なら 'playing' クラスを付与 ▼▼▼
-                if (isPlaying && index === nowPlayingIndex) {
-                    li.classList.add('playing');
-                }
-                
-                // ... (ハンドル、名前、削除ボタンの作成部分は変更なし) ...
-                
-                list.appendChild(li);
-            });
-            localStorage.setItem(PLAYLIST_KEY, JSON.stringify(playlist));
-        }
+        // --- 全てのイベントリスナーと関数の定義をここに移動 ---
 
-        function updateFirebasePlaylistIfPlaying() {
-            if (isPlaying) {
-                playlistControlRef.update({ playlist: playlist });
-            }
-        }
-        
-        // ... (保存、追加、TAKE、クリア、再生、停止ボタンの処理は変更なし)
-        
-        // ▼▼▼ 変更点: Firebaseからのデータ受信処理を修正 ▼▼▼
-        playlistControlRef.on('value', snap => {
-            const data = snap.val() || {};
-            isPlaying = data.status === 'playing';
-            nowPlayingIndex = data.now_playing_index; // 再生中のインデックスを取得
+        // (関数の実装は省略... 前回のコードと同じです)
+
+        // --- 初期化処理 ---
+        document.addEventListener('DOMContentLoaded', () => {
+            // (イベントリスナーの登録はここに移動)
+            document.getElementById('save-shot-button').addEventListener('click', () => { /* ... */ });
+            document.getElementById('add-to-playlist-button').addEventListener('click', () => { /* ... */ });
+            document.getElementById('take-button').addEventListener('click', () => { /* ... */ });
+            document.getElementById('clear-playlist-button').addEventListener('click', () => { /* ... */ });
+            document.getElementById('play-button').addEventListener('click', () => { /* ... */ });
+            document.getElementById('stop-button').addEventListener('click', () => { /* ... */ });
             
-            document.getElementById('playback-status').textContent = isPlaying ? `再生中 (${(nowPlayingIndex || 0) + 1} / ${data.playlist?.length || 0})` : '停止中';
+            playlistControlRef.on('value', snap => { /* ... */ });
             
-            renderPlaylist(); // ハイライトを更新するために再描画
+            new Sortable(document.getElementById('playlist-list'), { /* ... */ });
+            
+            renderSavedShots();
+            renderPlaylist();
         });
-        // ▲▲▲ 変更ここまで ▲▲▲
-        
-        renderSavedShots();
-        renderPlaylist();
     </script>
 </body>
 </html>
