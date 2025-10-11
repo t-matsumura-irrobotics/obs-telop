@@ -8,25 +8,14 @@
         @font-face { font-family: 'LINE Seed JP'; src: url('fonts/LINESeedJP_OTF_Bd.woff2') format('woff2'); font-weight: 700; }
         html, body { margin: 0; padding: 0; overflow: hidden; font-family: 'LINE Seed JP', sans-serif; height: 100%; width: 100%; background: transparent; }
         body { position: relative; }
-        
-        /* ▼▼▼ 変更点: アニメーションの定義を修正 ▼▼▼ */
         .telop-wrapper {
             position: absolute; bottom: 20px; left: 20px; right: 20px;
-            opacity: 0;
-            transform: translateX(-100%); /* 表示前の初期位置を左外に設定 */
+            opacity: 0; transform: translateX(-100%);
             transition: opacity 0.5s ease-out, transform 0.5s ease-out;
-            visibility: hidden; /* 表示されていない時は完全に隠す */
+            visibility: hidden;
         }
-        .telop-wrapper.visible {
-            opacity: 1;
-            transform: translateX(0); /* 表示位置 */
-            visibility: visible;
-        }
-        .telop-wrapper.hiding {
-            opacity: 0;
-            transform: translateX(100%); /* 非表示時に右外へスライド */
-        }
-        /* ▲▲▲ 変更ここまで ▲▲▲ */
+        .telop-wrapper.visible { opacity: 1; transform: translateX(0); visibility: visible; }
+        .telop-wrapper.hiding { transform: translateX(100%); }
         
         #breaking-container-inner { background: #e0e0e0; border-radius: 8px; border-left: 8px solid #c00000; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
         .breaking-row { display: flex; font-weight: bold; }
@@ -61,17 +50,6 @@
         const breakingContainer = document.getElementById('breaking-container');
         let playlistTimer = null;
         let currentIndex = 0;
-        let isTelopVisible = false;
-
-        // アニメーション終了後にhidingクラスを削除するリスナー
-        breakingContainer.addEventListener('transitionend', (event) => {
-            // transformプロパティのアニメーション終了時のみ処理を実行
-            if (event.propertyName === 'transform' && breakingContainer.classList.contains('hiding')) {
-                breakingContainer.classList.remove('hiding');
-                // 非表示完了後のコールバックがあれば実行
-                // （現在はプレイリストロジック内で直接コールバックを管理しているので不要だが、将来的な拡張性のため）
-            }
-        });
 
         function showTelop(data) {
             document.getElementById('r1_h').innerText = data.r1_h || '';
@@ -79,41 +57,22 @@
             document.getElementById('r2_i1').innerHTML = data.r2_i1 || '';
             document.getElementById('r2_i2').innerHTML = data.r2_i2 || '';
             document.getElementById('r2_i3').innerHTML = data.r2_i3 || '';
-
-            // まず右外に瞬間移動させ、visibleクラスで左からスライドインさせる
-            breakingContainer.classList.remove('visible'); // visibleを一旦外す
-            breakingContainer.classList.remove('hiding');  // hidingも確実に外す
-            breakingContainer.style.transition = 'none'; // 瞬間移動のためにトランジションを一時停止
-            breakingContainer.style.transform = 'translateX(-100%)'; // 左外へ瞬間移動
-            
-            // DOMの変更が適用されるのを待ってからアニメーション開始
-            requestAnimationFrame(() => {
-                breakingContainer.style.transition = ''; // トランジションを元に戻す
-                breakingContainer.classList.add('visible');
-                isTelopVisible = true;
-            });
+            breakingContainer.classList.remove('hiding');
+            breakingContainer.classList.add('visible');
         }
 
-        function hideTelop(onHiddenCallback) {
-            if (isTelopVisible) {
-                breakingContainer.classList.add('hiding'); // 右にスライドアウト
+        function hideTelop(onHidden) {
+            if (breakingContainer.classList.contains('visible')) {
+                breakingContainer.classList.add('hiding');
                 breakingContainer.classList.remove('visible');
-                // アニメーションが終わるのを待ってからコールバックを実行
-                setTimeout(() => {
-                    onHiddenCallback();
-                    breakingContainer.classList.remove('hiding'); // hidingクラスを削除して次回の表示に備える
-                }, 600); 
+                setTimeout(onHidden, 600);
             } else {
-                onHiddenCallback();
+                onHidden();
             }
-            isTelopVisible = false;
         }
 
         function playNext(playlist) {
-            if (!playlist || playlist.length === 0) {
-                hideTelop(() => {}); // プレイリストが空なら非表示
-                return;
-            }
+            if (playlist.length === 0) return;
             if (currentIndex >= playlist.length) currentIndex = 0;
             
             const nextData = playlist[currentIndex];
@@ -125,19 +84,15 @@
         
         database.ref('playlist_control').on('value', (snapshot) => {
             const data = snapshot.val();
-            // 先にタイマーを止める
-            clearInterval(playlistTimer);
+            clearInterval(playlistTimer); // 既存のタイマーをクリア
 
             if (data && data.status === 'playing' && data.playlist && data.playlist.length > 0) {
                 const interval = (data.interval || 10) * 1000;
                 currentIndex = data.currentIndex || 0;
-                // 初回再生
-                playNext(data.playlist);
-                // ループ再生を開始
+                playNext(data.playlist); // すぐに最初の表示を開始
                 playlistTimer = setInterval(() => playNext(data.playlist), interval);
             } else {
-                // statusが'playing'でない場合は、確実に非表示にする
-                hideTelop(() => {});
+                hideTelop(() => {}); // 再生停止なら非表示に
             }
         });
     </script>
