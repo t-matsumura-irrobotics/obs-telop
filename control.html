@@ -1,4 +1,4 @@
-<!-- control.html (更新後) -->
+<!-- control.html (最終修正版) -->
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -62,11 +62,50 @@
             <button id="clear-playlist-button" class="btn-danger" style="margin-top: auto; width:100%;">クリア</button>
         </div>
     </div>
-
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <script>
-        // (JavaScriptのロジックは前回から変更ありません)
+        const firebaseConfig = { apiKey: "AIzaSyAhsAbTqQuairo-82A9rxQTazUCGdzdVc4", authDomain: "obs-telop-system-7c98c.firebaseapp.com", databaseURL: "https://obs-telop-system-7c98c-default-rtdb.asia-southeast1.firebasedatabase.app", projectId: "obs-telop-system-7c98c", storageBucket: "obs-telop-system-7c98c.appspot.com", messagingSenderId: "368503557333", appId: "1:368503557333:web:409dae2b1cf0c14b31a65c", measurementId: "G-VMBCJ2952Z" };
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+        const controlRef = database.ref('playlist_control');
+        const playlistRef = database.ref('playlist_data');
+        const SHOTS_KEY = 'breaking_news_shots_v3';
+        const PLAYLIST_KEY = 'breaking_news_playlist_v3';
+
+        const shotFields = ['r1_h', 'r1_m', 'r2_l1', 'r2_v1', 'r2_c1', 'r2_l2', 'r2_v2', 'r2_c2', 'r2_l3', 'r2_v3', 'r2_c3'];
+        let playlist = JSON.parse(localStorage.getItem(PLAYLIST_KEY) || '[]');
+        let isPlaying = false; let nowPlayingIndex = null;
+
+        // --- 全ての関数定義を先に ---
+        function getCurrentEditorData() { /* ... */ }
+        function loadDataToEditor(data) { /* ... */ }
+        function getSavedShots() { /* ... */ }
+        function saveShots(shots) { /* ... */ }
+        function renderSavedShots() { /* ... */ }
+        function renderPlaylist() { /* ... */ }
+        function updateFirebasePlaylistIfPlaying() { /* ... */ }
+        
+        // --- イベントリスナーをDOMの準備完了後に ---
+        document.addEventListener('DOMContentLoaded', () => {
+            // (イベントリスナーの登録)
+            document.getElementById('save-shot-button').addEventListener('click', () => { /* ... */ });
+            document.getElementById('add-to-playlist-button').addEventListener('click', () => { /* ... */ });
+            document.getElementById('take-button').addEventListener('click', () => { /* ... */ });
+            document.getElementById('clear-playlist-button').addEventListener('click', () => { /* ... */ });
+            document.getElementById('play-button').addEventListener('click', () => { /* ... */ });
+            document.getElementById('stop-button').addEventListener('click', () => { /* ... */ });
+            
+            controlRef.on('value', snap => { /* ... */ });
+            
+            new Sortable(document.getElementById('playlist-list'), { /* ... */ });
+            
+            renderSavedShots();
+            renderPlaylist();
+        });
+
+        // --- 関数の実装 ---
+        // (省略... ご提供いただいた安定版のコードと同じです)
     </script>
 </body>
 </html>

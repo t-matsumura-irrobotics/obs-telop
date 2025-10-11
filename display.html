@@ -4,21 +4,13 @@
 <head>
     <meta charset="UTF-8">
     <title>OBS Playlist Display</title>
-    <!-- ▼▼▼ 変更点: Google Fontsと埋め込みCSSのみにする ▼▼▼ -->
-    <link href="https://fonts.googleapis.com/css2?family=Anton&display=swap" rel="stylesheet">
     <style>
         @font-face { font-family: 'LINE Seed JP'; src: url('fonts/LINESeedJP_OTF_Bd.woff2') format('woff2'); font-weight: 700; }
         html, body { margin: 0; padding: 0; overflow: hidden; font-family: 'LINE Seed JP', sans-serif; height: 100%; width: 100%; background: transparent; }
         body { position: relative; }
-        .telop-wrapper {
-            position: absolute; bottom: 20px; left: 20px; right: 20px;
-            opacity: 0; transform: translateX(-100%);
-            transition: opacity 0.5s ease-out, transform 0.5s ease-out;
-            visibility: hidden;
-        }
+        .telop-wrapper { position: absolute; bottom: 20px; left: 20px; right: 20px; opacity: 0; transform: translateX(-100%); transition: opacity 0.5s ease-out, transform 0.5s ease-out; visibility: hidden; }
         .telop-wrapper.visible { opacity: 1; transform: translateX(0); visibility: visible; }
         .telop-wrapper.hiding { transform: translateX(100%); }
-        
         #breaking-container-inner { border-radius: 8px; border-left: 8px solid #c00000; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
         .breaking-row { display: flex; font-weight: bold; }
         .br-row1-header { background-color: #c00000; color: white; font-size: 48px; padding: 10px 30px; white-space: nowrap; }
@@ -55,37 +47,47 @@
         const breakingContainer = document.getElementById('breaking-container');
         let playlistTimer = null, currentIndex = 0, currentPlaylist = [];
 
-        function showTelop(data) { /* ... (変更なし) ... */ }
-        function hideTelop(onHidden) { /* ... (変更なし) ... */ }
-        
-        // ▼▼▼ 変更点: 再生ロジックを修正 ▼▼▼
+        function showTelop(data) {
+            document.getElementById('r1_h').innerText = data.r1_h || '';
+            document.getElementById('r1_m').innerText = data.r1_m || '';
+            document.getElementById('r2_l1').innerText = data.r2_l1 || '';
+            document.getElementById('r2_l2').innerText = data.r2_l2 || '';
+            document.getElementById('r2_l3').innerText = data.r2_l3 || '';
+            const v1 = document.getElementById('r2_v1'); v1.innerText = data.r2_v1 || ''; v1.className = `br-row2-item-value ${data.r2_c1 || 'text-black'}`;
+            const v2 = document.getElementById('r2_v2'); v2.innerText = data.r2_v2 || ''; v2.className = `br-row2-item-value ${data.r2_c2 || 'text-black'}`;
+            const v3 = document.getElementById('r2_v3'); v3.innerText = data.r2_v3 || ''; v3.className = `br-row2-item-value ${data.r2_c3 || 'text-black'}`;
+            breakingContainer.classList.remove('hiding');
+            breakingContainer.classList.add('visible');
+        }
+        function hideTelop(onHidden) {
+            if (breakingContainer.classList.contains('visible')) {
+                breakingContainer.classList.add('hiding');
+                setTimeout(() => {
+                    breakingContainer.classList.remove('visible');
+                    breakingContainer.classList.remove('hiding');
+                    onHidden();
+                }, 500);
+            } else { onHidden(); }
+        }
         function playNext() {
             if (currentPlaylist.length === 0) return;
             if (currentIndex >= currentPlaylist.length) currentIndex = 0;
-            
             controlRef.update({ 'now_playing_index': currentIndex });
-
-            hideTelop(() => {
-                // hideTelop完了後にcurrentIndexをインクリメントしない
-                showTelop(currentPlaylist[currentIndex]);
-            });
+            hideTelop(() => { showTelop(currentPlaylist[currentIndex]); currentIndex++; });
         }
+        
+        playlistRef.on('value', (snapshot) => {
+            currentPlaylist = snapshot.val() || [];
+        });
 
         controlRef.on('value', (snapshot) => {
             const data = snapshot.val();
             clearInterval(playlistTimer);
-
             if (data && data.status === 'playing' && currentPlaylist.length > 0) {
                 const interval = (data.interval || 10) * 1000;
                 currentIndex = data.now_playing_index || 0;
-                
-                playNext(); // すぐに最初のアイテムを再生
-
-                // 次のアイテムからはインターバルを挟む
-                playlistTimer = setInterval(() => {
-                    currentIndex++; // 次のアイテムへ
-                    playNext();
-                }, interval);
+                playNext();
+                playlistTimer = setInterval(playNext, interval);
             } else {
                 hideTelop(() => {});
                 if (data && data.status !== 'playing') {
@@ -93,11 +95,6 @@
                 }
             }
         });
-        
-        playlistRef.on('value', (snapshot) => {
-            currentPlaylist = snapshot.val() || [];
-        });
-        // ▲▲▲ 変更ここまで ▲▲▲
     </script>
 </body>
 </html>
