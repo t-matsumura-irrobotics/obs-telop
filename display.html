@@ -8,8 +8,18 @@
         @font-face { font-family: 'LINE Seed JP'; src: url('fonts/LINESeedJP_OTF_Bd.woff2') format('woff2'); font-weight: 700; }
         html, body { margin: 0; padding: 0; overflow: hidden; font-family: 'LINE Seed JP', sans-serif; height: 100%; width: 100%; background: transparent; }
         body { position: relative; }
-        .telop-wrapper { position: absolute; bottom: 20px; left: 20px; right: 20px; opacity: 0; transform: translateX(100%); transition: opacity 0.5s ease-out, transform 0.5s ease-out; visibility: hidden; }
+        
+        /* ▼▼▼ 変更点: アニメーションを 左IN / 右OUT に変更 ▼▼▼ */
+        .telop-wrapper {
+            position: absolute; bottom: 20px; left: 20px; right: 20px;
+            opacity: 0; transform: translateX(-100%);
+            transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+            visibility: hidden;
+        }
         .telop-wrapper.visible { opacity: 1; transform: translateX(0); visibility: visible; }
+        .telop-wrapper.hiding { transform: translateX(100%); }
+        /* ▲▲▲ 変更ここまで ▲▲▲ */
+        
         #breaking-container-inner { background: #e0e0e0; border-radius: 8px; border-left: 8px solid #c00000; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
         .breaking-row { display: flex; font-weight: bold; }
         .br-row1-header { background: #e0e0e0; color: #000; font-size: 48px; padding: 10px 30px; white-space: nowrap; }
@@ -53,12 +63,16 @@
             const v1 = document.getElementById('r2_v1'); v1.innerText = data.r2_v1 || ''; v1.className = `br-row2-item-value ${data.r2_c1 || 'text-black'}`;
             const v2 = document.getElementById('r2_v2'); v2.innerText = data.r2_v2 || ''; v2.className = `br-row2-item-value ${data.r2_c2 || 'text-black'}`;
             const v3 = document.getElementById('r2_v3'); v3.innerText = data.r2_v3 || ''; v3.className = `br-row2-item-value ${data.r2_c3 || 'text-black'}`;
+            breakingContainer.classList.remove('hiding');
             breakingContainer.classList.add('visible');
         }
         function hideTelop(onHidden) {
             if (breakingContainer.classList.contains('visible')) {
-                breakingContainer.classList.remove('visible');
-                setTimeout(onHidden, 600);
+                breakingContainer.classList.add('hiding');
+                setTimeout(() => {
+                    breakingContainer.classList.remove('visible');
+                    onHidden();
+                }, 500);
             } else { onHidden(); }
         }
         function playNext(playlist) {
