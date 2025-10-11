@@ -111,4 +111,64 @@
                 
                 const actionsDiv = document.createElement('div'); actionsDiv.className = 'item-actions';
                 if(index > 0) {
-                    const upBtn = docu
+                    const upBtn = document.createElement('button'); upBtn.textContent = '↑'; upBtn.className = 'btn';
+                    upBtn.onclick = () => { [playlist[index-1], playlist[index]] = [playlist[index], playlist[index-1]]; renderPlaylist(); updateFirebasePlaylistIfPlaying(); };
+                    actionsDiv.appendChild(upBtn);
+                }
+                if(index < playlist.length - 1) {
+                    const downBtn = document.createElement('button'); downBtn.textContent = '↓'; downBtn.className = 'btn';
+                    downBtn.onclick = () => { [playlist[index+1], playlist[index]] = [playlist[index], playlist[index+1]]; renderPlaylist(); updateFirebasePlaylistIfPlaying(); };
+                    actionsDiv.appendChild(downBtn);
+                }
+                const deleteBtn = document.createElement('button');
+                deleteBtn.textContent = '削除'; deleteBtn.className = 'btn btn-danger';
+                deleteBtn.onclick = () => { playlist.splice(index, 1); renderPlaylist(); updateFirebasePlaylistIfPlaying(); };
+                li.appendChild(deleteBtn);
+                li.appendChild(actionsDiv);
+
+                list.appendChild(li);
+            });
+            localStorage.setItem(PLAYLIST_KEY, JSON.stringify(playlist));
+        }
+        // ▲▲▲ 変更ここまで ▲▲▲
+
+        function updateFirebasePlaylistIfPlaying() {
+            if (isPlaying) {
+                playlistControlRef.update({ playlist: playlist });
+            }
+        }
+        
+        document.getElementById('save-shot-button').addEventListener('click', () => {
+            const name = document.getElementById('r1_m').value;
+            if (!name) return alert('「1行目メイン」に名前を入力してください。');
+            const shots = getSavedShots();
+            shots[name] = getCurrentEditorData();
+            saveShots(shots);
+            renderSavedShots();
+            alert(`「${name}」を保存しました。`);
+        });
+        document.getElementById('add-to-playlist-button').addEventListener('click', () => {
+            const data = getCurrentEditorData();
+            if (!data.r1_m) return alert('「1行目メイン」に名前を入力してください。');
+            playlist.push(data);
+            renderPlaylist();
+            updateFirebasePlaylistIfPlaying();
+        });
+        document.getElementById('take-button').addEventListener('click', () => {
+            playlistControlRef.set({ status: 'playing', interval: 99999, playlist: [getCurrentEditorData()], currentIndex: 0 });
+        });
+        document.getElementById('clear-playlist-button').addEventListener('click', () => { if (!confirm('プレイリストをクリアしますか？')) return; playlist = []; renderPlaylist(); updateFirebasePlaylistIfPlaying(); });
+        document.getElementById('play-button').addEventListener('click', () => { if (playlist.length === 0) return alert('プレイリストにショットを追加してください。'); playlistControlRef.set({ status: 'playing', interval: 10, playlist: playlist, currentIndex: 0 }); });
+        document.getElementById('stop-button').addEventListener('click', () => playlistControlRef.set({ status: 'stopped' }));
+
+        playlistControlRef.on('value', snap => {
+            const data = snap.val() || {};
+            isPlaying = data.status === 'playing';
+            document.getElementById('playback-status').textContent = isPlaying ? `再生中 (全${data.playlist?.length || 0}件)` : '停止中';
+        });
+        
+        renderSavedShots();
+        renderPlaylist();
+    </script>
+</body>
+</html>
