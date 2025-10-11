@@ -3,12 +3,9 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <title>Kessan Sokuho Controller</title>
+    <title>決算速報 送出コントローラー</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
-    <style>
-        .list-item .item-actions button { margin-left: 5px; }
-    </style>
 </head>
 <body>
     <h1>決算速報 送出コントローラー</h1>
@@ -19,7 +16,7 @@
     </div>
     <div class="main-grid">
         <div id="editor-panel" class="panel">
-            <h2>ショット・エディター</h2>
+            <h2>送出エディット</h2>
             <div class="grid-2">
                 <div><label for="r1_h">1行目ヘッダー</label><input type="text" id="r1_h" value="決算速報"></div>
                 <div><label for="r1_m">1行目メイン</label><input type="text" id="r1_m" value="トヨタ自動車"></div>
@@ -49,7 +46,7 @@
              <h2>下書き</h2>
              <ul id="saved-shots-list" class="list"></ul>
              <div class="save-controls">
-                <button id="save-shot-button" class="btn-primary" style="width:100%">現在のエディター内容を「1行目メイン」の名前で保存</button>
+                <button id="save-shot-button" class="btn-primary" style="width:100%">下書き保存</button>
              </div>
         </div>
         <div id="playlist-panel" class="panel">
@@ -70,6 +67,7 @@
 
         const shotFields = ['r1_h', 'r1_m', 'r2_l1', 'r2_v1', 'r2_c1', 'r2_l2', 'r2_v2', 'r2_c2', 'r2_l3', 'r2_v3', 'r2_c3'];
         let playlist = JSON.parse(localStorage.getItem(PLAYLIST_KEY) || '[]');
+        let isPlaying = false;
 
         function getCurrentEditorData() {
             const data = {};
@@ -95,12 +93,6 @@
                 loadBtn.textContent = '読込'; loadBtn.className = 'btn btn-primary';
                 loadBtn.onclick = () => loadDataToEditor(data);
                 actionsDiv.appendChild(loadBtn);
-
-                const addBtn = document.createElement('button');
-                addBtn.textContent = '+ Playlist'; addBtn.className = 'btn btn-secondary';
-                addBtn.onclick = () => { playlist.push({ name, ...data }); renderPlaylist(); };
-                actionsDiv.appendChild(addBtn);
-
                 const deleteBtn = document.createElement('button');
                 deleteBtn.textContent = '削除'; deleteBtn.className = 'btn btn-danger';
                 deleteBtn.onclick = () => { if (!confirm(`「${name}」を削除しますか？`)) return; const s = getSavedShots(); delete s[name]; saveShots(s); renderSavedShots(); };
@@ -119,23 +111,28 @@
                 const actionsDiv = document.createElement('div'); actionsDiv.className = 'item-actions';
                 if(index > 0) {
                     const upBtn = document.createElement('button'); upBtn.textContent = '↑'; upBtn.className = 'btn';
-                    upBtn.onclick = () => { [playlist[index-1], playlist[index]] = [playlist[index], playlist[index-1]]; renderPlaylist(); };
+                    upBtn.onclick = () => { [playlist[index-1], playlist[index]] = [playlist[index], playlist[index-1]]; renderPlaylist(); updateFirebasePlaylistIfPlaying(); };
                     actionsDiv.appendChild(upBtn);
                 }
                 if(index < playlist.length - 1) {
                     const downBtn = document.createElement('button'); downBtn.textContent = '↓'; downBtn.className = 'btn';
-                    downBtn.onclick = () => { [playlist[index+1], playlist[index]] = [playlist[index], playlist[index+1]]; renderPlaylist(); };
+                    downBtn.onclick = () => { [playlist[index+1], playlist[index]] = [playlist[index], playlist[index+1]]; renderPlaylist(); updateFirebasePlaylistIfPlaying(); };
                     actionsDiv.appendChild(downBtn);
                 }
                 const deleteBtn = document.createElement('button');
                 deleteBtn.textContent = '削除'; deleteBtn.className = 'btn btn-danger';
-                deleteBtn.onclick = () => { playlist.splice(index, 1); renderPlaylist(); };
-                actionsDiv.appendChild(deleteBtn);
-                li.appendChild(actionsDiv);
+                deleteBtn.onclick = () => { playlist.splice(index, 1); renderPlaylist(); updateFirebasePlaylistIfPlaying(); };
+                li.appendChild(deleteBtn);
 
                 list.appendChild(li);
             });
             localStorage.setItem(PLAYLIST_KEY, JSON.stringify(playlist));
+        }
+
+        function updateFirebasePlaylistIfPlaying() {
+            if (isPlaying) {
+                playlistControlRef.update({ playlist: playlist });
+            }
         }
         
         document.getElementById('save-shot-button').addEventListener('click', () => {
@@ -152,15 +149,20 @@
             if (!data.r1_m) return alert('「1行目メイン」に名前を入力してください。');
             playlist.push(data);
             renderPlaylist();
+            updateFirebasePlaylistIfPlaying();
         });
         document.getElementById('take-button').addEventListener('click', () => {
             playlistControlRef.set({ status: 'playing', interval: 99999, playlist: [getCurrentEditorData()], currentIndex: 0 });
         });
-        document.getElementById('clear-playlist-button').addEventListener('click', () => { if (!confirm('プレイリストをクリアしますか？')) return; playlist = []; renderPlaylist(); });
+        document.getElementById('clear-playlist-button').addEventListener('click', () => { if (!confirm('プレイリストをクリアしますか？')) return; playlist = []; renderPlaylist(); updateFirebasePlaylistIfPlaying(); });
         document.getElementById('play-button').addEventListener('click', () => { if (playlist.length === 0) return alert('プレイリストにショットを追加してください。'); playlistControlRef.set({ status: 'playing', interval: 10, playlist: playlist, currentIndex: 0 }); });
         document.getElementById('stop-button').addEventListener('click', () => playlistControlRef.set({ status: 'stopped' }));
 
-        playlistControlRef.on('value', snap => { const data = snap.val() || {}; document.getElementById('playback-status').textContent = data.status === 'playing' ? `再生中 (全${data.playlist?.length || 0}件)` : '停止中'; });
+        playlistControlRef.on('value', snap => {
+            const data = snap.val() || {};
+            isPlaying = data.status === 'playing';
+            document.getElementById('playback-status').textContent = isPlaying ? `再生中 (全${data.playlist?.length || 0}件)` : '停止中';
+        });
         
         renderSavedShots();
         renderPlaylist();
