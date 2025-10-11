@@ -3,28 +3,23 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <title>OBS Playlist Display</title>
+    <title>OBS Breaking News Display</title>
     <style>
         @font-face { font-family: 'LINE Seed JP'; src: url('fonts/LINESeedJP_OTF_Bd.woff2') format('woff2'); font-weight: 700; }
         html, body { margin: 0; padding: 0; overflow: hidden; font-family: 'LINE Seed JP', sans-serif; height: 100%; width: 100%; background: transparent; }
         body { position: relative; }
         
-        /* ▼▼▼ 変更点: アニメーションの定義を修正 ▼▼▼ */
         .telop-wrapper {
             position: absolute; bottom: 20px; left: 20px; right: 20px;
             opacity: 0;
-            transform: translateX(-100%); /* 表示前の初期位置を左外に設定 */
+            transform: translateX(100%); /* 初期位置を画面の右外に設定 */
             transition: opacity 0.5s ease-out, transform 0.5s ease-out;
-            visibility: hidden; /* 表示されていない時は完全に隠す */
+            visibility: hidden;
         }
         .telop-wrapper.visible {
             opacity: 1;
-            transform: translateX(0); /* 表示位置 */
+            transform: translateX(0); /* 最終位置を画面内に設定 */
             visibility: visible;
-        }
-        .telop-wrapper.hiding {
-            opacity: 0;
-            transform: translateX(100%); /* 非表示時に右外へスライド */
         }
         /* ▲▲▲ 変更ここまで ▲▲▲ */
         
@@ -36,6 +31,12 @@
         .br-row2-item { flex: 1; text-align: center; padding: 0 10px; }
         .br-row2-item + .br-row2-item { border-left: 2px solid #555; }
         .br-row2-item-value { background: white; color: #000; padding: 0 15px; margin: 0 10px; border-radius: 4px; display: inline-block; }
+
+        /* ▼▼▼ 追加: 2行目の文字色クラス ▼▼▼ */
+        .text-red { color: #c00000; }
+        .text-blue { color: #007bff; }
+        .text-black { color: #000; }
+        /* ▲▲▲ 追加ここまで ▲▲▲ */
     </style>
 </head>
 <body>
@@ -46,12 +47,15 @@
                 <div class="br-row1-main" id="r1_m"></div>
             </div>
             <div class="breaking-row br-row2">
-                <div class="br-row2-item" id="r2_i1"></div>
-                <div class="br-row2-item" id="r2_i2"></div>
-                <div class="br-row2-item" id="r2_i3"></div>
+                <!-- ▼▼▼ 変更点: 各アイテムのspan要素にIDを追加 ▼▼▼ -->
+                <span class="br-row2-item" id="r2_i1"></span>
+                <span class="br-row2-item" id="r2_i2"></span>
+                <span class="br-row2-item" id="r2_i3"></span>
+                <!-- ▲▲▲ 変更ここまで ▲▲▲ -->
             </div>
         </div>
     </div>
+    
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <script>
@@ -59,85 +63,31 @@
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
         const breakingContainer = document.getElementById('breaking-container');
-        let playlistTimer = null;
-        let currentIndex = 0;
-        let isTelopVisible = false;
 
-        // アニメーション終了後にhidingクラスを削除するリスナー
-        breakingContainer.addEventListener('transitionend', (event) => {
-            // transformプロパティのアニメーション終了時のみ処理を実行
-            if (event.propertyName === 'transform' && breakingContainer.classList.contains('hiding')) {
-                breakingContainer.classList.remove('hiding');
-                // 非表示完了後のコールバックがあれば実行
-                // （現在はプレイリストロジック内で直接コールバックを管理しているので不要だが、将来的な拡張性のため）
-            }
-        });
-
-        function showTelop(data) {
-            document.getElementById('r1_h').innerText = data.r1_h || '';
-            document.getElementById('r1_m').innerText = data.r1_m || '';
-            document.getElementById('r2_i1').innerHTML = data.r2_i1 || '';
-            document.getElementById('r2_i2').innerHTML = data.r2_i2 || '';
-            document.getElementById('r2_i3').innerHTML = data.r2_i3 || '';
-
-            // まず右外に瞬間移動させ、visibleクラスで左からスライドインさせる
-            breakingContainer.classList.remove('visible'); // visibleを一旦外す
-            breakingContainer.classList.remove('hiding');  // hidingも確実に外す
-            breakingContainer.style.transition = 'none'; // 瞬間移動のためにトランジションを一時停止
-            breakingContainer.style.transform = 'translateX(-100%)'; // 左外へ瞬間移動
-            
-            // DOMの変更が適用されるのを待ってからアニメーション開始
-            requestAnimationFrame(() => {
-                breakingContainer.style.transition = ''; // トランジションを元に戻す
-                breakingContainer.classList.add('visible');
-                isTelopVisible = true;
-            });
-        }
-
-        function hideTelop(onHiddenCallback) {
-            if (isTelopVisible) {
-                breakingContainer.classList.add('hiding'); // 右にスライドアウト
-                breakingContainer.classList.remove('visible');
-                // アニメーションが終わるのを待ってからコールバックを実行
-                setTimeout(() => {
-                    onHiddenCallback();
-                    breakingContainer.classList.remove('hiding'); // hidingクラスを削除して次回の表示に備える
-                }, 600); 
-            } else {
-                onHiddenCallback();
-            }
-            isTelopVisible = false;
-        }
-
-        function playNext(playlist) {
-            if (!playlist || playlist.length === 0) {
-                hideTelop(() => {}); // プレイリストが空なら非表示
-                return;
-            }
-            if (currentIndex >= playlist.length) currentIndex = 0;
-            
-            const nextData = playlist[currentIndex];
-            hideTelop(() => {
-                showTelop(nextData);
-                currentIndex++;
-            });
-        }
-        
-        database.ref('playlist_control').on('value', (snapshot) => {
+        database.ref('breaking_news').on('value', (snapshot) => {
             const data = snapshot.val();
-            // 先にタイマーを止める
-            clearInterval(playlistTimer);
+            
+            if (data && data.visible) {
+                document.getElementById('r1_h').innerText = data.r1_h || '';
+                document.getElementById('r1_m').innerText = data.r1_m || '';
+                
+                // ▼▼▼ 変更点: 各アイテムのテキストと色を個別に設定 ▼▼▼
+                const r2_i1_el = document.getElementById('r2_i1');
+                r2_i1_el.innerHTML = data.r2_i1 || '';
+                r2_i1_el.className = `br-row2-item ${data.r2_i1_color || 'text-black'}`;
 
-            if (data && data.status === 'playing' && data.playlist && data.playlist.length > 0) {
-                const interval = (data.interval || 10) * 1000;
-                currentIndex = data.currentIndex || 0;
-                // 初回再生
-                playNext(data.playlist);
-                // ループ再生を開始
-                playlistTimer = setInterval(() => playNext(data.playlist), interval);
+                const r2_i2_el = document.getElementById('r2_i2');
+                r2_i2_el.innerHTML = data.r2_i2 || '';
+                r2_i2_el.className = `br-row2-item ${data.r2_i2_color || 'text-black'}`;
+
+                const r2_i3_el = document.getElementById('r2_i3');
+                r2_i3_el.innerHTML = data.r2_i3 || '';
+                r2_i3_el.className = `br-row2-item ${data.r2_i3_color || 'text-black'}`;
+                // ▲▲▲ 変更ここまで ▲▲▲
+
+                breakingContainer.classList.add('visible');
             } else {
-                // statusが'playing'でない場合は、確実に非表示にする
-                hideTelop(() => {});
+                breakingContainer.classList.remove('visible');
             }
         });
     </script>
