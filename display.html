@@ -1,4 +1,4 @@
-<!-- display.html (更新後) -->
+<!-- display.html (最終修正版) -->
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -35,7 +35,6 @@
                 <div id="r1_h" class="br-row1-header"></div>
                 <div id="r1_m" class="br-row1-main"></div>
             </div>
-            <!-- ▼▼▼ 変更点: 2行目を4項目に ▼▼▼ -->
             <div class="breaking-row br-row2">
                 <div class="br-row2-item"><span id="r2_l1"></span> <span id="r2_v1" class="br-row2-item-value"></span></div>
                 <div class="br-row2-item"><span id="r2_l2"></span> <span id="r2_v2" class="br-row2-item-value"></span></div>
@@ -61,19 +60,54 @@
             document.getElementById('r2_l1').innerText = data.r2_l1 || '';
             document.getElementById('r2_l2').innerText = data.r2_l2 || '';
             document.getElementById('r2_l3').innerText = data.r2_l3 || '';
-            document.getElementById('r2_l4').innerText = data.r2_l4 || ''; // 4項目目を追加
+            document.getElementById('r2_l4').innerText = data.r2_l4 || '';
             const v1 = document.getElementById('r2_v1'); v1.innerText = data.r2_v1 || ''; v1.className = `br-row2-item-value ${data.r2_c1 || 'text-black'}`;
             const v2 = document.getElementById('r2_v2'); v2.innerText = data.r2_v2 || ''; v2.className = `br-row2-item-value ${data.r2_c2 || 'text-black'}`;
             const v3 = document.getElementById('r2_v3'); v3.innerText = data.r2_v3 || ''; v3.className = `br-row2-item-value ${data.r2_c3 || 'text-black'}`;
-            const v4 = document.getElementById('r2_v4'); v4.innerText = data.r2_v4 || ''; v4.className = `br-row2-item-value ${data.r2_c4 || 'text-black'}`; // 4項目目を追加
+            const v4 = document.getElementById('r2_v4'); v4.innerText = data.r2_v4 || ''; v4.className = `br-row2-item-value ${data.r2_c4 || 'text-black'}`;
             breakingContainer.classList.remove('hiding');
             breakingContainer.classList.add('visible');
         }
-        function hideTelop(onHidden) { /* ... (変更なし) ... */ }
-        function playNext() { /* ... (変更なし) ... */ }
+        function hideTelop(onHidden) {
+            if (breakingContainer.classList.contains('visible')) {
+                breakingContainer.classList.add('hiding');
+                setTimeout(() => {
+                    breakingContainer.classList.remove('visible');
+                    breakingContainer.classList.remove('hiding');
+                    onHidden();
+                }, 500);
+            } else { onHidden(); }
+        }
+        function playNext() {
+            if (currentPlaylist.length === 0) return;
+            if (currentIndex >= currentPlaylist.length) currentIndex = 0;
+            controlRef.update({ 'now_playing_index': currentIndex });
+            hideTelop(() => {
+                showTelop(currentPlaylist[currentIndex]);
+                currentIndex++;
+            });
+        }
         
-        playlistRef.on('value', (snapshot) => { currentPlaylist = snapshot.val() || []; });
-        controlRef.on('value', (snapshot) => { /* ... (変更なし) ... */ });
+        playlistRef.on('value', (snapshot) => {
+            currentPlaylist = snapshot.val() || [];
+        });
+
+        // ▼▼▼ 変更点: 'breaking_news' から 'playlist_control' に修正 ▼▼▼
+        controlRef.on('value', (snapshot) => {
+            const data = snapshot.val();
+            clearInterval(playlistTimer);
+            if (data && data.status === 'playing' && currentPlaylist.length > 0) {
+                const interval = (data.interval || 10) * 1000;
+                currentIndex = data.now_playing_index || 0;
+                playNext();
+                playlistTimer = setInterval(playNext, interval);
+            } else {
+                hideTelop(() => {});
+                if (data && data.status !== 'playing') {
+                     controlRef.update({ 'now_playing_index': null });
+                }
+            }
+        });
     </script>
 </body>
 </html>
