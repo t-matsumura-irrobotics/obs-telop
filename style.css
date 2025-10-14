@@ -1,5 +1,6 @@
-/* style.css (更新後) */
+/* style.css (最終修正版) */
 @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Noto+Sans+JP:wght@400;700&display=swap');
+
 body { font-family: 'Roboto', 'Noto Sans JP', sans-serif; background-color: #121212; color: #e0e0e0; margin: 0; padding: 20px; font-size: 14px; }
 h1, h2 { text-align: center; color: #e0e0e0; margin-bottom: 20px; font-size: 24px; }
 h2 { margin-top: 0; border-bottom: 1px solid #333; padding-bottom: 10px; font-size: 18px; text-transform: uppercase; letter-spacing: 1px; }
@@ -8,8 +9,6 @@ h2 { margin-top: 0; border-bottom: 1px solid #333; padding-bottom: 10px; font-si
 label { display: block; margin-bottom: 5px; color: #aaa; }
 input, select { width: 100%; box-sizing: border-box; background-color: #2c2c2c; color: #e0e0e0; border: 1px solid #444; border-radius: 4px; padding: 10px; font-size: 16px; margin-bottom: 15px; }
 .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-/* ▼▼▼ 4分割用のグリッドスタイルを追加 ▼▼▼ */
-.grid-4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 10px; }
 .item-input-group { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 10px; align-items: flex-end; }
 button, .btn { padding: 10px 20px; font-size: 14px; cursor: pointer; border-radius: 4px; border: none; font-weight: bold; }
 .btn-primary { background-color: #0a84ff; color: white; }
