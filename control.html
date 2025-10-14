@@ -12,7 +12,6 @@
         .list-item.playing { background-color: #34c759 !important; color: white; font-weight: bold; }
         .list-item.playing .handle { color: white; }
         .list-item .item-actions { margin-left: auto; }
-        .item-input-group { display: flex; flex-direction: column; gap: 5px; }
     </style>
 </head>
 <body>
@@ -30,25 +29,20 @@
                 <div><label for="r1_m">1行目メイン</label><input type="text" id="r1_m" value="トヨタ自動車"></div>
             </div>
             <hr style="margin:15px 0; border-color:#444;">
-            <div class="grid-4">
-                <div class="item-input-group">
-                    <label>2行目-1 ラベル</label><input type="text" id="r2_l1" value="2026年8月期">
-                </div>
-                <div class="item-input-group">
-                    <label>2行目-2 ラベル</label><input type="text" id="r2_l2" value="売上高">
-                    <label>値</label><input type="text" id="r2_v2" value="減益">
-                    <label>色</label><select id="r2_c2"><option value="text-black">黒</option><option value="text-red" selected>赤</option><option value="text-blue">青</option></select>
-                </div>
-                <div class="item-input-group">
-                    <label>2行目-3 ラベル</label><input type="text" id="r2_l3" value="営業利益">
-                    <label>値</label><input type="text" id="r2_v3" value="減益">
-                    <label>色</label><select id="r2_c3"><option value="text-black">黒</option><option value="text-red" selected>赤</option><option value="text-blue">青</option></select>
-                </div>
-                <div class="item-input-group">
-                    <label>2行目-4 ラベル</label><input type="text" id="r2_l4" value="純利益">
-                    <label>値</label><input type="text" id="r2_v4" value="減益">
-                    <label>色</label><select id="r2_c4"><option value="text-black" selected>黒</option><option value="text-red">赤</option><option value="text-blue">青</option></select>
-                </div>
+            <div class="item-input-group">
+                <div><label>2行目-1 ラベル</label><input type="text" id="r2_i1_label" value="売上高"></div>
+                <div><label>値</label><input type="text" id="r2_i1_value" value="増収"></div>
+                <div><label>色</label><select id="r2_i1_color"><option value="text-black">黒</option><option value="text-red">赤</option><option value="text-blue">青</option></select></div>
+            </div>
+            <div class="item-input-group">
+                <div><label>2行目-2 ラベル</label><input type="text" id="r2_i2_label" value="営業利益"></div>
+                <div><label>値</label><input type="text" id="r2_i2_value" value="減益"></div>
+                <div><label>色</label><select id="r2_i2_color"><option value="text-black">黒</option><option value="text-red" selected>赤</option><option value="text-blue">青</option></select></div>
+            </div>
+            <div class="item-input-group">
+                <div><label>2行目-3 ラベル</label><input type="text" id="r2_i3_label" value="純利益"></div>
+                <div><label>値</label><input type="text" id="r2_i3_value" value="減益"></div>
+                <div><label>色</label><select id="r2_i3_color"><option value="text-black">黒</option><option value="text-red" selected>赤</option><option value="text-blue">青</option></select></div>
             </div>
             <div class="button-group" style="margin-top: auto;">
                 <button id="take-button" class="btn btn-play">TAKE (単発表示)</button>
@@ -77,29 +71,21 @@
         const database = firebase.database();
         const controlRef = database.ref('playlist_control');
         const playlistRef = database.ref('playlist_data');
-        const SHOTS_KEY = 'breaking_news_shots_v4';
-        const PLAYLIST_KEY = 'breaking_news_playlist_v4';
+        const SHOTS_KEY = 'breaking_news_shots_v3';
+        const PLAYLIST_KEY = 'breaking_news_playlist_v3';
 
-        // ▼▼▼ 変更点: IDリストを現在のHTMLに合わせて修正 ▼▼▼
-        const shotFields = ['r1_h', 'r1_m', 'r2_l1', 'r2_l2', 'r2_v2', 'r2_c2', 'r2_l3', 'r2_v3', 'r2_c3', 'r2_l4', 'r2_v4', 'r2_c4'];
+        const shotFields = ['r1_h', 'r1_m', 'r2_i1_label', 'r2_i1_value', 'r2_i1_color', 'r2_i2_label', 'r2_i2_value', 'r2_i2_color', 'r2_i3_label', 'r2_i3_value', 'r2_i3_color'];
         let playlist = JSON.parse(localStorage.getItem(PLAYLIST_KEY) || '[]');
         let isPlaying = false; let nowPlayingIndex = null;
-
+        
         function getCurrentEditorData() {
             const data = {};
-            shotFields.forEach(id => {
-                const el = document.getElementById(id);
-                if (el) data[id] = el.value;
-            });
-            // 2行目-1には値と色がないので空にする
-            data.r2_v1 = ''; data.r2_c1 = '';
+            shotFields.forEach(id => data[id] = document.getElementById(id).value);
             return data;
         }
-
         function loadDataToEditor(data) {
             shotFields.forEach(id => { if(document.getElementById(id)) document.getElementById(id).value = data[id] || ''; });
         }
-        
         function getSavedShots() { return JSON.parse(localStorage.getItem(SHOTS_KEY) || '{}'); }
         function saveShots(shots) { localStorage.setItem(SHOTS_KEY, JSON.stringify(shots)); }
 
@@ -115,6 +101,10 @@
                 loadBtn.textContent = '読込'; loadBtn.className = 'btn btn-primary';
                 loadBtn.onclick = () => loadDataToEditor(data);
                 actionsDiv.appendChild(loadBtn);
+                const addBtn = document.createElement('button');
+                addBtn.textContent = '+ Playlist'; addBtn.className = 'btn btn-secondary';
+                addBtn.onclick = () => { playlist.push({ name, ...data }); renderPlaylist(); };
+                actionsDiv.appendChild(addBtn);
                 const deleteBtn = document.createElement('button');
                 deleteBtn.textContent = '削除'; deleteBtn.className = 'btn btn-danger';
                 deleteBtn.onclick = () => { if (!confirm(`「${name}」を削除しますか？`)) return; const s = getSavedShots(); delete s[name]; saveShots(s); renderSavedShots(); };
@@ -133,7 +123,7 @@
                 const actionsDiv = document.createElement('div'); actionsDiv.className = 'item-actions';
                 const deleteBtn = document.createElement('button');
                 deleteBtn.textContent = '削除'; deleteBtn.className = 'btn btn-danger';
-                deleteBtn.onclick = () => { playlist.splice(index, 1); renderPlaylist(); playlistRef.set(playlist); };
+                deleteBtn.onclick = () => { playlist.splice(index, 1); renderPlaylist(); updateFirebasePlaylistIfPlaying(); };
                 li.appendChild(deleteBtn);
                 li.appendChild(actionsDiv);
                 list.appendChild(li);

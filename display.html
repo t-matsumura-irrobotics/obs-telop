@@ -21,7 +21,8 @@
         .breaking-row { display: flex; font-weight: bold; }
         .br-row1-header { background-color: #c00000; color: white; font-size: 48px; padding: 10px 30px; white-space: nowrap; }
         .br-row1-main { background-color: white; color: black; font-size: 48px; padding: 10px 30px; flex: 1; text-align: center; }
-        .br-row2 { background: #222; color: white; font-size: 42px; padding: 8px 0; display: flex; }
+        /* ▼▼▼ 変更点: 2行目の高さを調整 ▼▼▼ */
+        .br-row2 { background: #222; color: white; font-size: 38px; padding: 6px 0; display: flex; }
         .br-row2-item { flex: 1; text-align: center; padding: 0 10px; }
         .br-row2-item + .br-row2-item { border-left: 2px solid #555; }
         .br-row2-item-value { background: white; padding: 0 15px; margin: 0 10px; border-radius: 4px; display: inline-block; }
@@ -36,10 +37,9 @@
                 <div id="r1_m" class="br-row1-main"></div>
             </div>
             <div class="breaking-row br-row2">
-                <div class="br-row2-item"><span id="r2_l1"></span> <span id="r2_v1" class="br-row2-item-value"></span></div>
-                <div class="br-row2-item"><span id="r2_l2"></span> <span id="r2_v2" class="br-row2-item-value"></span></div>
-                <div class="br-row2-item"><span id="r2_l3"></span> <span id="r2_v3" class="br-row2-item-value"></span></div>
-                <div class="br-row2-item"><span id="r2_l4"></span> <span id="r2_v4" class="br-row2-item-value"></span></div>
+                <div class="br-row2-item" id="r2_i1"></div>
+                <div class="br-row2-item" id="r2_i2"></div>
+                <div class="br-row2-item" id="r2_i3"></div>
             </div>
         </div>
     </div>
@@ -57,14 +57,16 @@
         function showTelop(data) {
             document.getElementById('r1_h').innerText = data.r1_h || '';
             document.getElementById('r1_m').innerText = data.r1_m || '';
-            document.getElementById('r2_l1').innerText = data.r2_l1 || '';
-            document.getElementById('r2_l2').innerText = data.r2_l2 || '';
-            document.getElementById('r2_l3').innerText = data.r2_l3 || '';
-            document.getElementById('r2_l4').innerText = data.r2_l4 || '';
-            const v1 = document.getElementById('r2_v1'); v1.innerText = data.r2_v1 || ''; v1.className = `br-row2-item-value ${data.r2_c1 || 'text-black'}`;
-            const v2 = document.getElementById('r2_v2'); v2.innerText = data.r2_v2 || ''; v2.className = `br-row2-item-value ${data.r2_c2 || 'text-black'}`;
-            const v3 = document.getElementById('r2_v3'); v3.innerText = data.r2_v3 || ''; v3.className = `br-row2-item-value ${data.r2_c3 || 'text-black'}`;
-            const v4 = document.getElementById('r2_v4'); v4.innerText = data.r2_v4 || ''; v4.className = `br-row2-item-value ${data.r2_c4 || 'text-black'}`;
+            
+            const item1 = document.getElementById('r2_i1');
+            item1.innerHTML = data.r2_i1_label ? `${data.r2_i1_label} <span class="br-row2-item-value ${data.r2_i1_color}">${data.r2_i1_value}</span>` : '';
+
+            const item2 = document.getElementById('r2_i2');
+            item2.innerHTML = data.r2_i2_label ? `${data.r2_i2_label} <span class="br-row2-item-value ${data.r2_i2_color}">${data.r2_i2_value}</span>` : '';
+
+            const item3 = document.getElementById('r2_i3');
+            item3.innerHTML = data.r2_i3_label ? `${data.r2_i3_label} <span class="br-row2-item-value ${data.r2_i3_color}">${data.r2_i3_value}</span>` : '';
+
             breakingContainer.classList.remove('hiding');
             breakingContainer.classList.add('visible');
         }
@@ -79,17 +81,16 @@
             } else { onHidden(); }
         }
         function playNext() {
-            if (currentPlaylist.length === 0) { controlRef.update({status: 'stopped'}); return; }
+            if (currentPlaylist.length === 0) return;
             if (currentIndex >= currentPlaylist.length) currentIndex = 0;
             controlRef.update({ 'now_playing_index': currentIndex });
-            hideTelop(() => {
-                showTelop(currentPlaylist[currentIndex]);
-                currentIndex++;
-            });
+            hideTelop(() => { showTelop(currentPlaylist[currentIndex]); currentIndex++; });
         }
         
-        playlistRef.on('value', (snapshot) => { currentPlaylist = snapshot.val() || []; });
-        
+        playlistRef.on('value', (snapshot) => {
+            currentPlaylist = snapshot.val() || [];
+        });
+
         controlRef.on('value', (snapshot) => {
             const data = snapshot.val();
             clearInterval(playlistTimer);
