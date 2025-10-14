@@ -8,14 +8,18 @@
         @font-face { font-family: 'LINE Seed JP'; src: url('fonts/LINESeedJP_OTF_Bd.woff2') format('woff2'); font-weight: 700; }
         html, body { margin: 0; padding: 0; overflow: hidden; font-family: 'LINE Seed JP', sans-serif; height: 100%; width: 100%; background: transparent; }
         body { position: relative; }
+        
+        /* ▼▼▼ 変更点: シンプルで確実なアニメーション定義に変更 ▼▼▼ */
         .telop-wrapper {
             position: absolute; bottom: 20px; left: 20px; right: 20px;
             opacity: 0; transform: translateX(-100%);
             transition: opacity 0.5s ease-out, transform 0.5s ease-out;
             visibility: hidden;
         }
-        .telop-wrapper.visible { opacity: 1; transform: translateX(0); visibility: visible; }
-        .telop-wrapper.hiding { transform: translateX(100%); }
+        .telop-wrapper.visible {
+            opacity: 1; transform: translateX(0); visibility: visible;
+        }
+        /* ▲▲▲ 変更ここまで ▲▲▲ */
         
         #breaking-container-inner { border-radius: 8px; border-left: 8px solid #c00000; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
         .breaking-row { display: flex; font-weight: bold; }
@@ -65,17 +69,12 @@
             const v2 = document.getElementById('r2_v2'); v2.innerText = data.r2_v2 || ''; v2.className = `br-row2-item-value ${data.r2_c2 || 'text-black'}`;
             const v3 = document.getElementById('r2_v3'); v3.innerText = data.r2_v3 || ''; v3.className = `br-row2-item-value ${data.r2_c3 || 'text-black'}`;
             const v4 = document.getElementById('r2_v4'); v4.innerText = data.r2_v4 || ''; v4.className = `br-row2-item-value ${data.r2_c4 || 'text-black'}`;
-            breakingContainer.classList.remove('hiding');
             breakingContainer.classList.add('visible');
         }
         function hideTelop(onHidden) {
             if (breakingContainer.classList.contains('visible')) {
-                breakingContainer.classList.add('hiding');
-                setTimeout(() => {
-                    breakingContainer.classList.remove('visible');
-                    breakingContainer.classList.remove('hiding');
-                    onHidden();
-                }, 500);
+                breakingContainer.classList.remove('visible');
+                setTimeout(onHidden, 600);
             } else { onHidden(); }
         }
         function playNext() {
@@ -88,11 +87,8 @@
             });
         }
         
-        playlistRef.on('value', (snapshot) => {
-            currentPlaylist = snapshot.val() || [];
-        });
-
-        // ▼▼▼ 変更点: 'breaking_news' から 'playlist_control' に修正 ▼▼▼
+        playlistRef.on('value', (snapshot) => { currentPlaylist = snapshot.val() || []; });
+        
         controlRef.on('value', (snapshot) => {
             const data = snapshot.val();
             clearInterval(playlistTimer);
