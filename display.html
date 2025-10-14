@@ -8,18 +8,13 @@
         @font-face { font-family: 'LINE Seed JP'; src: url('fonts/LINESeedJP_OTF_Bd.woff2') format('woff2'); font-weight: 700; }
         html, body { margin: 0; padding: 0; overflow: hidden; font-family: 'LINE Seed JP', sans-serif; height: 100%; width: 100%; background: transparent; }
         body { position: relative; }
-        
-        /* ▼▼▼ 変更点: シンプルで確実なアニメーション定義に変更 ▼▼▼ */
         .telop-wrapper {
             position: absolute; bottom: 20px; left: 20px; right: 20px;
             opacity: 0; transform: translateX(-100%);
             transition: opacity 0.5s ease-out, transform 0.5s ease-out;
             visibility: hidden;
         }
-        .telop-wrapper.visible {
-            opacity: 1; transform: translateX(0); visibility: visible;
-        }
-        /* ▲▲▲ 変更ここまで ▲▲▲ */
+        .telop-wrapper.visible { opacity: 1; transform: translateX(0); visibility: visible; }
         
         #breaking-container-inner { border-radius: 8px; border-left: 8px solid #c00000; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
         .breaking-row { display: flex; font-weight: bold; }
@@ -80,7 +75,6 @@
         function playNext() {
             if (currentPlaylist.length === 0) return;
             if (currentIndex >= currentPlaylist.length) currentIndex = 0;
-            controlRef.update({ 'now_playing_index': currentIndex });
             hideTelop(() => {
                 showTelop(currentPlaylist[currentIndex]);
                 currentIndex++;
@@ -94,14 +88,11 @@
             clearInterval(playlistTimer);
             if (data && data.status === 'playing' && currentPlaylist.length > 0) {
                 const interval = (data.interval || 10) * 1000;
-                currentIndex = data.now_playing_index || 0;
+                currentIndex = 0; // 常に最初から再生
                 playNext();
                 playlistTimer = setInterval(playNext, interval);
             } else {
                 hideTelop(() => {});
-                if (data && data.status !== 'playing') {
-                     controlRef.update({ 'now_playing_index': null });
-                }
             }
         });
     </script>
