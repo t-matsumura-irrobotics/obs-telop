@@ -67,21 +67,28 @@
             const item3 = document.getElementById('r2_i3');
             item3.innerHTML = data.r2_i3_label ? `${data.r2_i3_label} <span class="br-row2-item-value ${data.r2_i3_color}">${data.r2_i3_value}</span>` : '';
 
-            breakingContainer.classList.remove('hiding');
             breakingContainer.classList.add('visible');
         }
 
         function hideTelop(onHidden) {
             if (breakingContainer.classList.contains('visible')) {
                 breakingContainer.classList.add('hiding');
+                
                 setTimeout(() => {
+                    // アニメーションを一時的に無効化し、テロップの位置を瞬時にリセット
+                    breakingContainer.style.transition = 'none';
                     breakingContainer.classList.remove('visible');
                     breakingContainer.classList.remove('hiding');
-                    // DOMの更新と再描画を待ってからコールバックを実行し、アニメーションを安定させる
+                    
+                    // ブラウザにDOMの変更を強制的に反映させる (リフロー)
+                    void breakingContainer.offsetWidth; 
+                    
+                    // 次の描画フレームでアニメーションを有効に戻し、コールバックを実行
                     requestAnimationFrame(() => {
-                        requestAnimationFrame(onHidden);
+                        breakingContainer.style.transition = '';
+                        onHidden();
                     });
-                }, 500); // CSSのtransition時間(0.5s)と合わせる
+                }, 500); // CSSのtransition時間と合わせる
             } else {
                 onHidden();
             }
