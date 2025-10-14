@@ -30,24 +30,45 @@
             </div>
             <hr style="margin:15px 0; border-color:#444;">
             <div class="item-input-group">
-                <div><label>2行目-1 ラベル</label><input type="text" id="r2_i2_label" value="営業利益"></div>
-                <div><label>値</label><input type="text" id="r2_i2_value" value="減益"></div>
-                <div><label>色</label><select id="r2_i2_color"><option value="text-black">黒</option><option value="text-red">赤</option><option value="text-blue" selected>青</option></select></div>
-            </div>
-            <div class="item-input-group">
-                <div><label>2行目-2 ラベル</label><input type="text" id="r2_i3_label" value="純利益"></div>
-                <div><label>値</label><input type="text" id="r2_i3_value" value="減益"></div>
-                <div><label>色</label><select id="r2_i3_color"><option value="text-black">黒</option><option value="text-red">赤</option><option value="text-blue" selected>青</option></select></div>
-            </div>
-            <div class="item-input-group">
-                <div><label>2行目-3 ラベル</label><input type="text" id="r2_i4_label" value=""></div>
+                <div><label>2行目-1 ラベル</label><input type="text" id="r2_i4_label" value=""></div>
                 <div><label>値</label><input type="text" id="r2_i4_value" value=""></div>
                 <div><label>色</label><select id="r2_i4_color"><option value="text-black" selected>黒</option><option value="text-red">赤</option><option value="text-blue">青</option></select></div>
             </div>
+             <div class="item-input-group">
+                <div style="grid-column: 1 / 2;"><label>2行目-2 ラベル</label><input type="text" id="r2_i1_label" value="売上高"></div>
+                <div style="grid-column: 2 / 4;">
+                    <label>値</label>
+                    <input type="hidden" id="r2_i1_value" value="増収">
+                    <select id="r2_i1_select">
+                        <option value="増収" data-color="text-red">増収</option>
+                        <option value="減収" data-color="text-blue">減収</option>
+                    </select>
+                    <div style="display: none;"><select id="r2_i1_color"><option value="text-black">黒</option><option value="text-red" selected>赤</option><option value="text-blue">青</option></select></div>
+                </div>
+            </div>
             <div class="item-input-group">
-                <div><label>2行目-4 ラベル</label><input type="text" id="r2_i1_label" value="売上高"></div>
-                <div><label>値</label><input type="text" id="r2_i1_value" value="増収"></div>
-                <div><label>色</label><select id="r2_i1_color"><option value="text-black">黒</option><option value="text-red" selected>赤</option><option value="text-blue">青</option></select></div>
+                <div style="grid-column: 1 / 2;"><label>2行目-3 ラベル</label><input type="text" id="r2_i2_label" value="営業利益"></div>
+                <div style="grid-column: 2 / 4;">
+                    <label>値</label>
+                    <input type="hidden" id="r2_i2_value" value="減益">
+                    <select id="r2_i2_select">
+                        <option value="増益" data-color="text-red">増益</option>
+                        <option value="減益" data-color="text-blue" selected>減益</option>
+                    </select>
+                    <div style="display: none;"><select id="r2_i2_color"><option value="text-black">黒</option><option value="text-red">赤</option><option value="text-blue" selected>青</option></select></div>
+                </div>
+            </div>
+            <div class="item-input-group">
+                 <div style="grid-column: 1 / 2;"><label>2行目-4 ラベル</label><input type="text" id="r2_i3_label" value="純利益"></div>
+                 <div style="grid-column: 2 / 4;">
+                    <label>値</label>
+                    <input type="hidden" id="r2_i3_value" value="減益">
+                    <select id="r2_i3_select">
+                        <option value="増益" data-color="text-red">増益</option>
+                        <option value="減益" data-color="text-blue" selected>減益</option>
+                    </select>
+                    <div style="display: none;"><select id="r2_i3_color"><option value="text-black">黒</option><option value="text-red">赤</option><option value="text-blue" selected>青</option></select></div>
+                </div>
             </div>
             <div class="button-group" style="margin-top: auto;">
                 <button id="take-button" class="btn btn-play">TAKE (単発表示)</button>
@@ -90,6 +111,7 @@
         }
         function loadDataToEditor(data) {
             shotFields.forEach(id => { if(document.getElementById(id)) document.getElementById(id).value = data[id] || ''; });
+            syncSelectorsFromHiddenData();
         }
         function getSavedShots() { return JSON.parse(localStorage.getItem(SHOTS_KEY) || '{}'); }
         function saveShots(shots) { localStorage.setItem(SHOTS_KEY, JSON.stringify(shots)); }
@@ -142,6 +164,40 @@
             }
         }
         
+        const valueSyncMappings = [
+            { selectId: 'r2_i1_select', valueId: 'r2_i1_value', colorId: 'r2_i1_color' },
+            { selectId: 'r2_i2_select', valueId: 'r2_i2_value', colorId: 'r2_i2_color' },
+            { selectId: 'r2_i3_select', valueId: 'r2_i3_value', colorId: 'r2_i3_color' }
+        ];
+
+        function syncHiddenDataFromSelectors() {
+            valueSyncMappings.forEach(map => {
+                const selectEl = document.getElementById(map.selectId);
+                const selectedOption = selectEl.options[selectEl.selectedIndex];
+                document.getElementById(map.valueId).value = selectedOption.value;
+                document.getElementById(map.colorId).value = selectedOption.dataset.color;
+            });
+        }
+
+        function syncSelectorsFromHiddenData() {
+            valueSyncMappings.forEach(map => {
+                const selectEl = document.getElementById(map.selectId);
+                const value = document.getElementById(map.valueId).value;
+                const color = document.getElementById(map.colorId).value;
+                for (let i = 0; i < selectEl.options.length; i++) {
+                    const option = selectEl.options[i];
+                    if (option.value === value && option.dataset.color === color) {
+                        selectEl.selectedIndex = i;
+                        break;
+                    }
+                }
+            });
+        }
+        
+        valueSyncMappings.forEach(map => {
+            document.getElementById(map.selectId).addEventListener('change', syncHiddenDataFromSelectors);
+        });
+
         document.getElementById('save-shot-button').addEventListener('click', () => {
             const name = document.getElementById('r1_m').value;
             if (!name) return alert('「1行目メイン」に名前を入力してください。');
@@ -197,8 +253,11 @@
             }
         });
         
-        renderSavedShots();
-        renderPlaylist();
+        document.addEventListener('DOMContentLoaded', () => {
+            syncHiddenDataFromSelectors();
+            renderSavedShots();
+            renderPlaylist();
+        });
     </script>
 </body>
 </html>
