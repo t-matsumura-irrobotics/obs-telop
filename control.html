@@ -30,24 +30,24 @@
             </div>
             <hr style="margin:15px 0; border-color:#444;">
             <div class="item-input-group">
-                <div><label>2行目-1 ラベル</label><input type="text" id="r2_i1_label" value="売上高"></div>
-                <div><label>値</label><input type="text" id="r2_i1_value" value="増収"></div>
-                <div><label>色</label><select id="r2_i1_color"><option value="text-black">黒</option><option value="text-red" selected>赤</option><option value="text-blue">青</option></select></div>
-            </div>
-            <div class="item-input-group">
-                <div><label>2行目-2 ラベル</label><input type="text" id="r2_i2_label" value="営業利益"></div>
+                <div><label>2行目-1 ラベル</label><input type="text" id="r2_i2_label" value="営業利益"></div>
                 <div><label>値</label><input type="text" id="r2_i2_value" value="減益"></div>
                 <div><label>色</label><select id="r2_i2_color"><option value="text-black">黒</option><option value="text-red">赤</option><option value="text-blue" selected>青</option></select></div>
             </div>
             <div class="item-input-group">
-                <div><label>2行目-3 ラベル</label><input type="text" id="r2_i3_label" value="純利益"></div>
+                <div><label>2行目-2 ラベル</label><input type="text" id="r2_i3_label" value="純利益"></div>
                 <div><label>値</label><input type="text" id="r2_i3_value" value="減益"></div>
                 <div><label>色</label><select id="r2_i3_color"><option value="text-black">黒</option><option value="text-red">赤</option><option value="text-blue" selected>青</option></select></div>
             </div>
             <div class="item-input-group">
-                <div><label>2行目-4 ラベル</label><input type="text" id="r2_i4_label" value=""></div>
+                <div><label>2行目-3 ラベル</label><input type="text" id="r2_i4_label" value=""></div>
                 <div><label>値</label><input type="text" id="r2_i4_value" value=""></div>
                 <div><label>色</label><select id="r2_i4_color"><option value="text-black" selected>黒</option><option value="text-red">赤</option><option value="text-blue">青</option></select></div>
+            </div>
+            <div class="item-input-group">
+                <div><label>2行目-4 ラベル</label><input type="text" id="r2_i1_label" value="売上高"></div>
+                <div><label>値</label><input type="text" id="r2_i1_value" value="増収"></div>
+                <div><label>色</label><select id="r2_i1_color"><option value="text-black">黒</option><option value="text-red" selected>赤</option><option value="text-blue">青</option></select></div>
             </div>
             <div class="button-group" style="margin-top: auto;">
                 <button id="take-button" class="btn btn-play">TAKE (単発表示)</button>
@@ -149,7 +149,6 @@
             shots[name] = getCurrentEditorData();
             saveShots(shots);
             renderSavedShots();
-            alert(`「${name}」を保存しました。`);
         });
         document.getElementById('add-to-playlist-button').addEventListener('click', () => {
             const data = getCurrentEditorData();
