@@ -15,7 +15,7 @@
             visibility: hidden;
         }
         .telop-wrapper.visible { opacity: 1; transform: translateX(0); visibility: visible; }
-        .telop-wrapper.hiding { transform: translateX(100%); }
+        .telop-wrapper.hiding { transform: translateX(-100%); }
         
         #breaking-container-inner { border-radius: 8px; border-left: 8px solid #c00000; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
         .breaking-row { display: flex; font-weight: bold; }
@@ -52,7 +52,7 @@
         const playlistRef = database.ref('playlist_data');
         const breakingContainer = document.getElementById('breaking-container');
         let playlistTimer = null, currentIndex = 0, currentPlaylist = [];
-        let currentStatus = null; // 現在の再生状態を保持する変数
+        let currentStatus = null;
 
         function showTelop(data) {
             document.getElementById('r1_h').innerText = data.r1_h || '';
@@ -70,21 +70,31 @@
             breakingContainer.classList.remove('hiding');
             breakingContainer.classList.add('visible');
         }
+
         function hideTelop(onHidden) {
             if (breakingContainer.classList.contains('visible')) {
                 breakingContainer.classList.add('hiding');
                 setTimeout(() => {
                     breakingContainer.classList.remove('visible');
                     breakingContainer.classList.remove('hiding');
-                    onHidden();
-                }, 500);
-            } else { onHidden(); }
+                    // DOMの更新と再描画を待ってからコールバックを実行し、アニメーションを安定させる
+                    requestAnimationFrame(() => {
+                        requestAnimationFrame(onHidden);
+                    });
+                }, 500); // CSSのtransition時間(0.5s)と合わせる
+            } else {
+                onHidden();
+            }
         }
+
         function playNext() {
             if (currentPlaylist.length === 0) return;
             if (currentIndex >= currentPlaylist.length) currentIndex = 0;
-            controlRef.update({ 'now_playing_index': currentIndex });
-            hideTelop(() => { showTelop(currentPlaylist[currentIndex]); currentIndex++; });
+            hideTelop(() => {
+                controlRef.update({ 'now_playing_index': currentIndex });
+                showTelop(currentPlaylist[currentIndex]);
+                currentIndex++;
+            });
         }
         
         playlistRef.on('value', (snapshot) => {
@@ -93,23 +103,27 @@
 
         controlRef.on('value', (snapshot) => {
             const data = snapshot.val() || {};
-            // 再生状態(status)が変化した時だけタイマーを操作する
-            if (data.status !== currentStatus) {
-                currentStatus = data.status;
-                clearInterval(playlistTimer);
+            const newStatus = data.status;
 
-                if (data.status === 'playing' && currentPlaylist.length > 0) {
+            if (newStatus === 'take' && data.data) {
+                clearInterval(playlistTimer);
+                hideTelop(() => showTelop(data.data));
+            } else if (newStatus !== currentStatus) {
+                clearInterval(playlistTimer);
+                if (newStatus === 'playing' && currentPlaylist.length > 0) {
                     const interval = (data.interval || 10) * 1000;
                     currentIndex = data.now_playing_index || 0;
                     playNext();
                     playlistTimer = setInterval(playNext, interval);
                 } else {
-                    hideTelop(() => {});
-                    if (data.status !== 'playing') {
-                         controlRef.update({ 'now_playing_index': null });
-                    }
+                    hideTelop(() => {
+                        if (newStatus !== 'playing') {
+                            controlRef.update({ 'now_playing_index': null });
+                        }
+                    });
                 }
             }
+            currentStatus = newStatus;
         });
     </script>
 </body>

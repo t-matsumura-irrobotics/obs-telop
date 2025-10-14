@@ -154,8 +154,10 @@
             updateFirebasePlaylistIfPlaying();
         });
         document.getElementById('take-button').addEventListener('click', () => {
-            playlistRef.set([getCurrentEditorData()]);
-            controlRef.set({ status: 'playing', interval: 99999, now_playing_index: 0 });
+            controlRef.set({
+                status: 'take',
+                data: getCurrentEditorData()
+            });
         });
         document.getElementById('clear-playlist-button').addEventListener('click', () => { if (!confirm('プレイリストをクリアしますか？')) return; playlist = []; renderPlaylist(); playlistRef.set(null); });
         document.getElementById('play-button').addEventListener('click', () => {
@@ -167,9 +169,17 @@
 
         controlRef.on('value', snap => {
             const data = snap.val() || {};
-            isPlaying = data.status === 'playing';
+            const status = data.status;
+            isPlaying = status === 'playing';
             nowPlayingIndex = data.now_playing_index;
-            document.getElementById('playback-status').textContent = isPlaying ? `再生中 (${(nowPlayingIndex || 0) + 1} / ${playlist.length})` : '停止中';
+
+            let statusText = '停止中';
+            if (status === 'playing') {
+                statusText = `再生中 (${(nowPlayingIndex || 0) + 1} / ${playlist.length})`;
+            } else if (status === 'take') {
+                statusText = '単発表示中';
+            }
+            document.getElementById('playback-status').textContent = statusText;
             renderPlaylist();
         });
         
@@ -179,7 +189,7 @@
                 const itemEl = playlist.splice(evt.oldIndex, 1)[0];
                 playlist.splice(evt.newIndex, 0, itemEl);
                 renderPlaylist();
-                playlistRef.set(playlist);
+                updateFirebasePlaylistIfPlaying();
             }
         });
         
