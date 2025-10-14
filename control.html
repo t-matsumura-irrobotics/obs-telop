@@ -5,13 +5,11 @@
     <meta charset="UTF-8">
     <title>決算速報 送出コントローラー</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
     <link rel="stylesheet" href="style.css">
+    <!-- ▼▼▼ SortableJSライブラリを読み込み ▼▼▼ -->
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
     <style>
         .handle { cursor: move; color: #888; margin-right: 15px; }
-        .list-item.playing { background-color: #34c759 !important; color: white; font-weight: bold; }
-        .list-item.playing .handle { color: white; }
-        .list-item .item-actions { margin-left: auto; }
     </style>
 </head>
 <body>
@@ -68,73 +66,118 @@
         const firebaseConfig = { apiKey: "AIzaSyAhsAbTqQuairo-82A9rxQTazUCGdzdVc4", authDomain: "obs-telop-system-7c98c.firebaseapp.com", databaseURL: "https://obs-telop-system-7c98c-default-rtdb.asia-southeast1.firebasedatabase.app", projectId: "obs-telop-system-7c98c", storageBucket: "obs-telop-system-7c98c.appspot.com", messagingSenderId: "368503557333", appId: "1:368503557333:web:409dae2b1cf0c14b31a65c", measurementId: "G-VMBCJ2952Z" };
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
-        const controlRef = database.ref('playlist_control');
-        const playlistRef = database.ref('playlist_data');
+        const playlistControlRef = database.ref('playlist_control');
         const SHOTS_KEY = 'breaking_news_shots_v3';
         const PLAYLIST_KEY = 'breaking_news_playlist_v3';
 
         const shotFields = ['r1_h', 'r1_m', 'r2_l1', 'r2_v1', 'r2_c1', 'r2_l2', 'r2_v2', 'r2_c2', 'r2_l3', 'r2_v3', 'r2_c3'];
         let playlist = JSON.parse(localStorage.getItem(PLAYLIST_KEY) || '[]');
-        let isPlaying = false; let nowPlayingIndex = null;
+        let isPlaying = false;
 
-        function getCurrentEditorData() { /* ... */ }
-        function loadDataToEditor(data) { /* ... */ }
-        function getSavedShots() { /* ... */ }
-        function saveShots(shots) { /* ... */ }
-        function renderSavedShots() { /* ... */ }
-        function renderPlaylist() { /* ... */ }
-        function updateFirebasePlaylistIfPlaying() { /* ... */ }
+        function getCurrentEditorData() {
+            const data = {};
+            shotFields.forEach(id => data[id] = document.getElementById(id).value);
+            return data;
+        }
+        function loadDataToEditor(data) {
+            shotFields.forEach(id => { if(document.getElementById(id)) document.getElementById(id).value = data[id] || ''; });
+        }
+        function getSavedShots() { return JSON.parse(localStorage.getItem(SHOTS_KEY) || '{}'); }
+        function saveShots(shots) { localStorage.setItem(SHOTS_KEY, JSON.stringify(shots)); }
+
+        function renderSavedShots() {
+            const list = document.getElementById('saved-shots-list'); list.innerHTML = '';
+            const shots = getSavedShots();
+            for (const name in shots) {
+                const data = shots[name];
+                const li = document.createElement('li'); li.className = 'list-item';
+                const nameSpan = document.createElement('span'); nameSpan.className = 'item-name'; nameSpan.textContent = name; li.appendChild(nameSpan);
+                const actionsDiv = document.createElement('div'); actionsDiv.className = 'item-actions';
+                const loadBtn = document.createElement('button');
+                loadBtn.textContent = '読込'; loadBtn.className = 'btn btn-primary';
+                loadBtn.onclick = () => loadDataToEditor(data);
+                actionsDiv.appendChild(loadBtn);
+                const addBtn = document.createElement('button');
+                addBtn.textContent = '+ Playlist'; addBtn.className = 'btn btn-secondary';
+                addBtn.onclick = () => { playlist.push({ name, ...data }); renderPlaylist(); };
+                actionsDiv.appendChild(addBtn);
+                const deleteBtn = document.createElement('button');
+                deleteBtn.textContent = '削除'; deleteBtn.className = 'btn btn-danger';
+                deleteBtn.onclick = () => { if (!confirm(`「${name}」を削除しますか？`)) return; const s = getSavedShots(); delete s[name]; saveShots(s); renderSavedShots(); };
+                actionsDiv.appendChild(deleteBtn);
+                li.appendChild(actionsDiv); list.appendChild(li);
+            }
+        }
         
-        document.addEventListener('DOMContentLoaded', () => {
-            document.getElementById('save-shot-button').addEventListener('click', () => {
-                const name = document.getElementById('r1_m').value;
-                if (!name) return alert('「1行目メイン」に名前を入力してください。');
-                const shots = getSavedShots();
-                shots[name] = getCurrentEditorData();
-                saveShots(shots);
-                renderSavedShots();
-                alert(`「${name}」を保存しました。`);
+        function renderPlaylist() {
+            const list = document.getElementById('playlist-list'); list.innerHTML = '';
+            playlist.forEach((shot, index) => {
+                const li = document.createElement('li'); li.className = 'list-item';
+                li.dataset.index = index;
+                const handle = document.createElement('span'); handle.className = 'handle'; handle.innerHTML = '&#9776;'; li.appendChild(handle);
+                const nameSpan = document.createElement('span'); nameSpan.className = 'item-name';
+                nameSpan.textContent = `${index + 1}: ${shot.r1_m}`; li.appendChild(nameSpan);
+                const actionsDiv = document.createElement('div'); actionsDiv.className = 'item-actions';
+                const deleteBtn = document.createElement('button');
+                deleteBtn.textContent = '削除'; deleteBtn.className = 'btn btn-danger';
+                deleteBtn.onclick = () => { playlist.splice(index, 1); renderPlaylist(); updateFirebasePlaylistIfPlaying(); };
+                li.appendChild(deleteBtn);
+                li.appendChild(actionsDiv);
+                list.appendChild(li);
             });
-            document.getElementById('add-to-playlist-button').addEventListener('click', () => {
-                const data = getCurrentEditorData();
-                if (!data.r1_m) return alert('「1行目メイン」に名前を入力してください。');
-                playlist.push(data);
+            localStorage.setItem(PLAYLIST_KEY, JSON.stringify(playlist));
+        }
+
+        function updateFirebasePlaylistIfPlaying() {
+            if (isPlaying) {
+                playlistControlRef.update({ playlist: playlist });
+            }
+        }
+        
+        document.getElementById('save-shot-button').addEventListener('click', () => {
+            const name = document.getElementById('r1_m').value;
+            if (!name) return alert('「1行目メイン」に名前を入力してください。');
+            const shots = getSavedShots();
+            shots[name] = getCurrentEditorData();
+            saveShots(shots);
+            renderSavedShots();
+            alert(`「${name}」を保存しました。`);
+        });
+        document.getElementById('add-to-playlist-button').addEventListener('click', () => {
+            const data = getCurrentEditorData();
+            if (!data.r1_m) return alert('「1行目メイン」に名前を入力してください。');
+            playlist.push(data);
+            renderPlaylist();
+            updateFirebasePlaylistIfPlaying();
+        });
+        document.getElementById('take-button').addEventListener('click', () => {
+            playlistControlRef.set({ status: 'playing', interval: 99999, playlist: [getCurrentEditorData()], currentIndex: 0 });
+        });
+        document.getElementById('clear-playlist-button').addEventListener('click', () => { if (!confirm('プレイリストをクリアしますか？')) return; playlist = []; renderPlaylist(); updateFirebasePlaylistIfPlaying(); });
+        document.getElementById('play-button').addEventListener('click', () => { if (playlist.length === 0) return alert('プレイリストにショットを追加してください。'); playlistControlRef.set({ status: 'playing', interval: 10, playlist: playlist, currentIndex: 0 }); });
+        document.getElementById('stop-button').addEventListener('click', () => playlistControlRef.set({ status: 'stopped' }));
+
+        playlistControlRef.on('value', snap => {
+            const data = snap.val() || {};
+            isPlaying = data.status === 'playing';
+            document.getElementById('playback-status').textContent = isPlaying ? `再生中 (全${data.playlist?.length || 0}件)` : '停止中';
+        });
+        
+        // ▼▼▼ SortableJSの初期化 ▼▼▼
+        const playlistEl = document.getElementById('playlist-list');
+        new Sortable(playlistEl, {
+            animation: 150,
+            handle: '.handle',
+            onEnd: function (evt) {
+                const itemEl = playlist.splice(evt.oldIndex, 1)[0];
+                playlist.splice(evt.newIndex, 0, itemEl);
                 renderPlaylist();
                 updateFirebasePlaylistIfPlaying();
-            });
-            document.getElementById('take-button').addEventListener('click', () => {
-                playlistRef.set([getCurrentEditorData()]);
-                controlRef.set({ status: 'playing', interval: 99999, now_playing_index: 0 });
-            });
-            document.getElementById('clear-playlist-button').addEventListener('click', () => { if (!confirm('プレイリストをクリアしますか？')) return; playlist = []; renderPlaylist(); playlistRef.set(null); });
-            document.getElementById('play-button').addEventListener('click', () => {
-                if (playlist.length === 0) return alert('プレイリストにショットを追加してください。');
-                playlistRef.set(playlist);
-                controlRef.set({ status: 'playing', interval: 10, now_playing_index: 0 });
-            });
-            document.getElementById('stop-button').addEventListener('click', () => controlRef.set({ status: 'stopped' }));
-            
-            controlRef.on('value', snap => {
-                const data = snap.val() || {};
-                isPlaying = data.status === 'playing';
-                nowPlayingIndex = data.now_playing_index;
-                document.getElementById('playback-status').textContent = isPlaying ? `再生中 (${(nowPlayingIndex || 0) + 1} / ${playlist.length})` : '停止中';
-                renderPlaylist();
-            });
-            
-            new Sortable(document.getElementById('playlist-list'), {
-                animation: 150, handle: '.handle',
-                onEnd: function (evt) {
-                    const itemEl = playlist.splice(evt.oldIndex, 1)[0];
-                    playlist.splice(evt.newIndex, 0, itemEl);
-                    renderPlaylist();
-                    playlistRef.set(playlist);
-                }
-            });
-            
-            renderSavedShots();
-            renderPlaylist();
+            }
         });
+        
+        renderSavedShots();
+        renderPlaylist();
     </script>
 </body>
 </html>
