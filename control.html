@@ -30,32 +30,18 @@
             </div>
             <hr style="margin:15px 0; border-color:#444;">
             <div class="grid-4">
-                <div>
-                    <label>2行目-1 ラベル</label><input type="text" id="r2_l1" value="2026年8月期">
-                </div>
+                <div><label>2行目-1 ラベル</label><input type="text" id="r2_l1" value="2026年8月期"></div>
                 <div>
                     <label>2行目-2 ラベル</label><input type="text" id="r2_l2" value="売上高">
-                    <label>値</label>
-                    <select id="r2_v2_select">
-                        <option value='{"v":"増収", "c":"text-red"}'>増収 (赤)</option>
-                        <option value='{"v":"減収", "c":"text-blue"}'>減収 (青)</option>
-                    </select>
+                    <label>値</label><select id="r2_v2_select"><option value='{"v":"増収", "c":"text-red"}'>増収 (赤)</option><option value='{"v":"減収", "c":"text-blue"}'>減収 (青)</option></select>
                 </div>
                 <div>
                     <label>2行目-3 ラベル</label><input type="text" id="r2_l3" value="営業利益">
-                    <label>値</label>
-                    <select id="r2_v3_select">
-                        <option value='{"v":"増益", "c":"text-red"}'>増益 (赤)</option>
-                        <option value='{"v":"減益", "c":"text-blue"}' selected>減益 (青)</option>
-                    </select>
+                    <label>値</label><select id="r2_v3_select"><option value='{"v":"増益", "c":"text-red"}'>増益 (赤)</option><option value='{"v":"減益", "c":"text-blue"}' selected>減益 (青)</option></select>
                 </div>
                 <div>
                     <label>2行目-4 ラベル</label><input type="text" id="r2_l4" value="純利益">
-                    <label>値</label>
-                    <select id="r2_v4_select">
-                        <option value='{"v":"増益", "c":"text-red"}'>増益 (赤)</option>
-                        <option value='{"v":"減益", "c":"text-blue"}' selected>減益 (青)</option>
-                    </select>
+                    <label>値</label><select id="r2_v4_select"><option value='{"v":"増益", "c":"text-red"}'>増益 (赤)</option><option value='{"v":"減益", "c":"text-blue"}' selected>減益 (青)</option></select>
                 </div>
             </div>
             <div class="button-group" style="margin-top: auto;">
@@ -76,6 +62,7 @@
             <button id="clear-playlist-button" class="btn-danger" style="margin-top: auto; width:100%;">クリア</button>
         </div>
     </div>
+
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <script>
@@ -87,39 +74,115 @@
         const SHOTS_KEY = 'breaking_news_shots_v4';
         const PLAYLIST_KEY = 'breaking_news_playlist_v4';
 
+        const shotFields = ['r1_h', 'r1_m', 'r2_l1', 'r2_l2', 'r2_l3', 'r2_l4'];
         let playlist = JSON.parse(localStorage.getItem(PLAYLIST_KEY) || '[]');
         let isPlaying = false; let nowPlayingIndex = null;
 
+        // --- ▼▼▼ 変更点: ここから ---
         function getCurrentEditorData() {
             const data = {};
-            data.r1_h = document.getElementById('r1_h').value;
-            data.r1_m = document.getElementById('r1_m').value;
-            data.r2_l1 = document.getElementById('r2_l1').value;
-            data.r2_v1 = ''; data.r2_c1 = '';
+            shotFields.forEach(id => data[id] = document.getElementById(id).value);
             ['2', '3', '4'].forEach(i => {
-                const selectData = JSON.parse(document.getElementById(`r2_v${i}_select`).value);
-                data[`r2_l${i}`] = document.getElementById(`r2_l${i}`).value;
-                data[`r2_v${i}`] = selectData.v;
-                data[`r2_c${i}`] = selectData.c;
+                const selectEl = document.getElementById(`r2_v${i}_select`);
+                if (selectEl) {
+                    const selectData = JSON.parse(selectEl.value);
+                    data[`r2_v${i}`] = selectData.v;
+                    data[`r2_c${i}`] = selectData.c;
+                }
             });
             return data;
         }
 
-        // ... (loadDataToEditor, get/saveSavedShots, renderSavedShots, renderPlaylist, updateFirebasePlaylistIfPlaying は変更なし) ...
-
-        document.getElementById('save-shot-button').addEventListener('click', () => { /* ... */ });
-        document.getElementById('add-to-playlist-button').addEventListener('click', () => { /* ... */ });
+        function loadDataToEditor(data) {
+            shotFields.forEach(id => { if(document.getElementById(id)) document.getElementById(id).value = data[id] || ''; });
+            ['2', '3', '4'].forEach(i => {
+                const select = document.getElementById(`r2_v${i}_select`);
+                if (select) {
+                    for (const option of select.options) {
+                        const optionData = JSON.parse(option.value);
+                        if (optionData.v === data[`r2_v${i}`] && optionData.c === data[`r2_c${i}`]) {
+                            option.selected = true;
+                            break;
+                        }
+                    }
+                }
+            });
+        }
         
-        // ▼▼▼ 変更点: TAKEボタンのロジックを修正 ▼▼▼
+        function getSavedShots() { return JSON.parse(localStorage.getItem(SHOTS_KEY) || '{}'); }
+        function saveShots(shots) { localStorage.setItem(SHOTS_KEY, JSON.stringify(shots)); }
+
+        function renderSavedShots() {
+            const list = document.getElementById('saved-shots-list'); list.innerHTML = '';
+            const shots = getSavedShots();
+            for (const name in shots) {
+                const data = shots[name];
+                const li = document.createElement('li'); li.className = 'list-item';
+                const nameSpan = document.createElement('span'); nameSpan.className = 'item-name'; nameSpan.textContent = name; li.appendChild(nameSpan);
+                const actionsDiv = document.createElement('div'); actionsDiv.className = 'item-actions';
+                const loadBtn = document.createElement('button');
+                loadBtn.textContent = '読込'; loadBtn.className = 'btn btn-primary';
+                loadBtn.onclick = () => loadDataToEditor(data);
+                actionsDiv.appendChild(loadBtn);
+                const deleteBtn = document.createElement('button');
+                deleteBtn.textContent = '削除'; deleteBtn.className = 'btn btn-danger';
+                deleteBtn.onclick = () => { if (!confirm(`「${name}」を削除しますか？`)) return; const s = getSavedShots(); delete s[name]; saveShots(s); renderSavedShots(); };
+                actionsDiv.appendChild(deleteBtn);
+                li.appendChild(actionsDiv); list.appendChild(li);
+            }
+        }
+        
+        function renderPlaylist() {
+            const list = document.getElementById('playlist-list'); list.innerHTML = '';
+            playlist.forEach((shot, index) => {
+                const li = document.createElement('li'); li.className = 'list-item';
+                if (isPlaying && index === nowPlayingIndex) { li.classList.add('playing'); }
+                const handle = document.createElement('span'); handle.className = 'handle'; handle.innerHTML = '&#9776;'; li.appendChild(handle);
+                const nameSpan = document.createElement('span'); nameSpan.className = 'item-name'; nameSpan.textContent = `${index + 1}: ${shot.r1_m}`; li.appendChild(nameSpan);
+                const actionsDiv = document.createElement('div'); actionsDiv.className = 'item-actions';
+                const deleteBtn = document.createElement('button');
+                deleteBtn.textContent = '削除'; deleteBtn.className = 'btn btn-danger';
+                deleteBtn.onclick = () => { playlist.splice(index, 1); renderPlaylist(); playlistRef.set(playlist); };
+                li.appendChild(deleteBtn);
+                li.appendChild(actionsDiv);
+                list.appendChild(li);
+            });
+            localStorage.setItem(PLAYLIST_KEY, JSON.stringify(playlist));
+        }
+
+        function updateFirebasePlaylistIfPlaying() {
+            if (isPlaying) {
+                playlistRef.set(playlist);
+            }
+        }
+        
+        document.getElementById('save-shot-button').addEventListener('click', () => {
+            const name = document.getElementById('r1_m').value;
+            if (!name) return alert('「1行目メイン」に名前を入力してください。');
+            const shots = getSavedShots();
+            shots[name] = getCurrentEditorData();
+            saveShots(shots);
+            renderSavedShots();
+            alert(`「${name}」を保存しました。`);
+        });
+        document.getElementById('add-to-playlist-button').addEventListener('click', () => {
+            const data = getCurrentEditorData();
+            if (!data.r1_m) return alert('「1行目メイン」に名前を入力してください。');
+            playlist.push(data);
+            renderPlaylist();
+            updateFirebasePlaylistIfPlaying();
+        });
         document.getElementById('take-button').addEventListener('click', () => {
             playlistRef.set([getCurrentEditorData()]);
             controlRef.set({ status: 'playing', interval: 99999, now_playing_index: 0 });
         });
-        // ▲▲▲ 変更ここまで ▲▲▲
-
-        document.getElementById('clear-playlist-button').addEventListener('click', () => { /* ... */ });
-        document.getElementById('play-button').addEventListener('click', () => { /* ... */ });
-        document.getElementById('stop-button').addEventListener('click', () => { /* ... */ });
+        document.getElementById('clear-playlist-button').addEventListener('click', () => { if (!confirm('プレイリストをクリアしますか？')) return; playlist = []; renderPlaylist(); playlistRef.set(null); });
+        document.getElementById('play-button').addEventListener('click', () => {
+            if (playlist.length === 0) return alert('プレイリストにショットを追加してください。');
+            playlistRef.set(playlist);
+            controlRef.set({ status: 'playing', interval: 10, now_playing_index: 0 });
+        });
+        document.getElementById('stop-button').addEventListener('click', () => controlRef.set({ status: 'stopped' }));
 
         controlRef.on('value', snap => {
             const data = snap.val() || {};
@@ -141,6 +204,7 @@
         
         renderSavedShots();
         renderPlaylist();
+        // --- ▲▲▲ 変更ここまで ▲▲▲
     </script>
 </body>
 </html>
