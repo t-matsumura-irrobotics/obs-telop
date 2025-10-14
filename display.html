@@ -21,7 +21,6 @@
         .breaking-row { display: flex; font-weight: bold; }
         .br-row1-header { background-color: #c00000; color: white; font-size: 48px; padding: 10px 30px; white-space: nowrap; }
         .br-row1-main { background-color: white; color: black; font-size: 48px; padding: 10px 30px; flex: 1; text-align: center; }
-        /* ▼▼▼ 変更点: 2行目の高さを調整 ▼▼▼ */
         .br-row2 { background: #222; color: white; font-size: 38px; padding: 6px 0; display: flex; }
         .br-row2-item { flex: 1; text-align: center; padding: 0 10px; }
         .br-row2-item + .br-row2-item { border-left: 2px solid #555; }
@@ -53,6 +52,7 @@
         const playlistRef = database.ref('playlist_data');
         const breakingContainer = document.getElementById('breaking-container');
         let playlistTimer = null, currentIndex = 0, currentPlaylist = [];
+        let currentStatus = null; // 現在の再生状態を保持する変数
 
         function showTelop(data) {
             document.getElementById('r1_h').innerText = data.r1_h || '';
@@ -92,17 +92,22 @@
         });
 
         controlRef.on('value', (snapshot) => {
-            const data = snapshot.val();
-            clearInterval(playlistTimer);
-            if (data && data.status === 'playing' && currentPlaylist.length > 0) {
-                const interval = (data.interval || 10) * 1000;
-                currentIndex = data.now_playing_index || 0;
-                playNext();
-                playlistTimer = setInterval(playNext, interval);
-            } else {
-                hideTelop(() => {});
-                if (data && data.status !== 'playing') {
-                     controlRef.update({ 'now_playing_index': null });
+            const data = snapshot.val() || {};
+            // 再生状態(status)が変化した時だけタイマーを操作する
+            if (data.status !== currentStatus) {
+                currentStatus = data.status;
+                clearInterval(playlistTimer);
+
+                if (data.status === 'playing' && currentPlaylist.length > 0) {
+                    const interval = (data.interval || 10) * 1000;
+                    currentIndex = data.now_playing_index || 0;
+                    playNext();
+                    playlistTimer = setInterval(playNext, interval);
+                } else {
+                    hideTelop(() => {});
+                    if (data.status !== 'playing') {
+                         controlRef.update({ 'now_playing_index': null });
+                    }
                 }
             }
         });
