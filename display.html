@@ -39,6 +39,7 @@
                 <div class="br-row2-item" id="r2_i1"></div>
                 <div class="br-row2-item" id="r2_i2"></div>
                 <div class="br-row2-item" id="r2_i3"></div>
+                <div class="br-row2-item" id="r2_i4"></div>
             </div>
         </div>
     </div>
@@ -66,6 +67,9 @@
 
             const item3 = document.getElementById('r2_i3');
             item3.innerHTML = data.r2_i3_label ? `${data.r2_i3_label} <span class="br-row2-item-value ${data.r2_i3_color}">${data.r2_i3_value}</span>` : '';
+
+            const item4 = document.getElementById('r2_i4');
+            item4.innerHTML = data.r2_i4_label ? `${data.r2_i4_label} <span class="br-row2-item-value ${data.r2_i4_color}">${data.r2_i4_value}</span>` : '';
 
             breakingContainer.classList.add('visible');
         }
