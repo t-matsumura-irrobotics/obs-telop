@@ -1,4 +1,4 @@
-<!-- control.html (更新後) -->
+<!-- control.html (最終修正版) -->
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -29,7 +29,6 @@
                 <div><label for="r1_m">1行目メイン</label><input type="text" id="r1_m" value="トヨタ自動車"></div>
             </div>
             <hr style="margin:15px 0; border-color:#444;">
-            <!-- ▼▼▼ 変更点: 2行目を4分割に ▼▼▼ -->
             <div class="grid-4">
                 <div>
                     <label>2行目-1 ラベル</label><input type="text" id="r2_l1" value="売上高">
@@ -52,7 +51,6 @@
                     <label>色</label><select id="r2_c4"><option value="text-black">黒</option><option value="text-red">赤</option><option value="text-blue">青</option></select>
                 </div>
             </div>
-            <!-- ▲▲▲ 変更ここまで ▲▲▲ -->
             <div class="button-group" style="margin-top: auto;">
                 <button id="take-button" class="btn btn-play">TAKE (単発表示)</button>
                 <button id="add-to-playlist-button" class="btn btn-primary">+ PLAYLIST</button>
@@ -79,14 +77,120 @@
         const database = firebase.database();
         const controlRef = database.ref('playlist_control');
         const playlistRef = database.ref('playlist_data');
-        const SHOTS_KEY = 'breaking_news_shots_v3';
-        const PLAYLIST_KEY = 'breaking_news_playlist_v3';
+        const SHOTS_KEY = 'breaking_news_shots_v4';
+        const PLAYLIST_KEY = 'breaking_news_playlist_v4';
 
-        const shotFields = ['r1_h', 'r1_m', 'r2_l1', 'r2_v1', 'r2_c1', 'r2_l2', 'r2_v2', 'r2_c2', 'r2_l3', 'r2_v3', 'r2_c3', 'r2_l4', 'r2_v4', 'r2_c4']; // 4項目目も追加
+        const shotFields = ['r1_h', 'r1_m', 'r2_l1', 'r2_v1', 'r2_c1', 'r2_l2', 'r2_v2', 'r2_c2', 'r2_l3', 'r2_v3', 'r2_c3', 'r2_l4', 'r2_v4', 'r2_c4'];
         let playlist = JSON.parse(localStorage.getItem(PLAYLIST_KEY) || '[]');
         let isPlaying = false; let nowPlayingIndex = null;
 
-        // ... (以下、JavaScriptのロジックは前回と同じで動作します) ...
+        // --- ▼▼▼ 変更点: ここから ---
+        function getCurrentEditorData() {
+            const data = {};
+            shotFields.forEach(id => data[id] = document.getElementById(id).value);
+            return data;
+        }
+        function loadDataToEditor(data) {
+            shotFields.forEach(id => { if(document.getElementById(id)) document.getElementById(id).value = data[id] || ''; });
+        }
+        function getSavedShots() { return JSON.parse(localStorage.getItem(SHOTS_KEY) || '{}'); }
+        function saveShots(shots) { localStorage.setItem(SHOTS_KEY, JSON.stringify(shots)); }
+
+        function renderSavedShots() {
+            const list = document.getElementById('saved-shots-list'); list.innerHTML = '';
+            const shots = getSavedShots();
+            for (const name in shots) {
+                const data = shots[name];
+                const li = document.createElement('li'); li.className = 'list-item';
+                const nameSpan = document.createElement('span'); nameSpan.className = 'item-name'; nameSpan.textContent = name; li.appendChild(nameSpan);
+                const actionsDiv = document.createElement('div'); actionsDiv.className = 'item-actions';
+                
+                const loadBtn = document.createElement('button');
+                loadBtn.textContent = '読込'; loadBtn.className = 'btn btn-primary';
+                loadBtn.onclick = () => loadDataToEditor(data);
+                actionsDiv.appendChild(loadBtn);
+                const deleteBtn = document.createElement('button');
+                deleteBtn.textContent = '削除'; deleteBtn.className = 'btn btn-danger';
+                deleteBtn.onclick = () => { if (!confirm(`「${name}」を削除しますか？`)) return; const s = getSavedShots(); delete s[name]; saveShots(s); renderSavedShots(); };
+                actionsDiv.appendChild(deleteBtn);
+                li.appendChild(actionsDiv); list.appendChild(li);
+            }
+        }
+        
+        function renderPlaylist() {
+            const list = document.getElementById('playlist-list'); list.innerHTML = '';
+            playlist.forEach((shot, index) => {
+                const li = document.createElement('li'); li.className = 'list-item';
+                if (isPlaying && index === nowPlayingIndex) { li.classList.add('playing'); }
+                const handle = document.createElement('span'); handle.className = 'handle'; handle.innerHTML = '&#9776;'; li.appendChild(handle);
+                const nameSpan = document.createElement('span'); nameSpan.className = 'item-name'; nameSpan.textContent = `${index + 1}: ${shot.r1_m}`; li.appendChild(nameSpan);
+                
+                const actionsDiv = document.createElement('div'); actionsDiv.className = 'item-actions';
+                const deleteBtn = document.createElement('button');
+                deleteBtn.textContent = '削除'; deleteBtn.className = 'btn btn-danger';
+                deleteBtn.onclick = () => { playlist.splice(index, 1); renderPlaylist(); playlistRef.set(playlist); };
+                li.appendChild(deleteBtn);
+                li.appendChild(actionsDiv);
+                list.appendChild(li);
+            });
+            localStorage.setItem(PLAYLIST_KEY, JSON.stringify(playlist));
+        }
+
+        function updateFirebasePlaylistIfPlaying() {
+            if (isPlaying) {
+                playlistRef.set(playlist);
+            }
+        }
+        
+        document.getElementById('save-shot-button').addEventListener('click', () => {
+            const name = document.getElementById('r1_m').value;
+            if (!name) return alert('「1行目メイン」に名前を入力してください。');
+            const shots = getSavedShots();
+            shots[name] = getCurrentEditorData();
+            saveShots(shots);
+            renderSavedShots();
+            alert(`「${name}」を保存しました。`);
+        });
+        document.getElementById('add-to-playlist-button').addEventListener('click', () => {
+            const data = getCurrentEditorData();
+            if (!data.r1_m) return alert('「1行目メイン」に名前を入力してください。');
+            playlist.push(data);
+            renderPlaylist();
+            updateFirebasePlaylistIfPlaying();
+        });
+        document.getElementById('take-button').addEventListener('click', () => {
+            playlistRef.set([getCurrentEditorData()]);
+            controlRef.set({ status: 'playing', interval: 99999, now_playing_index: 0 });
+        });
+        document.getElementById('clear-playlist-button').addEventListener('click', () => { if (!confirm('プレイリストをクリアしますか？')) return; playlist = []; renderPlaylist(); playlistRef.set(null); });
+        document.getElementById('play-button').addEventListener('click', () => {
+            if (playlist.length === 0) return alert('プレイリストにショットを追加してください。');
+            playlistRef.set(playlist);
+            controlRef.set({ status: 'playing', interval: 10, now_playing_index: 0 });
+        });
+        document.getElementById('stop-button').addEventListener('click', () => controlRef.set({ status: 'stopped' }));
+
+        controlRef.on('value', snap => {
+            const data = snap.val() || {};
+            isPlaying = data.status === 'playing';
+            nowPlayingIndex = data.now_playing_index;
+            document.getElementById('playback-status').textContent = isPlaying ? `再生中 (${(nowPlayingIndex || 0) + 1} / ${playlist.length})` : '停止中';
+            renderPlaylist();
+        });
+        
+        new Sortable(document.getElementById('playlist-list'), {
+            animation: 150, handle: '.handle',
+            onEnd: function (evt) {
+                const itemEl = playlist.splice(evt.oldIndex, 1)[0];
+                playlist.splice(evt.newIndex, 0, itemEl);
+                renderPlaylist();
+                playlistRef.set(playlist);
+            }
+        });
+        
+        renderSavedShots();
+        renderPlaylist();
+        // --- ▲▲▲ 変更ここまで ▲▲▲
     </script>
 </body>
 </html>
